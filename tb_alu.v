@@ -3,15 +3,16 @@
 module alutest;
 
 	// Inputs
-	reg [3:0] A;
-	reg [3:0] B;
-	reg [1:0] Opcode;
-
+	reg  [15:0] A;
+	reg  [15:0] B;
+	reg  [4:0]  Opcode;   
+	
 	// Outputs
-	wire [3:0] C;
-	wire [4:0] Flags;
-
+	wire [15:0] Y;
+	wire [4:0]  Flags;    // {Z, C, F, N, L}
+	
 	integer i;
+	
 	// Instantiate the Unit Under Test (UUT)
 	alu uut (
 		.A(A), 
