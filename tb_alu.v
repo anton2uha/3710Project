@@ -28,6 +28,8 @@ module alutest;
 //monitor statement which is executed everytime there is an event on any
 //signal in the argument list.
 
+		//SPECIFIC AND CORNER CASE TESTS:
+		
 		// Initialize Inputs
 		A = 0;
 		A = 0;
@@ -44,12 +46,17 @@ module alutest;
 		A = 4'b1111; B = 4'b 1110;
 		//$display("A: %b, B: %b, C:%b, Flags[1:0]: %b, time:%d", A, B, C, Flags[1:0], $time);
 ****/
-		//Random simulation
+		
+		
+		//RANDOM TESTS:
+		
+		// we can make one of these random loops for each instruction, in it we will place a
+		// condition that when it fails, will trigger a $monitor variable that will print a failure message.
 		for( i = 0; i< 10; i = i+ 1)
 		begin
 			#10
-			A = $random % 16;
-			B = $random %16;
+			A = $random % 65536; //bottom 16 bits, 2^16
+			B = $random % 65536;
 			$display("A: %0d, B: %0d, C: %0d, Flags[1:0]: %b, time:%0d", A, B, C, Flags[1:0], $time );
 		end
 		$finish(2);
