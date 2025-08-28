@@ -63,21 +63,130 @@ module alutest;
 		
 		
 		//RANDOM TESTS:
+		parameter NUMLOOPS = 10;
 		
-		// we can make one of these random loops for each instruction, in it we will place a
-		// condition that when it fails, will trigger a $monitor variable that will print a failure message.
-		for( i = 0; i< 10; i = i+ 1)
+		
+		Opcode = 4'b0101; //ADD
+		for(i = 0; i < NUMLOOPS; i = i + 1)
 		begin
+			A = $random % 65536; //bottom 16 bits, 2^16
+			B = $random % 65536;
 			#10
-			A = $random % 65536; // bottom 16 bits
-		    B = $random % 65536;
-		    Opcode = uut.ADD;    // can change
-		    $display("Rnd: OP=%0d A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b %b %b %b %b",
-		         Opcode,A,B,C,Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
+			if ($signed(A) + $signed(B) != $signed(C)) begin 
+				$display("RANDOM TEST FAILED! A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", A, B, C, Flags[4:0], $time); 
+			end
 		end
-		$finish(2);
 		
-		// Add stimulus here
+		
+		Opcode = 4'b0110; //ADDU
+		for(i = 0; i < NUMLOOPS; i = i + 1)
+		begin
+			A = $random % 65536;
+			B = $random % 65536;
+			#10
+			if (A + B != C) begin 
+				$display("RANDOM TEST FAILED! A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", A, B, C, Flags[4:0], $time); 
+			end
+		end
+		
+		
+		Opcode = 4'b0110; //ADDC
+		for(i = 0; i < NUMLOOPS; i = i + 1)
+		begin
+			A = $random % 65536;
+			B = $random % 65536;
+			Flags[3] = $random % 2; //0 or 1
+			#10
+			if ($signed(A) + $signed(B) + $signed({1'b0, Flags[3]}) != $signed(C)) begin 
+				$display("RANDOM TEST FAILED! A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", A, B, C, Flags[4:0], $time); 
+			end
+		end
+		
+		
+		Opcode = 4'b1110; //MUL
+		for(i = 0; i < NUMLOOPS; i = i + 1)
+		begin
+			A = $random % 65536;
+			B = $random % 65536;
+			#10
+			if ($signed(A) * $signed(B) != $signed(C)) begin 
+				$display("RANDOM TEST FAILED! A: %0d, B: %0d, C: %0d, Flags[1:0]: %b, time:%0d", A, B, C, Flags[4:0], $time); 
+			end
+		end
+		
+		
+		Opcode = 4'b0101; //SUB
+		for(i = 0; i < NUMLOOPS; i = i + 1)
+		begin
+			A = $random % 65536; 
+			B = $random % 65536;
+			#10
+			if ($signed(A) - $signed(B) != $signed(C)) begin 
+				$display("RANDOM TEST FAILED! A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", A, B, C, Flags[4:0], $time); 
+			end
+		end
+		
+		
+		Opcode = 4'b1011; //CMP
+		for(i = 0; i < NUMLOOPS; i = i + 1)
+		begin
+			A = $random % 65536; 
+			B = $random % 65536;
+			#10
+			
+			if ($signed(A) == $signed(B)) begin
+				if(Flags[4] != 1) begin
+					$display("RANDOM TEST FAILED! A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", A, B, C, Flags[4:0], $time);
+				end
+			end
+			else if ($signed(A) > $signed(B)) begin
+				if(Flags[0] != 1) begin
+					$display("RANDOM TEST FAILED! A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", A, B, C, Flags[4:0], $time);
+				end
+			end
+			else begin
+				if(Flags[1] != 1) begin
+					$display("RANDOM TEST FAILED! A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", A, B, C, Flags[4:0], $time);
+				end
+			end
+			
+		end
+		
+		
+		Opcode = 4'b0101; //AND
+		for(i = 0; i < NUMLOOPS; i = i + 1)
+		begin
+			A = $random % 65536;
+			B = $random % 65536;
+			#10
+			if ((A & B) != C) begin 
+				$display("RANDOM TEST FAILED! A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", A, B, C, Flags[4:0], $time); 
+			end
+		end
+		
+		
+		Opcode = 4'b0010; //OR
+		for(i = 0; i < NUMLOOPS; i = i + 1)
+		begin
+			A = $random % 65536;
+			B = $random % 65536;
+			#10
+			if ((A | B) != C) begin 
+				$display("RANDOM TEST FAILED! A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", A, B, C, Flags[4:0], $time); 
+			end
+		end
+		
+		
+		Opcode = 4'b0011; //XOR
+		for(i = 0; i < NUMLOOPS; i = i + 1)
+		begin
+			A = $random % 65536;
+			B = $random % 65536;
+			#10
+			if ((A ^ B) != C) begin 
+				$display("RANDOM TEST FAILED! A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", A, B, C, Flags[4:0], $time); 
+			end
+		end
 
 	end
       
