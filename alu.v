@@ -1,10 +1,10 @@
 `timescale 1ns / 1ps
 
-module alu( A, B, C, Opcode, carry, Flags);
-input [3:0] A, B;
+module alu( A, B, C, Opcode, cin, Flags);
+input [15:0] A, B;
 input [3:0] Opcode;
-input carry;
-output reg [3:0] C;
+input cin;
+output reg [15:0] C;
 output reg [4:0] Flags;
 
 /*
@@ -50,32 +50,66 @@ begin
 	case (Opcode)
 	ADDU:
 		begin
-		{Flags[3], C} = A + B;
-		if (C == 4'b0000) Flags[4] = 1'b1; 
-		else Flags[4] = 1'b0;
-		Flags[2:0] = 3'b000;
+		// Simply add A and B, no need to touch flags as detailed in CR16a manual
+		C = A + B;
 		end
 	ADD:
 		begin
-		C = A + B;
-		if (C == 4'b0000) Flags[4] = 1'b1;
-		else Flags[4] = 1'b0;
+
+		// Reset flags
+		Flags = 5'b00000;
+		// Sum A and B, and also set the carry flag if a carry happens.
+		{Flags[3], C} = A + B;
+		// If the sum is zero, set the Zero flag (Regardless if carry happened)
+		if (C == 16'b0) Flags[4] = 1'b1;
+		// Set overflow flag
 		if( (~A[3] & ~B[3] & C[3]) | (A[3] & B[3] & ~C[3]) ) Flags[2] = 1'b1;
-		else Flags[2] = 1'b0;
-		Flags[1:0] = 2'b00; Flags[3] = 1'b0;
+
+		end
+	ADDC:
+		begin
+
+		// Reset flags
+		Flags = 5'b00000;
+		// Sum A, B, cin, and also set the carry flag if a carry happens.
+		{Flags[3], C} = A + B + cin;
+		// If the sum is zero, set the Zero flag (Regardless if carry happened)
+		if (C == 16'b0) Flags[4] = 1'b1;
+		// Set overflow flag
+		if( (~A[3] & ~B[3] & C[3]) | (A[3] & B[3] & ~C[3]) ) Flags[2] = 1'b1;
 
 		end
 	SUB:
 		begin
+
+		// Reset flags
+		Flags = 5'b00000;
+		// Set C to 2's compl sub of A and B.
 		C = A - B;
-		if (C == 4'b0000) Flags[4] = 1'b1;
-		else Flags[4] = 1'b0;
+		// Set the carry flag (A<B)
+		if (A < B) Flags[3] = 1'b1;
+		// If C is zero, set the Zero flag
+		if (C == 16'b0) Flags[4] = 1'b1;
+		// If overflow happened, set the overflow flag
 		if( (~A[3] & ~B[3] & C[3]) | (A[3] & B[3] & ~C[3]) ) Flags[2] = 1'b1;
-		else Flags[2] = 1'b0;
-		Flags[1:0] = 2'b00; Flags[3] = 1'b0;
+
 		end
 	SUBC:
-	CMP:
+		begin
+
+		// Reset flags
+		Flags = 5'b00000;
+		// Subtract with cin
+		C = A - B - cin;
+		// Set the carry flag (A<B+cin)
+		if (A < (B+cin)) Flags[3] = 1'b1;
+		// set zero flag
+		if (C == 4'b0000) Flags[4] = 1'b1;
+		// set overflow flag
+		if( (~A[3] & ~B[3] & C[3]) | (A[3] & B[3] & ~C[3]) ) Flags[2] = 1'b1;
+
+		end
+	CMP: // TODO
 		begin
 		if( $signed(A) < $signed(B) ) Flags[1:0] = 2'b11;
 		else Flags[1:0] = 2'b00;
@@ -95,9 +129,15 @@ begin
 		C = 4'b0000;
 		*/
 		end
-	CMPU:
-	AND
-	OR:
+	CMPU: // TODO
+		begin
+		if($unsigned(A)<$unsigned(B)) Flags[1:0] = 2'b11;
+		else flags[1:0] = 2'b00;
+		C=4'b0000;
+
+		end
+	AND:
+	OR: 
 	XOR:
 	MOV:
 	LSH:
