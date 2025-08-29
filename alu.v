@@ -63,7 +63,7 @@ begin
 		// If the sum is zero, set the Zero flag (Regardless if carry happened)
 		if (C == 16'b0) Flags[4] = 1'b1;
 		// Set overflow flag
-		if( (~A[3] & ~B[3] & C[3]) | (A[3] & B[3] & ~C[3]) ) Flags[2] = 1'b1;
+		if( (~A[15] & ~B[15] & C[15]) | (A[15] & B[15] & ~C[15]) ) Flags[2] = 1'b1;
 
 		end
 	ADDC:
@@ -76,7 +76,7 @@ begin
 		// If the sum is zero, set the Zero flag (Regardless if carry happened)
 		if (C == 16'b0) Flags[4] = 1'b1;
 		// Set overflow flag
-		if( (~A[3] & ~B[3] & C[3]) | (A[3] & B[3] & ~C[3]) ) Flags[2] = 1'b1;
+		if( (~A[15] & ~B[15] & C[15]) | (A[15] & B[15] & ~C[15]) ) Flags[2] = 1'b1;
 
 		end
 	SUB:
@@ -91,7 +91,7 @@ begin
 		// If C is zero, set the Zero flag
 		if (C == 16'b0) Flags[4] = 1'b1;
 		// If overflow happened, set the overflow flag
-		if( (~A[3] & ~B[3] & C[3]) | (A[3] & B[3] & ~C[3]) ) Flags[2] = 1'b1;
+		if( (~A[15] & ~B[15] & C[15]) | (A[15] & B[15] & ~C[15]) ) Flags[2] = 1'b1;
 
 		end
 	SUBC:
@@ -106,7 +106,7 @@ begin
 		// set zero flag
 		if (C == 4'b0000) Flags[4] = 1'b1;
 		// set overflow flag
-		if( (~A[3] & ~B[3] & C[3]) | (A[3] & B[3] & ~C[3]) ) Flags[2] = 1'b1;
+		if( (~A[15] & ~B[15] & C[15]) | (A[15] & B[15] & ~C[15]) ) Flags[2] = 1'b1;
 
 		end
 	CMP: // TODO
