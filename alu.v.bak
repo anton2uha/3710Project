@@ -1,9 +1,9 @@
 `timescale 1ns / 1ps
 
-module alu( A, B, C, Opcode, carry, Flags);
+module alu( A, B, C, Opcode, Flags
+    );
 input [3:0] A, B;
-input [3:0] Opcode;
-input carry;
+input [1:0] Opcode;
 output reg [3:0] C;
 output reg [4:0] Flags;
 
@@ -12,30 +12,21 @@ parameter ADDU = 2'b00;
 parameter ADD = 2'b01;
 parameter SUB = 2'b10;
 parameter CMP = 2'b11;
-
-/*
-ADD, ADDI, ADDU, ADDUI, ADDC, ADDCU, ADDCUI, ADDCI, SUB, SUBI, CMP, CMPI, CMPU/I, AND,
-OR, XOR, NOT, LSH, LSHI, RSH, RSHI, ALSH, ARSH, NOP/WAIT
 */
 
-parameter ADD   = 4'b0101;
-parameter ADDU  = 4'b0110;
-parameter ADDC  = 4'b0111;
-parameter ADDCU = 4'b0100; // 1st unused OPCODE
-parameter SUB   = 4'b1001;
-parameter SUBC  = 4'b1010;
-parameter CMP   = 4'b1011;
-parameter CMPU  = 4'b????; // <------
-parameter AND   = 4'b0001;
-parameter OR    = 4'b0010;
-parameter XOR   = 4'b0011;
-parameter MOV   = 4'b1101;
-parameter LSH   = 4'b0100;
-parameter NOT   = 4'b????; // <------
-parameter RSH   = 4'b????; // <------
-parameter ALSH  = 4'b????; // <------
-parameter ARSH  = 4'b????; // <------
-parameter NOP   = 4'b????; // <------
+parameter ADD  = 4'b0101;
+parameter ADDU = 4'b0110;
+parameter ADDC = 4'b0111;
+//ADDCU, in list but cannot find in ISA?
+parameter MUL  = 4'b1110;
+parameter SUB  = 4'b1001;
+parameter SUBC = 4'b1010;
+parameter CMP  = 4'b1011;
+parameter AND  = 4'b0001;
+parameter OR   = 4'b0010;
+parameter XOR  = 4'b0011;
+parameter MOV  = 4'b1101;
+parameter LSH  = 4'b0100;
 
 
 /*
@@ -43,6 +34,10 @@ parameter NOP   = 4'b????; // <------
 2. Don't need to put immediate versions of instrs here, they have same opcode as normal version.
 3. Should maybe create parameters for Flags?? or reference this:
 	Flags[4,3,2,1,0] = Zero(Z), Carry(C), Overflow(O), ?Low(L), ?Negative(N)
+
+
+
+
 */
 
 always @(A, B, Opcode)
@@ -51,6 +46,7 @@ begin
 	ADDU:
 		begin
 		{Flags[3], C} = A + B;
+		// perhaps if ({Flags[3], C} == 5'b00000) ....
 		if (C == 4'b0000) Flags[4] = 1'b1; 
 		else Flags[4] = 1'b0;
 		Flags[2:0] = 3'b000;
@@ -74,7 +70,6 @@ begin
 		else Flags[2] = 1'b0;
 		Flags[1:0] = 2'b00; Flags[3] = 1'b0;
 		end
-	SUBC:
 	CMP:
 		begin
 		if( $signed(A) < $signed(B) ) Flags[1:0] = 2'b11;
@@ -95,17 +90,6 @@ begin
 		C = 4'b0000;
 		*/
 		end
-	CMPU:
-	AND
-	OR:
-	XOR:
-	MOV:
-	LSH:
-	NOT:
-	RSH:
-	ALSH:
-	ARSH:
-	NOP:
 	default: 
 		begin
 			C = 4'b0000;
