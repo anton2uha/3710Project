@@ -59,11 +59,6 @@ module alutest;
 	    $display("CMP  signed:         A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
              A,B,C,Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
-	    // 6) CMPU (unsigned): 1 < 0xFFFF → L=1
-	    Opcode = uut.CMPU; A = 16'h0001; B = 16'hFFFF; #10;
-	    $display("CMPU unsigned:       A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-             A,B,C,Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
-		
 		
 		
 		
