@@ -43,7 +43,7 @@ parameter NOP   = 4'b0000;
 
 always @(A, B, cin, Opcode)
 begin
-	// Initialize/Reset outputs to remove latch infers
+	// Initialize/Reset outputs to remove latch inferences
 	C = 16'b0;
 	Flags = 5'b0;
 
