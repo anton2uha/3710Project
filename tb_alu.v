@@ -33,7 +33,6 @@ module alutest;
 
 
 		//SPECIFIC AND CORNER CASE TESTS:
-		/*
 		
 		A = 16'h0000; 
 		B = 16'h0000; 
@@ -44,7 +43,7 @@ module alutest;
 		// 1) ADD (signed) overflow: 0x7FFF + 1 = 0x8000  => F=1, C=0, N=1, Z=0
     	Opcode = uut.ADD;  A = 16'h7FFF; B = 16'h0001; #10;
     	$display("ADD  overflow check: A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-             A,B,Y, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
+             A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
 		// 2) ADDU (unsigned) carry wrap: 0xFFFF + 1 = 0x0000 → C=1, Z=1, F=0
     	Opcode = uut.ADDU;  A = 16'hFFFF; B = 16'h0001; #10;
@@ -69,54 +68,52 @@ module alutest;
 		// 6) AND: 0xF0F0 & 0x0F0F = 0x0000  => result should be zero (flags typically unchanged in this ISA)
       Opcode = uut.AND;   A = 16'hF0F0; B = 16'h0F0F; #10;
       $display("AND  zero result:    A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,Y, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
+                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
       // 7) OR: 0xF000 | 0x0F0F = 0xFF0F  => verify OR combines high/low nibbles correctly
       Opcode = uut.OR;    A = 16'hF000; B = 16'h0F0F; #10;
       $display("OR   combine:        A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,Y, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
+                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
       // 8) XOR: 0xAAAA ^ 0x5555 = 0xFFFF  => classic complementary mask XOR check
       Opcode = uut.XOR;   A = 16'hAAAA; B = 16'h5555; #10;
       $display("XOR  pattern:        A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,Y, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
+                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
       // 9) NOT: ~0x0000 = 0xFFFF  => unary bitwise invert sanity check
       Opcode = uut.NOT;   A = 16'h0000; B = 16'hXXXX; #10;
       $display("NOT  invert:         A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,Y, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
+                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
       // 10) LSH: B=+1 => logical left shift 1; top bit should be dropped (0x8001 << 1 = 0x0002)
       Opcode = uut.LSH;   A = 16'h8001; B = 16'h0001; #10;
       $display("LSH  left +1:        A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,Y, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
+                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
       // 11) LSH: B=-1(=0xFFFF) => logical right shift 1; MSB filled with 0 (0x8001 >> 1 = 0x4000)
       Opcode = uut.LSH;   A = 16'h8001; B = 16'hFFFF; #10;
       $display("LSH  right -1:       A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,Y, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
+                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
       // 12) RSH: always logical right shift by 1 → 0x8001 >> 1 = 0x4000 (no sign extension)
       Opcode = uut.RSH;   A = 16'h8001; B = 16'h0001; #10;
       $display("RSH  logical >>1:    A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,Y, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
+                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
       // 13) ASHU: B<0 triggers arithmetic right shift 1; sign bit preserved (0x8001 >>> 1 = 0xC000)
       Opcode = uut.ASHU;  A = 16'h8001; B = 16'hFFFF; #10;
       $display("ASHU arith >>1:      A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,Y, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
+                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
       // 14) ALSH: arithmetic left shift by 1; high bit is discarded (0x8000 <<< 1 = 0x0000)
       Opcode = uut.ALSH;  A = 16'h8000; B = 16'h0001; #10;
       $display("ALSH arith <<<1:     A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,Y, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
+                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
       // 15) NOP: no operation; verify outputs/flags remain unchanged from previous state
       Opcode = uut.NOP;   A = 16'h1234; B = 16'h5678; #10;
       $display("NOP  no-op:          A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,Y, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
-		
-		*/
+                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 		
 		
 		//RANDOM TESTS:
