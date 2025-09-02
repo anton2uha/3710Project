@@ -33,6 +33,7 @@ module alutest;
 
 
 		//SPECIFIC AND CORNER CASE TESTS:
+	
 		
 		A = 16'h0000; 
 		B = 16'h0000; 
@@ -95,27 +96,17 @@ module alutest;
       $display("LSH  right -1:       A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
                  A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
-      // 12) RSH: always logical right shift by 1 → 0x8001 >> 1 = 0x4000 (no sign extension)
-      Opcode = uut.RSH;   A = 16'h8001; B = 16'h0001; #10;
-      $display("RSH  logical >>1:    A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
-
-      // 13) ASHU: B<0 triggers arithmetic right shift 1; sign bit preserved (0x8001 >>> 1 = 0xC000)
+      // 12) ASHU: B<0 triggers arithmetic right shift 1; sign bit preserved (0x8001 >>> 1 = 0xC000)
       Opcode = uut.ASHU;  A = 16'h8001; B = 16'hFFFF; #10;
       $display("ASHU arith >>1:      A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
                  A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 
-      // 14) ALSH: arithmetic left shift by 1; high bit is discarded (0x8000 <<< 1 = 0x0000)
-      Opcode = uut.ALSH;  A = 16'h8000; B = 16'h0001; #10;
-      $display("ALSH arith <<<1:     A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
-                 A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
-
-      // 15) NOP: no operation; verify outputs/flags remain unchanged from previous state
+      // 13) NOP: no operation; verify outputs/flags remain unchanged from previous state
       Opcode = uut.NOP;   A = 16'h1234; B = 16'h5678; #10;
       $display("NOP  no-op:          A=%h B=%h -> Y=%h | Flags(Z C F N L)=%b%b%b%b%b",
                  A,B,C, Flags[4],Flags[3],Flags[2],Flags[1],Flags[0]);
 		
-		
+	
 		//RANDOM TESTS:
 		
 		
@@ -151,24 +142,10 @@ module alutest;
 			B = $random % 65536;
 			carry = $random % 2; //0 or 1
 			#10
-			if ($signed(A) + $signed(B) + $signed({1'b0, Flags[3]}) != $signed(C)) begin 
+			if ($signed(A) + $signed(B) + $signed({1'b0, carry}) != $signed(C)) begin 
 				$display("RANDOM TEST FAILED! Opcode: %04b, A: %0d, B: %0d, carry: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, A, B, carry, C, Flags[4:0], $time); 
 			end
 		end
-		
-		/* possibly just use ADDC
-		Opcode = 4'b????; //ADDCU
-		for(i = 0; i < NUMLOOPS; i = i + 1)
-		begin
-			A = $random % 65536;
-			B = $random % 65536;
-			Flags[3] = $random % 2;
-			#10
-			if (A + B + Flags[3] != C) begin 
-				$display("RANDOM TEST FAILED! Opcode: %0b, A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, A, B, C, Flags[4:0], $time); 
-			end
-		end
-		*/
 		
 		
 		Opcode = 4'b1001; //SUB
@@ -183,6 +160,18 @@ module alutest;
 		end
 		
 		
+		Opcode = 4'b1010; //SUBC
+		for(i = 0; i < NUMLOOPS; i = i + 1)
+		begin
+			A = $random % 65536; 
+			B = $random % 65536;
+			carry = $random % 2;
+			#10
+			if ($signed(A) - $signed(B) - $signed({1'b0, carry}) != $signed(C)) begin 
+				$display("RANDOM TEST FAILED! Opcode: %04b, A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, A, B, C, Flags[4:0], $time); 
+			end
+		end
+		
 		Opcode = 4'b1011; //CMP
 		for(i = 0; i < NUMLOOPS; i = i + 1)
 		begin
@@ -195,12 +184,12 @@ module alutest;
 					$display("RANDOM TEST FAILED! Opcode: %04b, A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, A, B, C, Flags[4:0], $time);
 				end
 			end
-			if ($signed(A) > $signed(B)) begin
+			if ($signed(A) < $signed(B)) begin
 				if(Flags[0] != 1) begin
 					$display("RANDOM TEST FAILED! Opcode: %04b, A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, A, B, C, Flags[4:0], $time);
 				end
 			end
-			if ($unsigned(A) > $unsigned(B)) begin
+			if ($unsigned(A) < $unsigned(B)) begin
 				if(Flags[1] != 1) begin
 					$display("RANDOM TEST FAILED! Opcode: %04b, A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, A, B, C, Flags[4:0], $time);
 				end
@@ -244,6 +233,8 @@ module alutest;
 			end
 		end
 		
+		
+		
 		/*
 		//NOT implemeted with XOR
 		Opcode = 4'b0011; //XOR
@@ -257,6 +248,19 @@ module alutest;
 			end
 		end
 		*/
+		
+		
+		Opcode = 4'b1000; //NOT
+		for(i = 0; i < NUMLOOPS; i = i + 1)
+		begin
+			A = $random % 65536;
+			B = $random % 65536;
+			#10
+			if (~A != C) begin 
+				$display("RANDOM TEST FAILED! Opcode: %04b, A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, A, B, C, Flags[4:0], $time); 
+			end
+		end
+		
 		
 		//L(ogical)SH implements both L(eft)SH and R(ight)SH, depending on sign of src.
 		Opcode = 4'b0100; //LSH
