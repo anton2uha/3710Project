@@ -29,12 +29,9 @@ parameter OR    = 4'b0010;
 parameter XOR   = 4'b0011;
 parameter MOV   = 4'b1101;
 parameter LSH   = 4'b0100;
-parameter NOT   = 4'b1000; // <------
-parameter ASHU  = 4'b1100; // <------
-parameter NOP   = 4'b0000; // Same as WAIT?
-parameter RSH	 = 4'b1110; //
-parameter ALSH	 = 4'b1111; //
-parameter ARSH	 = 4'b????; //
+parameter NOT   = 4'b1000;
+parameter ASHU  = 4'b1100;
+parameter NOP   = 4'b0000;
 
 
 /*
@@ -46,6 +43,10 @@ parameter ARSH	 = 4'b????; //
 
 always @(A, B, cin, Opcode)
 begin
+	// Initialize/Reset outputs to remove latch infers
+	C = 16'b0;
+	Flags = 5'b0;
+
 	case (Opcode)
 	ADDU: // does not set flags
 		begin
@@ -152,33 +153,6 @@ begin
 		else // If B is negative, do a arithmetic right shift instead (preserves sign bit)
 			C = ($signed(A) >>> (-$signed(B)));
 
-		end
-	RSH: //Logical right shift. Does not set flags
-		begin
-		
-			// Shift right logically (fills with 0s)
-			if ($signed(B) >= 0)
-				C = A >> B;
-			else // if negative, treat as left shift
-            C = A << (-$signed(B));
-				
-		end
-	ALSH: // Arithmetic left shift, same as LSH but ISA calls seperately
-		begin
-		
-			if ($signed(B) >= 0)
-				C = A <<< B;   // left shift
-			else
-            C = A >>> (-$signed(B)); // arithmetic right shift
-				
-		end
-	ARSH: // Arithmetic right shift, preserves the sign
-		begin
-			
-			if ($signed(B) >= 0)
-            C = $signed(A) >>> B; // signed right shift
-        else
-            C = A << (-$signed(B));
 		end
 	NOP: begin end // No operation, do nothing
 

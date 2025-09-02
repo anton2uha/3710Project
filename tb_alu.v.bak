@@ -6,14 +6,10 @@ module alutest;
 	reg [15:0] A;
 	reg [15:0] B;
 	reg [3:0] Opcode;
-	reg [15:0] abs_A;
-	reg carry;
 
 	// Outputs
 	wire [15:0] C;
 	wire [4:0] Flags;
-	
-	parameter NUMLOOPS = 10;
 
 	integer i;
 	// Instantiate the Unit Under Test (UUT)
@@ -22,12 +18,10 @@ module alutest;
 		.B(B), 
 		.C(C), 
 		.Opcode(Opcode), 
-		.carry(cin),
 		.Flags(Flags)
 	);
 
 	initial begin
-		carry = 0;
 		//$monitor("A: %0d, B: %0d, C: %0d, Flags[1:0]:%b, time:%0d", A, B, C, Flags[1:0], $time );
 
 
@@ -117,7 +111,7 @@ module alutest;
 
 
 		//RANDOM TESTS:
-		
+		parameter NUMLOOPS = 10;
 		
 		
 		Opcode = 4'b0101; //ADD
@@ -149,10 +143,10 @@ module alutest;
 		begin
 			A = $random % 65536;
 			B = $random % 65536;
-			carry = $random % 2; //0 or 1
+			Flags[3] = $random % 2; //0 or 1
 			#10
 			if ($signed(A) + $signed(B) + $signed({1'b0, Flags[3]}) != $signed(C)) begin 
-				$display("RANDOM TEST FAILED! Opcode: %0b, A: %0d, B: %0d, carry: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, A, B, carry, C, Flags[4:0], $time); 
+				$display("RANDOM TEST FAILED! Opcode: %0b, A: %0d, B: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, A, B, C, Flags[4:0], $time); 
 			end
 		end
 		
@@ -269,9 +263,9 @@ module alutest;
 		begin
 			A = $random % 65536; //src (interpreted as signed)
 			B = $random % 65536; //dest (unsigned)
-			#10;
+			#10
 			
-			abs_A = (A < 0) ? -A : A; //absolute value of A
+			reg [15:0] abs_A = (A < 0) ? -A : A; //absolute value of A
 			
 			if($signed(A) >= 0) begin //left
 				if (C != B << abs_A) begin
@@ -292,8 +286,9 @@ module alutest;
 		begin
 			A = $random % 65536; //src (interpreted as signed)
 			B = $random % 65536; //dest (also signed)
-			#10;
-			abs_A = (A < 0) ? -A : A; //absolute value of A
+			#10
+			
+			reg [15:0] abs_A = (A < 0) ? -A : A; //absolute value of A
 			
 			if($signed(A) >= 0) begin //left
 				if (C != B << abs_A) begin //arithmetic left is equivalent to logical left
