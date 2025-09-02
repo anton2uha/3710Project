@@ -27,7 +27,7 @@ module alutest;
 	);
 
 	initial begin
-		carry = 0;
+		
 		//$monitor("A: %0d, B: %0d, C: %0d, Flags[1:0]:%b, time:%0d", A, B, C, Flags[1:0], $time );
 
 
@@ -37,6 +37,7 @@ module alutest;
 
 		A = 16'h0000; 
 		B = 16'h0000; 
+		carry = 0;
 		Opcode = uut.ADD; // Need to change based on the default Opcode
 		#10; 
 
