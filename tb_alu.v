@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module alutest;
+module tb_alu;
 
 	// Inputs
 	reg [15:0] A;
