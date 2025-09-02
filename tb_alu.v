@@ -6,7 +6,6 @@ module alutest;
 	reg [15:0] A;
 	reg [15:0] B;
 	reg [3:0] Opcode;
-	reg [15:0] abs_A;
 	reg carry;
 
 	// Outputs
@@ -14,10 +13,9 @@ module alutest;
 	wire [4:0] Flags;
 	
 	parameter NUMLOOPS = 10;
-
 	integer i;
-	parameter NUMLOOPS = 10;
 	reg [15:0] abs_A;
+	
 	// Instantiate the Unit Under Test (UUT)
 	alu uut (
 		.A(A), 
