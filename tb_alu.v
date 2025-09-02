@@ -22,7 +22,7 @@ module alutest;
 		.B(B), 
 		.C(C), 
 		.Opcode(Opcode), 
-		.carry(cin),
+		.cin(carry),
 		.Flags(Flags)
 	);
 
@@ -155,7 +155,7 @@ module alutest;
 			carry = $random % 2; //0 or 1
 			#10
 			if ($signed(A) + $signed(B) + $signed({1'b0, Flags[3]}) != $signed(C)) begin 
-				$display("RANDOM TEST FAILED! Opcode: %0b, A: %0d, B: %0d, carry: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, A, B, carry, C, Flags[4:0], $time); 
+				$display("RANDOM TEST FAILED! Opcode: %04b, A: %0d, B: %0d, carry: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, A, B, carry, C, Flags[4:0], $time); 
 			end
 		end
 		
