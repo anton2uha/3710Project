@@ -107,7 +107,7 @@ begin
 		// If A==B is zero, set the Zero flag
 		if (A == B) Flags[4] = 1'b1;
 		// Set the negative flag if A < B (signed)
-		if ($signed(A) == $signed(B)) Flags[0] = 1'b1;
+		if ($signed(A) < $signed(B)) Flags[0] = 1'b1;
 		// Set the low flag if A < B (unsigned)
 		if ($unsigned(A) < $unsigned(B)) Flags[1] = 1'b1;
 
