@@ -14,11 +14,11 @@ module fpga_top(
   wire mode_level, mode_rise, mode_fall;
   wire com_level,  com_rise;  // commit uses only rising edge in DATA
 
-  db_pulse #(.CNT_MAX(500_000)) u_db_mode ( // ~10ms @ 50MHz
+  db_pulse #(.CNT_MAX(500000)) u_db_mode ( // ~10ms @ 50MHz
     .clk(CLOCK_50), .din(SW[9]),
     .level(mode_level), .rise(mode_rise), .fall(mode_fall)
   );
-  db_pulse #(.CNT_MAX(500_000)) u_db_commit(
+  db_pulse #(.CNT_MAX(500000)) u_db_commit(
     .clk(CLOCK_50), .din(SW[8]),
     .level(com_level), .rise(com_rise), .fall(/*unused*/)
   );
