@@ -58,16 +58,17 @@ reg [1:0] immediateEnable;
 reg [3:0] Opcode;
 reg [7:0] imm;
 always @(*) begin
-    if (instr[15:12] == 4'b0000)
+    if (instr[15:12] == 4'b0000) begin
         Opcode = instr[7:4];
 		  raddrB = instr[3:0];
 		  imm = 8'b0;
 		  immediateEnable = 2'b00;
-    else
+    end else begin
         Opcode = instr[15:12];
 		  raddrB = 4'b0;
 		  imm = instr[7:0];
 		  immediateEnable = 2'b01;
+	 end
 end
 
 
@@ -126,11 +127,7 @@ end
 
 //this loop executes logic for current state.
 always @(posedge clk, posedge reset) begin
-	if (reset) begin
-		state <= RESET;
-		regFileInputEnable <= 2'b00;
-	end else begin
-		case (state)
+	case (state)
 			FETCH: begin
 				regFileWriteEnable = 2'b01; //dataIn
 				dataAMuxEnable = 1'b0;
@@ -159,9 +156,7 @@ always @(posedge clk, posedge reset) begin
 				immediateEnable = 1'b00;
 			end
 		
-		endcase
-	end
-	
+	endcase
 end
 
 
