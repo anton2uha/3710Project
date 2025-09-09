@@ -8,6 +8,7 @@ module Regfile_ALU_Datapath(
 );
 
 
+//This seems redundant? We already have a two to one mux below?
 //mux modules
 module mux(
     input [15:0] wire a,    
