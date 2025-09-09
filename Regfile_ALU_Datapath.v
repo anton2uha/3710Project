@@ -1,40 +1,21 @@
 
+module twoToOneMux (
+    input  wire [15:0] a,
+    input  wire [15:0] b,
+    input  wire        sel,   // 1-bit select
+    output wire [15:0] y
+);
+    assign y = sel ? b : a;   // if sel=1 → b, else → a
+endmodule
+
+
 module Regfile_ALU_Datapath(
 	input clk, 
 	input reset,
-	input [15:0] instr,	// cr16a instruction to execute
-	input [15:0] inData    // to directly feed data into regfile,
+	input wire [15:0] instr,	// cr16a instruction to execute
+	input wire [15:0] inData    // to directly feed data into regfile,
 								// will eventually be replaced with data fetched from memory?
 );
-
-
-//mux modules
-module mux(
-    input [15:0] wire a,    
-    input wire sel,
-    output [15:0] wire y       
-);
-
-assign y = sel ? a : 16'b0;  // propagate a only if sel is 1
-
-endmodule
-
-module twoToOneMux (
-	input [15:0] wire a,
-	input [15:0] wire b,
-	input [1:0] wire sel,
-	output [15:0] wire out
-);
-
-always @(*) begin
-	case (sel) 
-		2'b01: out = a;
-		2'b10: out = b;
-		default: out = 16'b0;
-	endcase
-end
-
-endmodule
 
 
 //regFile connections
@@ -44,39 +25,37 @@ reg [3:0] raddrB;  //rsrc
 wire [15:0] regFileInput;
 wire [15:0] rdataA;
 wire [15:0] rdataB;
-reg [1:0] regFileWriteEnable;
+reg regFileWriteEnable;
 
 //ALU connections
 wire [15:0] dataA;
 wire [15:0] dataB;
 wire [15:0] ALUout;
-reg dataAMuxEnable; //maybe need seperate enables for A and B?
-reg [1:0] immediateEnable;
+reg dataAMuxEnable; 
+reg immediateEnable;
 
 
 //extract info from instr. Below works for most but not all instrs, like shifts, will come back.
 reg [3:0] Opcode;
 reg [7:0] imm;
+reg isImmediate;
 always @(*) begin
     if (instr[15:12] == 4'b0000) begin
         Opcode = instr[7:4];
 		  raddrB = instr[3:0];
 		  imm = 8'b0;
-		  immediateEnable = 2'b00;
+		  isImmediate = 0;
     end else begin
         Opcode = instr[15:12];
 		  raddrB = 4'b0;
 		  imm = instr[7:0];
-		  immediateEnable = 2'b01;
+		  isImmediate = 1;
 	 end
 end
 
-
-
-
-mux muxA (rdataA, regToAluMuxEnable, dataA);
-twoToOneMux immMux (rdataB, imm, immediateEnable, dataB);
-twoToOneMux muxRegFile (inData, ALUout, regFileWriteEnable, regFileInput);
+twoToOneMux dataAMux (rdataA, rdataA, dataAMuxEnable, dataA);
+twoToOneMux immMux (rdataB, {8'b0, imm}, immediateEnable, dataB);
+twoToOneMux regFileMux (inData, ALUout, regFileWriteEnable, regFileInput);
 
 regfile my_regs
 (
@@ -87,7 +66,7 @@ regfile my_regs
 	.raddrA(raddrA),
 	.raddrB(raddrB),
 	.rdataA(rdataA),
-	.rdataB(rdataB),
+	.rdataB(rdataB)
 );
 
 
@@ -103,11 +82,10 @@ alu my_alu
 
 
 //FSM
-parameter RESET = 2'b000;  //reset
-parameter FETCH = 2'b001;  //fetch: read instr from mem, we feed data directly for now.
-parameter DECODE = 2'b010; //decode: decode instr, update regfile
-parameter EXECALU = 2'b011;  //execute ALU
-parameter WRITEBACK = 2'b100; //writeback: place output of ALU into regfile
+parameter FETCH = 3'b001;  //fetch: read instr from mem, we feed data directly for now.
+parameter DECODE = 3'b010; //decode: decode instr, update regfile
+parameter EXECALU = 3'b011;  //execute ALU
+parameter WRITEBACK = 3'b100; //writeback: place output of ALU into regfile
 
 reg [2:0] state;
 //this loop takes care of state: FETCH -> DECODE -> EXECUTE -> WRITEBACK -> FETCH
@@ -117,8 +95,8 @@ always @(posedge clk or posedge reset) begin
     else begin
         case (state)
             FETCH:     state <= DECODE;
-            DECODE:    state <= EXECUTE;
-            EXECUTE:   state <= WRITEBACK;
+            DECODE:    state <= EXECALU;
+            EXECALU:   state <= WRITEBACK;
             WRITEBACK: state <= FETCH;   // loop back
             default:     state <= FETCH;   // safety
         endcase
@@ -126,35 +104,40 @@ always @(posedge clk or posedge reset) begin
 end
 
 //this loop executes logic for current state.
-always @(posedge clk, posedge reset) begin
+always @(*) begin
 	case (state)
-			FETCH: begin
-				regFileWriteEnable = 2'b01; //dataIn
-				dataAMuxEnable = 1'b0;
-				immediateEnable = 1'b00;
+		FETCH: begin
+			regFileWriteEnable = 1'b0; //inData
+			dataAMuxEnable = 1'b0;
+			immediateEnable = 1'b0;
+		end
+			
+		DECODE: begin
+			regFileWriteEnable = 1'b0;
+			dataAMuxEnable = 1'b0;
+			immediateEnable = 1'b0;
+		end
+			
+		EXECALU: begin
+			regFileWriteEnable = 1'b0;
+			dataAMuxEnable = 1'b1;
+			if(isImmediate == 1) 
+				immediateEnable = 1'b1;
+			else
+				immediateEnable = 1'b0;			
 			end
 			
-			DECODE: begin
-				regFileWriteEnable = 2'b11;
-				dataAMuxEnable = 1'b0;
-				immediateEnable = 1'b11;
-			end
+		WRITEBACK: begin
+			regFileWriteEnable = 1'b1; //ALUout
+			dataAMuxEnable = 1'b0;
+			immediateEnable = 1'b0;
+		end
 			
-			EXECALU: begin
-				
-			end
-			
-			WRITEBACK: begin
-				regFileWriteEnable = 2'b10; //ALUout
-				dataAMuxEnable = 1'b0;
-				immediateEnable = 1'b00;
-			end
-			
-			default: begin
-				regFileWriteEnable = 2'b00;
-				dataAMuxEnable = 1'b0;
-				immediateEnable = 1'b00;
-			end
+		default: begin
+			regFileWriteEnable = 1'b0;
+			dataAMuxEnable = 1'b0;
+			immediateEnable = 1'b0;
+		end
 		
 	endcase
 end
