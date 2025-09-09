@@ -52,11 +52,11 @@ src2 = A src1 = B for cmp instruction
 - Bus module (Ian / Martin)
 - MUX module (Anthony / Evelyn)
 - REG File module (Anthony / Evelyn)
-- Bus module tb (Anthony / Evelyn)
+- Bus module tb (Anthony / Evelyn) We might collab on this
 - MUX module tb (Ian / Martin)
 - REG File module tb (Ian / Martin)
 - ALU module (already done, but maybe needs refining?)
-- Programming the FPGA
+- Programming the FPGA // This is gonna be big
 
 ### Commitments
 

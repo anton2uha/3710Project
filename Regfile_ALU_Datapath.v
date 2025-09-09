@@ -18,7 +18,11 @@ endmodule
 module Regfile_ALU_Datapath(
 	input clk, 
 	input reset,
-	input wire [15:0] instr,	// cr16a instruction to execute
+	// input wire [15:0] instr,	// cr16a instruction to execute
+	input [15:0] imm,
+	input isImm,
+	input [3:0] src, dest,
+
 	input wire [15:0] inData    // to directly feed data into regfile,
 								// will eventually be replaced with data fetched from memory?
 );
@@ -60,8 +64,8 @@ always @(*) begin
 end
 
 twoToOneMux dataAMux (rdataA, rdataA, dataAMuxEnable, dataA);
+twoToOneMux regFileMux (inData, ALUout, regFileWriteEnable, regFileInput); // Clarify these a bit
 twoToOneMux immMux (rdataB, {8'b0, imm}, immediateEnable, dataB);
-twoToOneMux regFileMux (inData, ALUout, regFileWriteEnable, regFileInput);
 
 regfile my_regs
 (
