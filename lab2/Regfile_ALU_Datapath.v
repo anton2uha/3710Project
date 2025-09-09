@@ -21,10 +21,10 @@ assign y = sel ? a : 16'b0;  // propagate a only if sel is 1
 endmodule
 
 module twoToOneMux (
-	input [15:0] wire a,
-	input [15:0] wire b,
-	input [1:0] wire sel,
-	output [15:0] wire out
+	input [15:0] a,
+	input [15:0] b,
+	input [1:0] sel,
+	output reg [15:0] out
 );
 
 always @(*) begin
