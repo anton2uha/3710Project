@@ -1,3 +1,6 @@
+// Notes on this: This module seems to not only try to implement a datapath(bus) but also a control module. If we want to do a
+// control module, we should probably do it in a separate file and ensure it is needed for lab 2.
+
 
 module Regfile_ALU_Datapath(
 	input clk, 
