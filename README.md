@@ -64,3 +64,7 @@ src2 = A src1 = B for cmp instruction
 - The report is 7-8 pages (Like actually? 3700 was 8 pages of graphics, is it the same for this?)
   - If the report is really 7-8 pages of text, lets use the last week to get it done.
 - RTL Diagram
+
+### Block diagram
+
+![block diagram](resources/Datapath%20Block%20Diagram.drawio.png "Block Diagram")
