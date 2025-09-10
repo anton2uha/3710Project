@@ -9,6 +9,12 @@ module twoToOneMux (
 endmodule
 
 
+// Lets split this out
+// I don't feel the bus should be in charge of control logic. 
+// Therefore, instead of taking a 16 bit intruction input, we should divide that out into control signals
+// and values for registers. 
+
+// The control logic will be very useful for testing and potentially future labs. 
 module Regfile_ALU_Datapath(
 	input clk, 
 	input reset,
