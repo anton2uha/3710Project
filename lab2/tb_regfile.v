@@ -42,18 +42,16 @@ module tb_regfile;
 
 		$display("writing ABCD to register 3");
 		wdata = 16'hABCD;
-		// Enable write to register 3
 		regEnable = 16'b0000_0000_0000_1000; 
 		#10;
 
 		$display("writing 1234 to register 5");
 		wdata = 16'h1234;
-		// Enable write to register 5
 		regEnable = 16'b0000_0000_0010_0000;
 		#10;
 
 		$display("Reading registers 3 and 5");
-		regEnable = 16'b0000_0000_0000_0000;
+		regEnable = 16'b0000_0000_0000_0000; // Disable writing to ensure no reg is written to
 		// Read from register 3
 		raddrA = 4'h3; 
 		// Read from register 5

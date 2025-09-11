@@ -36,7 +36,7 @@ regfile my_regs
 (
 	.clk(clk),
 	.reset(reset),
-	.wdata(regFileInput),
+	.wdata(out),
 	.regEnable(regEnable),
 	.raddrA(raddrA),
 	.raddrB(raddrB),
