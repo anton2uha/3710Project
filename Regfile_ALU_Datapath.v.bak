@@ -3,11 +3,11 @@
 module Regfile_ALU_Datapath(
 	input clk, 
 	input reset,
-	input wire [3:0] opcode,     // opcode of our instruction to perform
-	input wire [3:0] rdest,      // destination register
-	input wire [3:0] rsrc,       // source register
-	input wire [15:0] immediate, // immediate value, if needed
-	input wire useImmediate  	 // whether to use immediate value or not
+	input wire [3:0] opcode,    // opcode of our instruction to perform
+	input wire [3:0] rdest,     // destination register
+	input wire [3:0] rsrc,      // source register
+	input wire [7:0] immediate, // immediate value, if needed
+	input wire useImmediate,  	// whether to use immediate value or not
 );
 
 //regFile connections
@@ -22,15 +22,8 @@ wire [15:0] dataB;
 wire [15:0] ALUout;
 reg dataAMuxEnable; 
 reg immediateEnable;
-reg [4:0] flags;
 
-// A or B for register input? A because A = dest
-twoToOneMux immMux 
-(
-	.a(rdataA),
-	.b(imm),
-	.sel(immediateEnable)
-);
+twoToOneMux immMux (rdataB, {8'b0, imm}, immediateEnable, dataB);
 
 regfile my_regs
 (
@@ -44,14 +37,15 @@ regfile my_regs
 	.rdataB(rdataB)
 );
 
+
 alu my_alu 
 (
 	.A(dataA), 
 	.B(dataB), 
 	.C(ALUout), 
 	.Opcode(Opcode), 
-	.cin(flags[3]),
-	.Flags(flags)
+	.cin(??),
+	.Flags(??)
 );
 
 endmodule

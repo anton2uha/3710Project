@@ -1,8 +1,8 @@
 
 // Given below is a 2D-memory array implementation 
 module regfile(
-    input      clk,
-    input      reset,
+    input      	  clk,
+    input         reset,
     input  [15:0] wdata,        // write data input, connected to ALU (eventually memory?)
     input  [15:0] regEnable,    // enables for each register
     input  [3:0]  raddrA,       // read address A, selects which register to output.
@@ -26,8 +26,6 @@ module regfile(
 			else
 				if(regEnable[i]==1'b1)
 				r[i] <= wdata;
-				//else
-				//r[i] <= r[i];
 		end
 	end
 	endgenerate
