@@ -49,7 +49,7 @@ alu my_alu
 	.A(dataA), 
 	.B(dataB), 
 	.C(out), 
-	.Opcode(Opcode), 
+	.Opcode(opcode), 
 	.cin(flags[3]),
 	.Flags(flags)
 );
