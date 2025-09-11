@@ -6,13 +6,13 @@ module Regfile_ALU_Datapath(
 	input [3:0] opcode,     // opcode of our instruction to perform
 	input [3:0] rdest,      // destination register
 	input [3:0] rsrc,       // source register
+	input [15:0] regEnable, // Register index to enable writing to
 	input [15:0] immediate, // immediate value, if needed
-	input useImmediate,  	 // whether to use immediate value or not
-	output [15:0] out
+	input useImmediate,  	// whether to use immediate value or not
+	output [15:0] out       // output of the ALU
 );
 
 //regFile connections
-reg [15:0] regEnable;
 wire [15:0] rdataA;
 wire [15:0] rdataB;
 reg regFileWriteEnable;

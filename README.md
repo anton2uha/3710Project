@@ -49,14 +49,15 @@ src2 = A src1 = B for cmp instruction
 
 ### Modules / Tasks
 
-- Bus module (Ian / Martin)
-- MUX module (Anthony / Evelyn)
-- REG File module (Anthony / Evelyn)
-- Bus module tb (Anthony / Evelyn)
-- MUX module tb (Ian / Martin)
-- REG File module tb (Ian / Martin)
-- ALU module (already done, but maybe needs refining?)
-- Programming the FPGA
+- Bus module
+- MUX module
+- REG File module
+- Bus module tb (Evelyn)
+- MUX module tb
+- REG File module tb
+- FSM Fib (Anthony / Evelyn) TBD per anthony's implementation
+- FSM Our implementation (Martin) TBD per anthony's implementation
+- Put all on FPGA (Ian)
 
 ### Commitments
 
