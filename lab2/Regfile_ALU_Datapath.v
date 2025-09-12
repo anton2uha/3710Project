@@ -18,20 +18,20 @@ module Regfile_ALU_Datapath(
 wire [15:0] rdataA;
 wire [15:0] rdataB;
 wire [15:0] regInput;
-reg regFileWriteEnable;
+//reg regFileWriteEnable;
 
 //ALU connections
 wire [15:0] dataA;
 wire [15:0] dataB;
 reg dataAMuxEnable; 
-reg useImmediate;
+//reg useImmediate;
 wire [4:0] flags;
 
 // A or B for register input? A because A = dest
 twoToOneMux immMux 
 (
 	.a(rdataA),
-	.b(imm),
+	.b(immediate),
 	.sel(useImmediate),
 	.y(dataA)
 );
