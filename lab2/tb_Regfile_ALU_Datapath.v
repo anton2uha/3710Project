@@ -53,7 +53,7 @@ module tb_Regfile_ALU_Datapath;
     wr1(2);
     opcode=4'b0000;
 
-    // CMP: r1 - r2  (out depends on ALU; some designs flags-only)
+    // CMP: r1 - r2  
     opcode=4'b1011; rdest=4'd1; rsrc=4'd2; useImmediate=0; regEnable=0;
     @(posedge clk); #1;
     $display("[%t] CMP r1-r2  out=%h", $time, out);
@@ -70,3 +70,4 @@ module tb_Regfile_ALU_Datapath;
     $finish;
   end
 endmodule
+
