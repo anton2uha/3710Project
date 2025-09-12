@@ -25,7 +25,7 @@ wire [15:0] dataA;
 wire [15:0] dataB;
 reg dataAMuxEnable; 
 reg useImmediate;
-reg [4:0] flags;
+wire [4:0] flags;
 
 // A or B for register input? A because A = dest
 twoToOneMux immMux 
