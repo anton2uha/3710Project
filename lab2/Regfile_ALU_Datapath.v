@@ -7,6 +7,8 @@ module Regfile_ALU_Datapath(
 	input [3:0] rdest,      // destination register
 	input [3:0] rsrc,       // source register
 	input [15:0] regEnable, // Register index to enable writing to
+	input regFileWriteEnable,
+	input [15:0] wdata,
 	input [15:0] immediate, // immediate value, if needed
 	input useImmediate,  	// whether to use immediate value or not
 	output [15:0] out       // output of the ALU
@@ -15,13 +17,14 @@ module Regfile_ALU_Datapath(
 //regFile connections
 wire [15:0] rdataA;
 wire [15:0] rdataB;
+wire [15:0] regInput;
 reg regFileWriteEnable;
 
 //ALU connections
 wire [15:0] dataA;
 wire [15:0] dataB;
 reg dataAMuxEnable; 
-reg immediateEnable;
+reg useImmediate;
 reg [4:0] flags;
 
 // A or B for register input? A because A = dest
@@ -29,17 +32,26 @@ twoToOneMux immMux
 (
 	.a(rdataA),
 	.b(imm),
-	.sel(immediateEnable)
+	.sel(useImmediate),
+	.y(dataA)
+);
+
+twoToOneMux regInputMux 
+(
+	.a(out),
+	.b(wdata),
+	.sel(regFileWriteEnable),
+	.y(regInput)
 );
 
 regfile my_regs
 (
 	.clk(clk),
 	.reset(reset),
-	.wdata(out),
+	.wdata(regInput),
 	.regEnable(regEnable),
-	.raddrA(raddrA),
-	.raddrB(raddrB),
+	.raddrA(rdest),
+	.raddrB(rsrc),
 	.rdataA(rdataA),
 	.rdataB(rdataB)
 );
