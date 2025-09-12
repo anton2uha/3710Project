@@ -2,8 +2,9 @@
 module FSM (input clk, input reset);
 
 reg [3:0] opcode, rdest, rsrc;
-reg [15:0] regEnable, wdata, immediate, out;
+reg [15:0] regEnable, wdata, immediate;
 reg regFileWriteEnable, useImmediate;
+wire [15:0] out;
 
 Regfile_ALU_Datapath my_dataPath
 (
