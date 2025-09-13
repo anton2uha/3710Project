@@ -52,8 +52,8 @@ parameter S15 = 5'd15;
 parameter S16 = 5'd16;
 
 // Defining start values as parameters so we can change them and test diff fib sequences
-parameter [15:0] F0_INIT = 16'd1;
-parameter [15:0] F1_INIT = 16'd2;
+parameter [15:0] F0_INIT = 16'd0;
+parameter [15:0] F1_INIT = 16'd1;
 
 reg [4:0] state;
 //this loop takes care of state
