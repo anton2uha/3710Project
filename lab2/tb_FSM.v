@@ -16,9 +16,9 @@ FSM my_FSM
 initial begin
 	// Initialize signals
 	clk = 0;
-	reset = 1;
-	#5;
 	reset = 0;
+	#10;
+	reset = 1;
 end
 
 always #3 clk = ~clk;

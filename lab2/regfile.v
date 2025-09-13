@@ -21,7 +21,7 @@ module regfile(
 	begin:reg_write
 		always @(posedge clk)
 		begin
-			if (reset == 1'b1)
+			if (reset == 1'b0)
 				r[i]<= 16'd0;
 			else
 				if(regEnable[i]==1'b1)

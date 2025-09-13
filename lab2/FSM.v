@@ -1,4 +1,4 @@
-
+`timescale 1ns/1ps
 module FSM (input clk, input reset, output [15:0] out);
 
 reg [3:0] opcode, rdest, rsrc;
@@ -51,10 +51,14 @@ parameter S14 = 5'd14;
 parameter S15 = 5'd15;
 parameter S16 = 5'd16;
 
+// Defining start values as parameters so we can change them and test diff fib sequences
+parameter [15:0] F0_INIT = 16'd1;
+parameter [15:0] F1_INIT = 16'd2;
+
 reg [4:0] state;
 //this loop takes care of state
-always @(posedge clk or posedge reset) begin
-    if (reset)
+always @(posedge clk or negedge reset) begin
+    if (!reset)
         state <= S0;       // start in S0 after reset
     else begin
         case (state)
@@ -84,7 +88,7 @@ end
 always @(*) begin
 	case (state)
 		S0: begin //fill r[0]
-			wdata = 16'd0;
+			wdata = F0_INIT;
 			opcode = 4'b0101;
 			rdest = 4'd0;
 			rsrc = 4'd1;
@@ -93,7 +97,7 @@ always @(*) begin
 		end
 		
 		S1: begin //fill r[1]
-			wdata = 16'd1;
+			wdata = F1_INIT;
 			opcode = 4'b0101;
 			rdest = 4'd0;
 			rsrc = 4'd1;
@@ -101,7 +105,7 @@ always @(*) begin
 			regEnable = 16'b0000000000000010;
 		end
 		
-		S2: begin //r[2] = r[0] + r[1]
+		S2: begin //r[2] = r[0] + r[1] => r[2] = 0 + 1 = 1
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd0;
@@ -110,7 +114,7 @@ always @(*) begin
 			regEnable = 16'b0000000000000100;
 		end
 		
-		S3: begin //r[3] = r[1] + r[2]
+		S3: begin //r[3] = r[1] + r[2] => r[3] = 1 + 1 = 2
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd1;
@@ -119,7 +123,7 @@ always @(*) begin
 			regEnable = 16'b0000000000001000;
 		end
 		
-		S4: begin //r[4] = r[2] + r[3]
+		S4: begin //r[4] = r[2] + r[3] => r[4] = 1 + 2 = 3
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd2;
@@ -129,7 +133,7 @@ always @(*) begin
 		
 		end
 		
-		S5: begin //r[5] = r[3] + r[4]
+		S5: begin //r[5] = r[3] + r[4] => r[5] = 2 + 3 = 5
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd3;
@@ -139,7 +143,7 @@ always @(*) begin
 		
 		end
 		
-		S6: begin //r[6] = r[4] + r[5]
+		S6: begin //r[6] = r[4] + r[5] => r[6] = 3 + 5 = 8
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd4;
@@ -149,7 +153,7 @@ always @(*) begin
 		
 		end
 		
-		S7: begin //r[7] = r[5] + r[6]
+		S7: begin //r[7] = r[5] + r[6] => r[7] = 5 + 8 = 13
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd5;
@@ -159,7 +163,7 @@ always @(*) begin
 		
 		end
 		
-		S8: begin //r[8] = r[6] + r[7]
+		S8: begin //r[8] = r[6] + r[7] => r[8] = 8 + 13 = 21
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd6;
@@ -169,7 +173,7 @@ always @(*) begin
 		
 		end
 	
-		S9: begin //r[9] = r[7] + r[8]
+		S9: begin //r[9] = r[7] + r[8] => r[9] = 13 + 21 = 34
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd7;
@@ -179,7 +183,7 @@ always @(*) begin
 		
 		end
 		
-		S10: begin //r[10] = r[8] + r[9]
+		S10: begin //r[10] = r[8] + r[9] => r[10] = 21 + 34 = 55
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd8;
@@ -189,8 +193,8 @@ always @(*) begin
 		
 		end
 		
-		S11: begin //r[11] = r[9] + r[10]
-			wdata = 16'b0;
+		S11: begin //r[11] = r[9] + r[10] => r[11] = 34 + 55 = 89
+			wdata = 16'b0; 
 			opcode = 4'b0101;
 			rdest = 4'd9;
 			rsrc = 4'd10;
@@ -199,7 +203,7 @@ always @(*) begin
 		
 		end
 		
-		S12: begin //r[12] = r[10] + r[11]
+		S12: begin //r[12] = r[10] + r[11] => r[12] = 55 + 89 = 144
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd10;
@@ -209,7 +213,7 @@ always @(*) begin
 		
 		end
 	
-		S13: begin //r[13] = r[11] + r[12]
+		S13: begin //r[13] = r[11] + r[12] => r[13] =  89 + 144 = 233
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd11;
@@ -219,7 +223,7 @@ always @(*) begin
 		
 		end
 		
-		S14: begin //r[14] = r[12] + r[13]
+		S14: begin //r[14] = r[12] + r[13] => r[14] = 144 + 233 = 377
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd12;
@@ -228,7 +232,7 @@ always @(*) begin
 			regEnable = 16'b0100000000000000;
 		end
 		
-		S15: begin //r[15] = r[13] + r[14]
+		S15: begin //r[15] = r[13] + r[14] => r[15] = 233 + 377 = 610
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd13;
