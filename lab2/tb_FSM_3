@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module tb_FSM_Bitwise;
+module tb_FSM_3;
 
   reg clk;
   reg reset;
