@@ -1,0 +1,39 @@
+`timescale 1ns / 1ps
+
+module tb_FSM_Bitwise;
+
+  reg clk;
+  reg reset;
+  wire [15:0] out;
+
+FSM_BitwiseFunctions uut
+(
+    .clk(clk),
+    .reset(reset),
+    .out(out)
+);
+
+always #3 clk = ~clk;
+
+initial begin
+    // Initialize signals
+    clk   = 0;
+    reset = 0;
+    #10;
+    reset = 1;
+end
+
+initial begin
+    #100;
+
+    $display("=== Bitwise Sanity Suite Results ===");
+    $display("r3 (AND) = %b (expected 0000000000001111)", uut.my_dataPath.regfile[3]);
+    $display("r4 (OR)  = %b (expected 0000111111111111)", uut.my_dataPath.regfile[4]);
+    $display("r5 (XOR) = %b (expected 0000111111110000)", uut.my_dataPath.regfile[5]);
+    $display("r6 (NOT) = %b (expected 1111000000001111)", uut.my_dataPath.regfile[6]);
+    $display("====================================");
+
+    $finish;
+end
+
+endmodule
