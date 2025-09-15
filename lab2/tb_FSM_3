@@ -6,7 +6,7 @@ module tb_FSM_3;
   reg reset;
   wire [15:0] out;
 
-FSM_3 BitwiseFSM
+FSM_3 uut
 (
     .clk(clk),
     .reset(reset),
