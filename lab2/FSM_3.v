@@ -1,7 +1,7 @@
 /* Secondary FSM for verifying AND, OR, XOR, NOT implementations
 */
 `timescale 1ns/1ps
-module FSM_Bitwise(
+module FSM_3(
     input  wire clk,
     input  wire reset,
     output wire [15:0] out
