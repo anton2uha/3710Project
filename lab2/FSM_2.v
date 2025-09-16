@@ -86,16 +86,6 @@ end
 
 //this loop executes logic for current state.
 always @(*) begin
-
-	wdata = 16'b0;
-   opcode = 4'b0000;        
-   rdest  = 4'd0;
-   rsrc   = 4'd0;
-   immediate = 16'd0;
-   useImmediate = 1'b0;
-   regFileWriteEnable = 1'b0;
-   regEnable = 16'b0;
-  
 	case (state)
 		S0: begin //fill r[0]
 			wdata = F0_INIT;
@@ -120,7 +110,7 @@ always @(*) begin
 			opcode = 4'b0101;
 			rdest = 4'd0;
 			rsrc = 4'd1;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0000000000000100;
 		end
 		
@@ -129,7 +119,7 @@ always @(*) begin
 			opcode = 4'b0101;
 			rdest = 4'd1;
 			rsrc = 4'd2;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0000000000001000;
 		end
 		
@@ -138,7 +128,7 @@ always @(*) begin
 			opcode = 4'b0101;
 			rdest = 4'd2;
 			rsrc = 4'd3;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0000000000010000;
 		
 		end
@@ -148,7 +138,7 @@ always @(*) begin
 			opcode = 4'b0001;
 			rdest = 4'd3;
 			rsrc = 4'd4;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0000000000100000;
 		
 		end
@@ -158,57 +148,57 @@ always @(*) begin
 			opcode = 4'b0101;
 			rdest = 4'd4;
 			rsrc = 4'd5;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0000000001000000;
 		
 		end
 		
-		S7: begin //r[7] = r[5] | r[6] => r[7] = 5 | 3 = 7
+		S7: begin //r[7] = r[5] | r[6] => r[7] = 2 | 5 = 7
 			wdata = 16'b0;
 			opcode = 4'b0010;
 			rdest = 4'd5;
 			rsrc = 4'd6;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0000000010000000;
 		
 		end
 		
-		S8: begin //r[8] = r[6] - r[7] => r[8] = 5 - 7 = -2
+		S8: begin //r[8] = r[6] + r[7] => r[8] = 5 - 7 = -2
 			wdata = 16'b0;
 			opcode = 4'b1001;
 			rdest = 4'd6;
 			rsrc = 4'd7;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0000000100000000;
 		
 		end
 	
-		S9: begin //r[9] = r[7] + r[8] => r[9] = 7 - 2 = 5
+		S9: begin //r[9] = r[7] + r[8] => r[9] = 7 + -2 = 5
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd7;
 			rsrc = 4'd8;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0000001000000000;
 		
 		end
 		
-		S10: begin //r[10] = r[8] + r[9] => r[10] = 5 - 2 = 3
+		S10: begin //r[10] = r[8] + r[9] => r[10] = -2 + 5 = 3
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd8;
 			rsrc = 4'd9;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0000010000000000;
 		
 		end
 		
-		S11: begin //r[11] = r[9] XOR r[10] => r[11] = 5 XOR 3  = 6
+		S11: begin //r[11] = r[9] + r[10] => r[11] = 5 XOR 3 = 6
 			wdata = 16'b0; 
 			opcode = 4'b0011;
 			rdest = 4'd9;
 			rsrc = 4'd10;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0000100000000000;
 		
 		end
@@ -218,7 +208,7 @@ always @(*) begin
 			opcode = 4'b0011;
 			rdest = 4'd10;
 			rsrc = 4'd11;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0001000000000000;
 		
 		end
@@ -228,30 +218,29 @@ always @(*) begin
 			opcode = 4'b0110;
 			rdest = 4'd11;
 			rsrc = 4'd12;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0010000000000000;
 		
 		end
 		
-		S14: begin //r[14] = r[12] + r[13] => r[14] = 11 + 5 = 16
+		S14: begin //r[14] = r[12] + r[13] => r[14] = 5 + 11 = 16
 			wdata = 16'b0;
 			opcode = 4'b0101;
 			rdest = 4'd12;
 			rsrc = 4'd13;
-			regFileWriteEnable = 1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b0100000000000000;
 		end
 		
-		S15: begin //r[15] = r[14] << r[0] => r[15] = 16 << 1 = 32
+		S15: begin //r[15] = r[14] << r[2] => r[15] = 16 << 1 = 32
 			wdata = 16'b0;
 			opcode = 4'b0100;
 			rdest = 4'd14;
-         rsrc = 4'd0;
-			//useImmediate = 1;
-			//immediate = 16'd1;
-			regFileWriteEnable = 1;
+			rsrc = 4'd0;
+			useImmediate = 1;
+			immediate = 16'b1;
+			regFileWriteEnable = 0;
 			regEnable = 16'b1000000000000000;
-			
 		end
 		
 		default: begin
