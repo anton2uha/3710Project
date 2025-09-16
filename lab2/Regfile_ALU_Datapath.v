@@ -21,7 +21,7 @@ wire [15:0] regInput;
 //reg regFileWriteEnable;
 
 //ALU connections
-wire [15:0] dataA;
+wire [15:0] dataB;
 reg dataAMuxEnable; 
 wire [4:0] flags;
 wire [15:0] aluOut;
@@ -29,10 +29,10 @@ wire [15:0] aluOut;
 // A or B for register input? A because A = dest
 twoToOneMux immMux 
 (
-	.a(rdataA),
+	.a(rdataB),
 	.b(immediate),
 	.sel(useImmediate),
-	.y(dataA)
+	.y(dataB)
 );
 
 twoToOneMux regInputMux 
@@ -57,8 +57,8 @@ regfile my_regs
 
 alu my_alu 
 (
-	.A(dataA), 
-	.B(rdataB), 
+	.A(rdataA), 
+	.B(dataB), 
 	.C(aluOut), 
 	.Opcode(opcode), 
 	.cin(flags[3]),
