@@ -1,11 +1,7 @@
 
 module regfile(
     input      	  clk,
-<<<<<<< HEAD:regfile.v
-    input      	  reset,
-=======
     input         reset,
->>>>>>> 4c016b1068d454ee2d0bd8b49e32e5856dc1de16:lab2/regfile.v
     input  [15:0] wdata,        // write data input, connected to ALU (eventually memory?)
     input  [15:0] regEnable,    // enables for each register
     input  [3:0]  raddrA,       // read address A, selects which register to output.
