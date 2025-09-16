@@ -1,7 +1,11 @@
 
 module regfile(
     input      	  clk,
+<<<<<<< HEAD:regfile.v
     input      	  reset,
+=======
+    input         reset,
+>>>>>>> 4c016b1068d454ee2d0bd8b49e32e5856dc1de16:lab2/regfile.v
     input  [15:0] wdata,        // write data input, connected to ALU (eventually memory?)
     input  [15:0] regEnable,    // enables for each register
     input  [3:0]  raddrA,       // read address A, selects which register to output.
@@ -20,13 +24,11 @@ module regfile(
 	begin:reg_write
 		always @(posedge clk)
 		begin
-			if (reset == 1'b1)
+			if (reset == 1'b0)
 				r[i]<= 16'd0;
 			else
 				if(regEnable[i]==1'b1)
 				r[i] <= wdata;
-				//else
-				//r[i] <= r[i];
 		end
 	end
 	endgenerate

@@ -49,6 +49,7 @@ src2 = A src1 = B for cmp instruction
 
 ### Modules / Tasks
 
+<<<<<<< HEAD
 - Bus module (Ian / Martin)
 - MUX module (Anthony / Evelyn)
 - REG File module (Anthony / Evelyn)
@@ -57,6 +58,17 @@ src2 = A src1 = B for cmp instruction
 - REG File module tb (Ian / Martin)
 - ALU module (already done, but maybe needs refining?)
 - Programming the FPGA // This is gonna be big
+=======
+- Bus module
+- MUX module
+- REG File module
+- Bus module tb (Evelyn)
+- MUX module tb
+- REG File module tb
+- FSM Fib (Anthony / Evelyn) TBD per anthony's implementation
+- FSM Our implementation (Martin) TBD per anthony's implementation
+- Put all on FPGA (Ian)
+>>>>>>> 4c016b1068d454ee2d0bd8b49e32e5856dc1de16
 
 ### Commitments
 
@@ -64,3 +76,7 @@ src2 = A src1 = B for cmp instruction
 - The report is 7-8 pages (Like actually? 3700 was 8 pages of graphics, is it the same for this?)
   - If the report is really 7-8 pages of text, lets use the last week to get it done.
 - RTL Diagram
+
+### Block diagram
+
+![block diagram](resources/Datapath%20Block%20Diagram.drawio.png "Block Diagram")
