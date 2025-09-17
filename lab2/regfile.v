@@ -1,5 +1,4 @@
 
-// Given below is a 2D-memory array implementation 
 module regfile(
     input      	  clk,
     input         reset,
