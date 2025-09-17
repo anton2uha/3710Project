@@ -2,6 +2,8 @@
 
 ## ALU Instructions
 
+---
+
 closely follows implementation listed [here](https://my.eng.utah.edu/~cs3710/handouts/cr16a-prog-ref.pdf)
 
 Destination input = A, Src input = B. This means CMP does A<B and SUB does A-B.
@@ -9,6 +11,8 @@ Destination input = A, Src input = B. This means CMP does A<B and SUB does A-B.
 src2 = A src1 = B for cmp instruction
 
 ## Lab 1 List of instructions
+
+---
 
 - ADD = 4'b0101
 - ADDU = 4'b0110
@@ -26,6 +30,8 @@ src2 = A src1 = B for cmp instruction
 - NOP = 4'b0000
 
 ## Lab 2:
+
+---
 
 ### Questions
 
@@ -69,3 +75,7 @@ src2 = A src1 = B for cmp instruction
 ### Block diagram
 
 ![block diagram](resources/DatapathDiagram.png "Block Diagram")
+
+## Lab 3
+
+---
