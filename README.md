@@ -68,4 +68,4 @@ src2 = A src1 = B for cmp instruction
 
 ### Block diagram
 
-![block diagram](resources/Datapath%20Block%20Diagram.drawio.png "Block Diagram")
+![block diagram](resources/DatapathDiagram.png "Block Diagram")
