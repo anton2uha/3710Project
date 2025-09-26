@@ -1,3 +1,5 @@
+// TODO: modify to be for lab3 instead of lab2
+
 module to_fpga(
   input clk, rst,
   output wire [0:6]  HEX3,  // left most
