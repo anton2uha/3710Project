@@ -6,8 +6,8 @@ module regfile(
     input  [15:0] regEnable,    // enables for each register
     input  [3:0]  raddrA,       // read address A, selects which register to output.
     input  [3:0]  raddrB,       // read address B
-    output [15:0] rdataA,      // read data A
-    output [15:0] rdataB       // read data B
+    output [15:0] rdataA,       // read data A
+    output [15:0] rdataB        // read data B
 );
 	
 	// 16 registers, each 16 bits wide

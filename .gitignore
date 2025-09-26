@@ -1,3 +1,4 @@
 *.bak
 **/*.bak
 **/3710Project.code-workspace
+.vscode/
