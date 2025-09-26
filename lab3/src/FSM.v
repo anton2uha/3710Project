@@ -1,8 +1,7 @@
 /*
     Design choices for FPGA:
-        - Use a button to handle each address progress
-        - initialize using $readmemh() to load memory
-        - Display data from one memory address
+        - initialize using $readmemh() to load memory in the memory module
+        - Display data from one memory address (Right now address 512 in S9)
 
 */
 
