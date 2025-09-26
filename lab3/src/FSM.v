@@ -51,7 +51,13 @@ module FSM (input clk, reset, output [(DATA_WIDTH-1):0] q_a, q_b);
                     S0: state <= S1;
                     S1: state <= S2;
                     S2: state <= S3;
-                    S3: state <= S0;
+                    S3: state <= S4;
+                    S4: state <= S5;
+                    S5: state <= S6;
+                    S6: state <= S7;
+                    S7: state <= S8;
+                    S8: state <= S9;
+                    S9: state <= S9;
                     default: state <= S0; // safety
             endcase
         end
