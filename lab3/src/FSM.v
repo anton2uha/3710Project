@@ -10,7 +10,8 @@
 module FSM (input clk, reset, output [(DATA_WIDTH-1):0] q_a, q_b);
 
     parameter DATA_WIDTH = 16;
-    reg [(DATA_WIDTH-1):0] memory [7]; // used to store read values and hold our modifications for state S4
+	 parameter ADDR_WIDTH = 16;
+    reg [(DATA_WIDTH-1):0] memory [6:0]; // used to store read values and hold our modifications for state S4
 
     reg [(DATA_WIDTH-1):0] data_a, data_b;
     reg [(ADDR_WIDTH-1):0] addr_a, addr_b;
@@ -41,26 +42,13 @@ module FSM (input clk, reset, output [(DATA_WIDTH-1):0] q_a, q_b);
     parameter S8 = 5'd8; // Write 512, 513
     parameter S9 = 5'd9; // Read 512
 
-    reg [4:0] state;
+    reg [4:0] state, next_state;
+
+
     //this loop takes care of state
     always @(posedge clk or negedge reset) begin
-        if (!reset)
-            state <= S0; // start in S0 after reset
-        else begin
-            case (state)
-                    S0: state <= S1;
-                    S1: state <= S2;
-                    S2: state <= S3;
-                    S3: state <= S4;
-                    S4: state <= S5;
-                    S5: state <= S6;
-                    S6: state <= S7;
-                    S7: state <= S8;
-                    S8: state <= S9;
-                    S9: state <= S9;
-                    default: state <= S0; // safety
-            endcase
-        end
+        if (!reset) state <= S0;
+        else state <= next_state;
     end
 
 
@@ -73,42 +61,34 @@ module FSM (input clk, reset, output [(DATA_WIDTH-1):0] q_a, q_b);
         addr_b = 0;
         we_a = 0;
         we_b = 0;
+        next_state = state;
 
         case (state)
             S0: begin // read at 0 & 1
                 addr_a = 0;
                 addr_b = 1;
-                memory[0] = q_a;
-                memory[1] = q_b;    
+                next_state = S1;  
             end
             
             S1: begin // read at 2
                 addr_a = 2;
-                memory[2] = q_a;
+                next_state = S2;
             end
             
             S2: begin // read at 510 & 511
                 addr_a = 510;
                 addr_b = 511;
-                memory[3] = q_a;
-                memory[4] = q_b;    
+                next_state = S3;
             end
             
             S3: begin // read at 512 & 513
                 addr_a = 512;
                 addr_b = 513;
-                memory[5] = q_a;
-                memory[6] = q_b;    
+                next_state = S4;
             end
 
             S4: begin // modify values
-                memory[0] = memory[0] + 16'd5;
-                memory[1] = memory[1] + 16'd5;
-                memory[2] = memory[2] + 16'd5;
-                memory[3] = memory[3] + 16'd5;
-                memory[4] = memory[4] + 16'd5;
-                memory[5] = memory[5] + 16'd5;
-                memory[6] = memory[6] + 16'd5;
+                next_state = S5;
             end
 
             S5: begin // write at 0 & 1
@@ -118,15 +98,14 @@ module FSM (input clk, reset, output [(DATA_WIDTH-1):0] q_a, q_b);
                 data_b = memory[1];
                 we_a = 1;
                 we_b = 1;    
+                next_state = S6;
             end
 
-            S6: begin // write at 2 & 3
+            S6: begin // write at 2
                 addr_a = 2;
-                addr_b = 3;
                 data_a = memory[2];
-                data_b = memory[3];
                 we_a = 1;
-                we_b = 1;    
+                next_state = S7; 
             end
 
             S7: begin // write at 510 & 511
@@ -135,7 +114,8 @@ module FSM (input clk, reset, output [(DATA_WIDTH-1):0] q_a, q_b);
                 data_a = memory[3];
                 data_b = memory[4];
                 we_a = 1;
-                we_b = 1;    
+                we_b = 1;  
+                next_state = S8;  
             end
 
             S8: begin // write at 512 & 513
@@ -145,15 +125,59 @@ module FSM (input clk, reset, output [(DATA_WIDTH-1):0] q_a, q_b);
                 data_b = memory[6];
                 we_a = 1;
                 we_b = 1;    
+                next_state = S9;
             end
 
             S9: begin // read at 512
                 addr_a = 512;
-                memory[5] = q_a;
+					 addr_b = 512;
+                next_state = S9; // stay here
             end
             default: begin
                 // default values already set at start of always block
             end
         endcase
+    end
+    
+    always @(posedge clk or negedge reset) begin
+        if (!reset) begin
+            memory[0] <= 0; 
+            memory[1] <= 0; 
+            memory[2] <= 0;
+            memory[3] <= 0; 
+            memory[4] <= 0; 
+            memory[5] <= 0;
+            memory[6] <= 0;
+        end 
+        else begin
+            case (state)
+                S0: begin
+                    memory[0] <= q_a;
+                    memory[1] <= q_b; 
+                end
+                S1: begin
+                    memory[2] <= q_a;
+                end
+                S2: begin
+                    memory[3] <= q_a;
+                    memory[4] <= q_b;
+                end
+                S3: begin
+                    memory[5] <= q_a;
+                    memory[6] <= q_b;
+                end
+                S4: begin
+                    memory[0] <= memory[0] + 16'd5;
+                    memory[1] <= memory[1] + 16'd5;
+                    memory[2] <= memory[2] + 16'd5;
+                    memory[3] <= memory[3] + 16'd5;
+                    memory[4] <= memory[4] + 16'd5;
+                    memory[5] <= memory[5] + 16'd5;
+                    memory[6] <= memory[6] + 16'd5;
+                end
+                S9: ;
+                default: ;
+            endcase
+        end
     end
 endmodule
