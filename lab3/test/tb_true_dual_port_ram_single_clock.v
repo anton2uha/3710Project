@@ -87,6 +87,22 @@ module tb_true_dual_port_ram_single_clock;
         $display("Disable write to both ports");
         #20;
 		  
+		  $display("check that all written ports are populated correctly");
+		  addr_a = 16'h0;
+        addr_b = 16'h1;
+		  #20;
+		  
+		  addr_a = 16'h2;
+		  #20;
+		  
+		  addr_a = 16'd510;
+		  addr_b = 16'd511;
+		  #20;
+		  
+		  addr_a = 16'd512;
+		  addr_b = 16'd513;
+		  #20;
+		  
         $finish;
     end
 endmodule
