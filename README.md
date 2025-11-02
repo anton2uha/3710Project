@@ -76,6 +76,9 @@ src2 = A src1 = B for cmp instruction
 
 ![block diagram](resources/DatapathDiagram.png "Block Diagram")
 
-## Lab 3
+## Lab 3 - Memory
 
 ---
+
+### Design choices:
+- On dual channel where both channels recieve a write instuction to the same address at the same time (Write conflict), channel A will be the one to write to the address. 
