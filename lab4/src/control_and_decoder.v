@@ -1,0 +1,73 @@
+// Control and decoder FSM from instruction opcodes following the CR16a architecture
+
+/*
+    List of all control signals we need to account for
+
+    ALU:
+        - A ()
+        - B ()
+        - Opcode
+        - cin
+    Regfile:
+        - opcode [4bit]
+        - rdest [4bit]
+        - rsrc [4bit]
+        - regenable [16bit]
+        - regFileWriteEnable 
+        - wdata [16bit]
+        - immediate [16bit]
+        - useImmediate
+
+    List of opcodes so far:
+
+        parameter ADD   = 4'b0101;
+        parameter ADDU  = 4'b0110;
+        parameter ADDC  = 4'b0111;
+        parameter SUB   = 4'b1001;
+        parameter SUBC  = 4'b1010;
+        parameter CMP   = 4'b1011;
+        parameter AND   = 4'b0001;
+        parameter OR    = 4'b0010;
+        parameter XOR   = 4'b0011;
+        parameter MOV   = 4'b1101; // havent implemented yet
+        parameter LSH   = 4'b0100;
+        parameter NOT   = 4'b1000;
+        parameter ASHU  = 4'b1100;
+        parameter NOP   = 4'b0000;
+
+*/
+module control_and_decoder(
+
+);
+
+    // states
+    // Should we set pc_en to 1 in S0, or the states before S0?
+    parameter S0 = 3'd0; // fetch stage
+    parameter S1 = 3'd1; // decode stage
+    parameter S2 = 3'd2; // r-type: exectution + writeback | next state -> S0
+    parameter S3 = 3'd3; // store: writeback into mem for store | next state -> S0
+    parameter S4 = 3'd4; // load: apply load address to memory | next state -> S5
+    parameter S5 = 3'd5; // load: writeback from mem to regfile | next state -> S0
+
+    reg [4:0] state, next_state, prev_state;
+
+    //this loop takes care of state
+    always @(posedge clk or negedge reset) begin
+        if (!reset) begin
+            state      <= S0;
+            prev_state <= S0; // initialize previous state on reset for clean capture
+        end
+        else begin
+            prev_state <= state;
+            state      <= next_state;
+        end
+    end
+
+    //this loop executes logic for current state
+    always @(*) begin
+        // Initialize all values to prevent latches
+        case (state)
+        endcase
+    end
+
+endmodule
