@@ -50,15 +50,14 @@ module control_and_decoder(
     output reg  [3:0]  op,           // opcode (mapped from instr[12:9])
     output reg  [3:0]  rsrc,         // src reg index  (instr[4:1])
     output reg  [3:0]  rdest,        // dest reg index (instr[8:5])
-    output reg  [7:0]  imm8,   
-    
-
+    output reg  [7:0]  imm8,        
+    output reg  [15:0] reg_en,
 );
 
-    wire [3:0] opcode = instr[15:12];
-    wire [3:0] rd     = instr[11:8];
-    wire [3:0] ext    = instr[7:4];
-    wire [3:0] rs     = instr[3:0];
+    wire [3:0] opcode;
+    wire [3:0] rd;
+    wire [3:0] ext;
+    wire [3:0] rs;
     
     // states
     // Should we set pc_en to 1 in S0, or the states before S0?
@@ -73,20 +72,43 @@ module control_and_decoder(
 
     //this loop takes care of state
     always @(posedge clk or negedge reset) begin
-        if (!reset) begin
-            state      <= S0;
-            prev_state <= S0; // initialize previous state on reset for clean capture
-        end
-        else begin
-            prev_state <= state;
-            state      <= next_state;
-        end
+        // if (!reset) begin
+        //     state      <= S0;
+        //     prev_state <= S0; // initialize previous state on reset for clean capture
+        // end
+        // else begin
+        //     prev_state <= state;
+        //     state      <= next_state;
+        // end
+        case (state)
+            S0: state <= S1;
+            S1: state <= S2;
+            S2: state <= S3;
+            S3: state <= S0;
+            default: state <= S0;   // safety
+        endcase
     end
 
     //this loop executes logic for current state
     always @(*) begin
         // Initialize all values to prevent latches
+        opcode = instr[15:12];
+        rd     = instr[11:8];
+        ext    = instr[7:4];
+        rs     = instr[3:0];
         case (state)
+            S0: begin
+                // TODO: Fetch stage, what needs to happen in here?
+            end
+            S1: begin
+            
+            end
+            S2: begin
+
+            end
+            S3: begin
+
+            end
         endcase
     end
 
