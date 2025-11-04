@@ -63,6 +63,9 @@ module control_and_decoder(
     parameter S4 = 3'd4; // load: apply load address to memory | next state -> S5
     parameter S5 = 3'd5; // load: writeback from mem to regfile | next state -> S0
 
+    parameter CMP   = 4'b1011;
+    parameter NOP   = 4'b0000;
+
     reg [4:0] state, next_state, prev_state;
 
     integer i = 0;
@@ -149,10 +152,12 @@ module control_and_decoder(
                 // IR cntl
                 ir_en = 1;
 
-                // reg_we & reg_en
-                // Convert rd into a 16 bit value for reg_en. Ex: if rd is 4 then reg_en would be 0000000000010000
-                reg_en = 16'd1 << rdest;
-                reg_we = 1;
+                if(op != CMP && op != NOP) begin
+                    // reg_we & reg_en
+                    // Convert rd into a 16 bit value for reg_en. Ex: if rd is 4 then reg_en would be 0000000000010000
+                    reg_en = 16'd1 << rdest;
+                    reg_we = 1;
+                end
 
                 // pc
                 pc_en = 1;
