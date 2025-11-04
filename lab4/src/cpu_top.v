@@ -2,12 +2,8 @@
 module cpu_top (
 	input clk,
 	input reset,
-	
 	output [15:0] out // output of the ALU to show on 7 seg on fpga.
 );
-
-
-
 
 //enable wires (from control FSM)
 wire pc_en, ir_en, reg_we, imm_en, alu_mux_ctrl;
@@ -35,7 +31,6 @@ assign we_a = 0;
 
 //program counter
 wire [15:0] pc;
-
 
 //regFile connections
 wire [15:0] rdataA; //output A from regfile
@@ -70,7 +65,6 @@ program_counter my_pc(
 	.pc(pc) //[15:0]
 );
 
-
 control_and_decoder my_control_decode(
 	.clk(clk), //inputs
 	.reset(reset),     
@@ -87,10 +81,8 @@ control_and_decoder my_control_decode(
 	.imm8(imm8),        
    .reg_en(reg_en),
 	
-	.alu_mux_ctrl(alu_mux_ctrl) //added
-	
+	.alu_mux_ctrl(alu_mux_ctrl) //added	
 );
-
 
 // A or B for register input? A because A = dest
 twoToOneMux immMux 
@@ -100,7 +92,6 @@ twoToOneMux immMux
 	.sel(imm_en),
 	.y(dataB)
 );
-
 
 twoToOneMux regFileInputMux 
 (
@@ -133,6 +124,5 @@ alu my_alu
 );
 
 assign out = aluOut;
-
 
 endmodule

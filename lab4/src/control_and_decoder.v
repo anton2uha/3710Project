@@ -136,11 +136,11 @@ module control_and_decoder(
                 rdest  = instr[11:8];
                 rsrc   = instr[3:0];
 
-                if(instr[15:12] != 4'b0000) begin
-                    op = instr[15:12];
+                if(instr[15:12] == 4'b0000) begin
+                    op = instr[7:4];
                 end
                 else begin 
-                    op = instr[7:4];
+                    op = instr[15:12];
                     // set imm cntl
                     imm_en = 1; 
                 end
