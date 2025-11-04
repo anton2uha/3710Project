@@ -53,11 +53,6 @@ module control_and_decoder(
     output reg  [7:0]  imm8,        
     output reg  [15:0] reg_en,
 );
-
-    wire [3:0] opcode;
-    wire [3:0] rd;
-    wire [3:0] ext;
-    wire [3:0] rs;
     
     // states
     // Should we set pc_en to 1 in S0, or the states before S0?
@@ -109,34 +104,40 @@ module control_and_decoder(
         rsrc = 4'd0;
         rdest = 4'd0;
         reg_en = 16'd0;
+        imm8   = 8'd0; 
 
-        imm8 = 8'd0; 
-        opcode = instr[15:12];
-        rd     = instr[11:8];
-        ext    = instr[7:4];
-        rs     = instr[3:0];
         case (state)
             S0: begin
                 // TODO: Fetch stage, what needs to happen in here?
                 pc_en = 0;
             end
             S1: begin
-                opcode = instr[15:12];
-                rd     = instr[11:8];
-                ext    = instr[7:4];
-                rs     = instr[3:0];
+                // opcode = instr[15:12];
+                // rd     = instr[11:8];
+                // ext    = instr[7:4];
+                // rs     = instr[3:0];
+                // imm    = instr[7:0];
 
-                // TODO: set imm cntl
+                ir_en = 1;
 
+                if(instr[15:12] != 4'b0000) begin
+                    op = instr[15:12];
+                end
+                else begin op = instr[7:4] end
+
+                // set imm cntl
+                if(opcode == 4'b0101) begin
+                    imm_en = 1;
+                end
                 // TODO: IR cntl
-                // TODO: reg_w ctl
-                // TODO: reg_enable & reg_file_w_en
             end
             S2: begin
+                // TODO: reg_we & reg_en
+                // Convert rd into a 16 bit value for reg_en. Ex: if rd is 4 then reg_en would be 0000000000010000
+                reg_en = 16'd1 << rdest;
 
-            end
-            S3: begin
-
+                // TODO: pc
+                pc_en = 1;
             end
         endcase
     end
