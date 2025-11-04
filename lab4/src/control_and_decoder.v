@@ -37,6 +37,21 @@
 
 */
 module control_and_decoder(
+    input  wire        clk,
+    input  wire        reset,     
+    input  wire [15:0] instr,        
+
+    input  wire        Z, L, N, C, F,
+
+    output reg         pc_en,        // to do PC+1 
+    output reg         ir_en,        // IR <= DOUT during S1
+    output reg         reg_we,       // regfile write enable
+    output reg         imm_en,       // 0: B=Rdest (RR), 1: B=Imm 
+    output reg  [3:0]  op,           // opcode (mapped from instr[12:9])
+    output reg  [3:0]  rsrc,         // src reg index  (instr[4:1])
+    output reg  [3:0]  rdest,        // dest reg index (instr[8:5])
+    output reg  [7:0]  imm8,   
+    
 
 );
 
