@@ -91,7 +91,26 @@ module control_and_decoder(
 
     //this loop executes logic for current state
     always @(*) begin
+        // output reg         pc_en,        // to do PC+1 
+        // output reg         ir_en,        // IR <= DOUT during S1
+        // output reg         reg_we,       // regfile write enable
+        // output reg         imm_en,       // 0: B=Rdest (RR), 1: B=Imm 
+        // output reg  [3:0]  op,           // opcode (mapped from instr[12:9])
+        // output reg  [3:0]  rsrc,         // src reg index  (instr[4:1])
+        // output reg  [3:0]  rdest,        // dest reg index (instr[8:5])
+        // output reg  [7:0]  imm8,        
+        // output reg  [15:0] reg_en,
         // Initialize all values to prevent latches
+        pc_en = 1;
+        ir_en = 0;
+        reg_we = 0;
+        imm_en = 0;
+        op = 4'd0;
+        rsrc = 4'd0;
+        rdest = 4'd0;
+        imm8 = 8'd0;
+        reg_en = 16'd0;
+
         opcode = instr[15:12];
         rd     = instr[11:8];
         ext    = instr[7:4];
@@ -99,9 +118,18 @@ module control_and_decoder(
         case (state)
             S0: begin
                 // TODO: Fetch stage, what needs to happen in here?
+                pc_en = 0;
             end
             S1: begin
-            
+                opcode = instr[15:12];
+                rd     = instr[11:8];
+                ext    = instr[7:4];
+                rs     = instr[3:0];
+
+                // TODO: set imm cntl
+                // TODO: IR cntl
+                // TODO: reg_w ctl
+                // TODO: reg_enable
             end
             S2: begin
 
