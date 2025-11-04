@@ -108,9 +108,9 @@ module control_and_decoder(
         op = 4'd0;
         rsrc = 4'd0;
         rdest = 4'd0;
-        imm8 = 8'd0;
         reg_en = 16'd0;
 
+        imm8 = 8'd0; 
         opcode = instr[15:12];
         rd     = instr[11:8];
         ext    = instr[7:4];
@@ -127,9 +127,10 @@ module control_and_decoder(
                 rs     = instr[3:0];
 
                 // TODO: set imm cntl
+
                 // TODO: IR cntl
                 // TODO: reg_w ctl
-                // TODO: reg_enable
+                // TODO: reg_enable & reg_file_w_en
             end
             S2: begin
 
