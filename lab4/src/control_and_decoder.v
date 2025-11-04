@@ -55,6 +55,11 @@ module control_and_decoder(
 
 );
 
+    wire [3:0] opcode = instr[15:12];
+    wire [3:0] rd     = instr[11:8];
+    wire [3:0] ext    = instr[7:4];
+    wire [3:0] rs     = instr[3:0];
+    
     // states
     // Should we set pc_en to 1 in S0, or the states before S0?
     parameter S0 = 3'd0; // fetch stage
