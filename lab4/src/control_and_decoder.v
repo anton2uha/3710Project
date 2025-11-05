@@ -71,6 +71,8 @@ module control_and_decoder(
     integer i = 0;
     parameter instrs = 1;
 
+    wire paused = (state == S2) && (i >= instrs);
+
     // State
     always @(posedge clk or negedge reset) begin
         if (!reset) begin
@@ -80,14 +82,10 @@ module control_and_decoder(
             case (state)
                 S0: begin
                     state <= S1;
-                    i <= i + 1;
+                    if (!paused) i <= i + 1;
                 end
                 S1: state <= S2;
-                S2: begin
-                    // if (i == instrs) state <= S2;
-                    // else state <= S2;
-                    state <= S2;
-                end
+                S2: state <= (paused) ? S2 : S0;
                 default: state <= S0;
             endcase
         end
@@ -127,28 +125,50 @@ module control_and_decoder(
                 end
             end
             S2: begin
-                imm_en = 0;
+                // imm_en = 0;
+                // reg_en = 16'd0;
+                // imm8   = instr[7:0];
+                // rdest  = instr[11:8];
+                // rsrc   = instr[3:0];
+
+                // if (instr[15:12] == 4'b0000) begin
+                //     op = instr[7:4];
+                // end else begin 
+                //     op     = instr[15:12];
+                //     imm_en = 1; 
+                // end
+
+                // ir_en = 1;
+
+                
+                // if ((op != CMP && op != NOP) && i <= instrs) begin
+                //     reg_en = 16'd1 << rdest;
+                //     reg_we = 1;
+                // end
+
+                // pc_en = (paused) ? 1'b0 : 1'b1;
+
+                // default values for S2
                 reg_en = 16'd0;
                 imm8   = instr[7:0];
                 rdest  = instr[11:8];
                 rsrc   = instr[3:0];
+                op     = (instr[15:12]==4'b0000) ? instr[7:4] : instr[15:12];
+                imm_en = (instr[15:12]==4'b0000) ? 1'b0 : 1'b1;
 
-                if (instr[15:12] == 4'b0000) begin
-                    op = instr[7:4];
-                end else begin 
-                    op     = instr[15:12];
-                    imm_en = 1; 
+                // default disables
+                pc_en  = 0;
+                ir_en  = 0;
+                reg_we = 0;
+
+                if (!paused) begin
+                    // normal execution & writeback
+                    if (op != CMP && op != NOP) begin
+                        reg_en = 16'd1 << rdest;
+                        reg_we = 1;
+                    end
+                    pc_en = 1;  // allow PC to advance
                 end
-
-                ir_en = 1;
-
-                
-                if ((op != CMP && op != NOP) && i <= instrs) begin
-                    reg_en = 16'd1 << rdest;
-                    reg_we = 1;
-                end
-
-                pc_en = (i >= instrs) ? 1'b0 : 1'b1;
             end
         endcase
     end
