@@ -84,8 +84,9 @@ module control_and_decoder(
                 end
                 S1: state <= S2;
                 S2: begin
-                    if (i == instrs) state <= S2;
-                    else state <= S0;
+                    // if (i == instrs) state <= S2;
+                    // else state <= S2;
+                    state <= S2;
                 end
                 default: state <= S0;
             endcase

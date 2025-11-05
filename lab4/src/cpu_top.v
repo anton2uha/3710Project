@@ -57,7 +57,6 @@ true_dual_port_ram_single_clock my_ram
 	.q_b(q_b)
 );
 
-
 program_counter my_pc(
 	.en(pc_en), 
 	.clk(clk), 
@@ -79,7 +78,7 @@ control_and_decoder my_control_decode(
 	.rsrc(rsrc),
 	.rdest(rdest),
 	.imm8(imm8),        
-   .reg_en(reg_en),
+    .reg_en(reg_en),
 	
 	.alu_mux_ctrl(alu_mux_ctrl) //added	
 );
