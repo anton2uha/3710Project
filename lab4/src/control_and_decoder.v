@@ -142,7 +142,8 @@ module control_and_decoder(
 
                 ir_en = 1;
 
-                if (op != CMP && op != NOP) begin
+                
+                if ((op != CMP && op != NOP) && i <= instrs) begin
                     reg_en = 16'd1 << rdest;
                     reg_we = 1;
                 end
