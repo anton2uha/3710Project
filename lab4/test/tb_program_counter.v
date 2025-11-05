@@ -2,7 +2,7 @@
 // 	input en, clk, rst_n,
 // 	output reg [15:0] pc
 // );
-
+`timescale 1ns / 1ps
 module tb_program_counter;
     reg en;
     reg clk;

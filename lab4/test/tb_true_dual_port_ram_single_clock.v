@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module tb_true_dual_port_ram_single_clock;
     
     // Setup

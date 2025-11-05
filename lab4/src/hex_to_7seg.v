@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module hex_to_7seg(bcd,seven_seg);
 
 input wire [3:0] bcd;

@@ -36,99 +36,92 @@
         parameter NOP   = 4'b0000;
 
 */
+`timescale 1ns / 1ps
 module control_and_decoder(
     input  wire        clk,
     input  wire        reset,     
+    input  wire [4:0]  flags,
     input  wire [15:0] instr,        
-
-    input  wire        Z, L, N, C, F,
 
     output reg         pc_en,        // to do PC+1 
     output reg         ir_en,        // IR <= DOUT during S1
     output reg         reg_we,       // regfile write enable
     output reg         imm_en,       // 0: B=Rdest (RR), 1: B=Imm 
+    output reg         alu_mux_ctrl, // not used yet
     output reg  [3:0]  op,           // opcode (mapped from instr[12:9])
     output reg  [3:0]  rsrc,         // src reg index  (instr[4:1])
     output reg  [3:0]  rdest,        // dest reg index (instr[8:5])
     output reg  [7:0]  imm8,        
-    output reg  [15:0] reg_en,
+    output reg  [15:0] reg_en
 );
-    
+
     // states
-    // Should we set pc_en to 1 in S0, or the states before S0?
     parameter S0 = 3'd0; // fetch stage
     parameter S1 = 3'd1; // decode stage
-    parameter S2 = 3'd2; // r-type: exectution + writeback | next state -> S0
-    parameter S3 = 3'd3; // store: writeback into mem for store | next state -> S0
-    parameter S4 = 3'd4; // load: apply load address to memory | next state -> S5
-    parameter S5 = 3'd5; // load: writeback from mem to regfile | next state -> S0
+    parameter S2 = 3'd2; // r-type: execution + writeback
+    parameter S3 = 3'd3; // store
+    parameter S4 = 3'd4; // load addr
+    parameter S5 = 3'd5; // load wb
 
-    parameter CMP   = 4'b1011;
-    parameter NOP   = 4'b0000;
+    parameter CMP = 4'b1011;
+    parameter NOP = 4'b0000;
 
-    reg [4:0] state, next_state, prev_state;
+    reg [2:0] state;
 
     integer i = 0;
     parameter instrs = 1;
 
-
-    //this loop takes care of state
+    // State
     always @(posedge clk or negedge reset) begin
-        if(!reset_n) begin
+        if (!reset) begin
             state <= S0;
-        end
-        else begin 
+            i     <= 0;
+        end else begin 
             case (state)
-                S0: state <= S1;
+                S0: begin
+                    state <= S1;
+                    i <= i + 1;
+                end
                 S1: state <= S2;
                 S2: begin
-                    if(i == insts) state <= S2;
+                    if (i == instrs) state <= S2;
                     else state <= S0;
                 end
-                default: state <= S0;   // safety
+                default: state <= S0;
             endcase
         end
     end
 
-    //this loop executes logic for current state
+    // Outputs
     always @(*) begin
         case (state)
-            S0: begin
-                pc_en = 1;
-                ir_en = 0;
+            S0: begin 
+                ir_en  = 0;
                 reg_we = 0;
                 imm_en = 0;
-                rsrc = 0;
-                rdest = 0;
-                op = 4'd0;
+                rsrc   = 0;
+                rdest  = 0;
+                op     = 4'd0;
                 reg_en = 16'd0;
                 imm8   = 8'd0; 
-                // TODO: Fetch stage, what needs to happen in here?
-                pc_en = 0;
+                pc_en  = 0;
             end
             S1: begin
-                pc_en = 0;
+                pc_en  = 0;
                 reg_we = 0;
                 imm_en = 0;
                 reg_en = 16'd0;
 
-                // opcode = instr[15:12];
-                // rd     = instr[11:8];
-                // ext    = instr[7:4];
-                // rs     = instr[3:0];
                 imm8   = instr[7:0];
                 rdest  = instr[11:8];
                 rsrc   = instr[3:0];
 
-                // IR cntl
-                ir_en = 1;
+                ir_en  = 1;
 
-                if(instr[15:12] != 4'b0000) begin
-                    op = instr[15:12];
-                end
-                else begin 
-                    op = instr[7:4];
-                    // set imm cntl
+                if (instr[15:12] == 4'b0000) begin
+                    op     = instr[7:4];
+                end else begin 
+                    op     = instr[15:12];
                     imm_en = 1; 
                 end
             end
@@ -139,28 +132,21 @@ module control_and_decoder(
                 rdest  = instr[11:8];
                 rsrc   = instr[3:0];
 
-                if(instr[15:12] == 4'b0000) begin
+                if (instr[15:12] == 4'b0000) begin
                     op = instr[7:4];
-                end
-                else begin 
-                    op = instr[15:12];
-                    // set imm cntl
+                end else begin 
+                    op     = instr[15:12];
                     imm_en = 1; 
                 end
-                
 
-                // IR cntl
                 ir_en = 1;
 
-                if(op != CMP && op != NOP) begin
-                    // reg_we & reg_en
-                    // Convert rd into a 16 bit value for reg_en. Ex: if rd is 4 then reg_en would be 0000000000010000
+                if (op != CMP && op != NOP) begin
                     reg_en = 16'd1 << rdest;
                     reg_we = 1;
                 end
 
-                // pc
-                pc_en = 1;
+                pc_en = (i >= instrs) ? 1'b0 : 1'b1;
             end
         endcase
     end

@@ -1,5 +1,6 @@
 // Quartus Prime Verilog Template
 // True Dual Port RAM with single clock
+`timescale 1ns / 1ps
 module true_dual_port_ram_single_clock
 #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 (
@@ -14,7 +15,7 @@ module true_dual_port_ram_single_clock
 
 	// load memory using $readmemh
 	initial begin
-		$readmemh("C:/Users/toaoi/Documents/Repos/school/ECE3710/lab3/init_memory.txt", ram);
+		$readmemh("C:/Users/toaoi/Documents/Repos/school/ECE3710/lab4/init_memory.txt", ram);
 	end
 
 	// Port A 

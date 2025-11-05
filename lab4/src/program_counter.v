@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module program_counter(
 	input en, clk, rst_n,
 	input  [1:0]      pc_src,      // 00: +1, 01: PC + offset, 10: direct target, 11: alu result

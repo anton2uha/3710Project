@@ -1,5 +1,8 @@
-
-module regfile(
+`timescale 1ns / 1ps
+module regfile #(
+    parameter [15:0] INIT_R1 = 16'h0011,
+    parameter [15:0] INIT_R2 = 16'h0022
+)(
     input      	  clk,
     input         reset,
     input  [15:0] wdata,        // write data input, connected to ALU (eventually memory?)
@@ -20,8 +23,11 @@ module regfile(
 	begin:reg_write
 		always @(posedge clk)
 		begin
-			if (reset == 1'b0)
-				r[i]<= 16'd0;
+			if (reset == 1'b0) begin
+				if(i == 1) r[i] <= INIT_R1;
+				else if(i == 2) r[i] <= INIT_R2;
+				else r[i]<= 16'd0;
+			end
 			else
 				if(regEnable[i]==1'b1)
 				r[i] <= wdata;
