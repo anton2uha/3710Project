@@ -60,7 +60,7 @@ true_dual_port_ram_single_clock my_ram
 program_counter my_pc(
 	.en(pc_en), 
 	.clk(clk), 
-	.rst_n(!reset), //CHECK: should be active low?
+	.rst_n(reset),
 	.pc(pc) //[15:0]
 );
 

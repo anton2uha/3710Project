@@ -69,7 +69,7 @@ module control_and_decoder(
     reg [2:0] state;
 
     integer i = 0;
-    parameter instrs = 1;
+    parameter instrs = 2;
 
     wire paused = (state == S2) && (i >= instrs);
 
@@ -125,29 +125,6 @@ module control_and_decoder(
                 end
             end
             S2: begin
-                // imm_en = 0;
-                // reg_en = 16'd0;
-                // imm8   = instr[7:0];
-                // rdest  = instr[11:8];
-                // rsrc   = instr[3:0];
-
-                // if (instr[15:12] == 4'b0000) begin
-                //     op = instr[7:4];
-                // end else begin 
-                //     op     = instr[15:12];
-                //     imm_en = 1; 
-                // end
-
-                // ir_en = 1;
-
-                
-                // if ((op != CMP && op != NOP) && i <= instrs) begin
-                //     reg_en = 16'd1 << rdest;
-                //     reg_we = 1;
-                // end
-
-                // pc_en = (paused) ? 1'b0 : 1'b1;
-
                 // default values for S2
                 reg_en = 16'd0;
                 imm8   = instr[7:0];
@@ -167,7 +144,7 @@ module control_and_decoder(
                         reg_en = 16'd1 << rdest;
                         reg_we = 1;
                     end
-                    pc_en = 1;  // allow PC to advance
+						  pc_en=1;
                 end
             end
         endcase
