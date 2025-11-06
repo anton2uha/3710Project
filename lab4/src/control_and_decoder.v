@@ -37,7 +37,9 @@
 
 */
 `timescale 1ns / 1ps
-module control_and_decoder(
+module control_and_decoder #(
+    parameter [3:0] instrs = 4'd3 // number of instructions to execute before pausing
+)(
     input  wire        clk,
     input  wire        reset,     
     input  wire [4:0]  flags,
@@ -69,7 +71,6 @@ module control_and_decoder(
     reg [2:0] state;
 
     integer i = 0;
-    parameter instrs = 3;
 
     wire paused = (state == S2) && (i >= instrs);
 	 
