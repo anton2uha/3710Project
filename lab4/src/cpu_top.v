@@ -78,7 +78,7 @@ control_and_decoder my_control_decode(
 	.rsrc(rsrc),
 	.rdest(rdest),
 	.imm8(imm8),        
-    .reg_en(reg_en),
+   .reg_en(reg_en),
 	
 	.alu_mux_ctrl(alu_mux_ctrl) //added	
 );

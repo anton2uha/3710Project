@@ -69,9 +69,10 @@ module control_and_decoder(
     reg [2:0] state;
 
     integer i = 0;
-    parameter instrs = 2;
+    parameter instrs = 3;
 
     wire paused = (state == S2) && (i >= instrs);
+	 
 
     // State
     always @(posedge clk or negedge reset) begin
@@ -93,6 +94,7 @@ module control_and_decoder(
 
     // Outputs
     always @(*) begin
+		alu_mux_ctrl = 0; // not setting this was breaking our second instruction
         case (state)
             S0: begin 
                 ir_en  = 0;
