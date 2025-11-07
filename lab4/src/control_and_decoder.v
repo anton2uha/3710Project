@@ -87,14 +87,14 @@ module control_and_decoder #(
                     state <= S1;
                     if (!paused) i <= i + 1;
                 end
-                S1: 
-					 
-					 if (instr[15:12] == 4'b0100 && instr[7:4] == 4'b0000) state <= S4;
-					 else state <= S2;
-                
-					 S2: state <= (paused) ? S2 : S0;
+                S1: begin
+						if (instr[15:12] == 4'b0100 && instr[7:4] == 4'b0000) state <= S4;
+						else state <= S2;
+                end
+				S2: state <= (paused) ? S2 : S0;
+				S4: state <= S5;
                 default: state <= S0;
-					 S4: state <= S5;
+					 
             endcase
         end
     end
@@ -195,8 +195,6 @@ module control_and_decoder #(
 						 pc_en=1;
                end			
 					
-					
-				
 			end
         endcase
     end
