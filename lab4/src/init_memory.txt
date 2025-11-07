@@ -1,4 +1,14 @@
 // 0000 0001 0101 0010 add r1, r2 | add dest, src
-0152
-0192
-0152
+0152 // ADD 0011 0022, out = 0033
+0192 // SUB 0033 0022, out = 0011
+0152 // ADD 0011 0022, out = 0033
+0113 // AND 0033 0022, out = 0022
+0223 // OR  0022 0033, out = 0033
+0234 // XOR 0033 1111, out = 1122
+0480 // NOT 1111 0000, out = eeee
+0455 // ADD eeee 1112, out = 0000, make carry = 1
+0274 //ADDC 1122 0000, out = 1123
+0274 //ADDC 1123 0000, out = 1123, check that carry got cleared
+0655 // ADD eeee 1112, out = 0000, make carry = 1
+05A0 //SUBC 1112 0000, out = 1111
+0547 // LSH 1111 0001, out = 2222

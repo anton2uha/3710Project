@@ -38,12 +38,13 @@
 */
 `timescale 1ns / 1ps
 module control_and_decoder #(
-    parameter [3:0] instrs = 4'd3 // number of instructions to execute before pausing
+    parameter [3:0] instrs = 4'd13 // number of instructions to execute before pausing
 )(
     input  wire        clk,
     input  wire        reset,     
     input  wire [4:0]  flags,
-    input  wire [15:0] instr,        
+    input  wire [15:0] instr,  
+	 input  wire [15:0] ir_reg,
 
     output reg         pc_en,        // to do PC+1 
     output reg         ir_en,        // IR <= DOUT during S1
@@ -86,9 +87,14 @@ module control_and_decoder #(
                     state <= S1;
                     if (!paused) i <= i + 1;
                 end
-                S1: state <= S2;
-                S2: state <= (paused) ? S2 : S0;
+                S1: 
+					 
+					 if (instr[15:12] == 4'b0100 && instr[7:4] == 4'b0000) state <= S4;
+					 else state <= S2;
+                
+					 S2: state <= (paused) ? S2 : S0;
                 default: state <= S0;
+					 S4: state <= S5;
             endcase
         end
     end
@@ -118,7 +124,7 @@ module control_and_decoder #(
                 rdest  = instr[11:8];
                 rsrc   = instr[3:0];
 
-                ir_en  = 1;
+                ir_en  = 0;
 
                 if (instr[15:12] == 4'b0000) begin
                     op     = instr[7:4];
@@ -126,6 +132,9 @@ module control_and_decoder #(
                     op     = instr[15:12];
                     imm_en = 1; 
                 end
+					 
+					 if (instr[15:12] == 4'b0100 && instr[7:4] == 4'b0000) ir_en = 1; //LOAD
+						
             end
             S2: begin
                 // default values for S2
@@ -150,6 +159,45 @@ module control_and_decoder #(
 						  pc_en=1;
                 end
             end
+				
+			S4: begin
+				ir_en = 0; 
+				alu_mux_ctrl = 0;
+				// read from memory
+				
+				
+			end
+				
+			S5: begin
+				ir_en = 0;
+				alu_mux_ctrl = 1;
+					
+				//same as s2, but now we read IR
+					
+               reg_en = 16'd0;
+               imm8   = ir_reg[7:0];
+               rdest  = ir_reg[11:8];
+               rsrc   = ir_reg[3:0];
+               op     = (ir_reg[15:12]==4'b0000) ? ir_reg[7:4] : ir_reg[15:12];
+               imm_en = (ir_reg[15:12]==4'b0000) ? 1'b0 : 1'b1;
+
+               // default disables
+               pc_en  = 0;
+               ir_en  = 0;
+               reg_we = 0;
+
+               if (!paused) begin
+                   // normal execution & writeback
+                   if (op != CMP && op != NOP) begin
+                       reg_en = 16'd1 << rdest;
+                       reg_we = 1;
+                   end
+						 pc_en=1;
+               end			
+					
+					
+				
+			end
         endcase
     end
 

@@ -1,7 +1,12 @@
 `timescale 1ns / 1ps
 module regfile #(
     parameter [15:0] INIT_R1 = 16'h0011,
-    parameter [15:0] INIT_R2 = 16'h0022
+    parameter [15:0] INIT_R2 = 16'h0022,
+	parameter [15:0] INIT_R3 = 16'h0033,
+	parameter [15:0] INIT_R4 = 16'h1111,
+	parameter [15:0] INIT_R5 = 16'h1112,
+	parameter [15:0] INIT_R6 = 16'heeee,
+	parameter [15:0] INIT_R7 = 16'h0001
 )(
     input      	  clk,
     input         reset,
@@ -26,6 +31,11 @@ module regfile #(
 			if (reset == 1'b0) begin
 				if(i == 1) r[i] <= INIT_R1;
 				else if(i == 2) r[i] <= INIT_R2;
+				else if(i == 3) r[i] <= INIT_R3;
+				else if(i == 4) r[i] <= INIT_R4;
+				else if(i == 5) r[i] <= INIT_R5;
+				else if(i == 6) r[i] <= INIT_R6;
+				else if(i == 7) r[i] <= INIT_R7;
 				else r[i]<= 16'd0;
 			end
 			else
