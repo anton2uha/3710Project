@@ -5,9 +5,10 @@ module cpu_top (
 	output [15:0] out // output of the ALU to show on 7 seg on fpga.
 );
 
-//enable wires (from control FSM)
-wire pc_en, ir_en, reg_we, imm_en, alu_mux_ctrl;
+//enable and control wires (from control FSM)
+wire pc_en, pc_mux_crtl, LS_ctrl, ir_en, reg_we, imm_en, alu_mux_ctrl;
 wire [15:0] reg_en;
+
 
 //IR reg
 wire[15:0] ir_reg;
@@ -22,6 +23,11 @@ wire we_a;
 
 wire [15:0] data_b, addr_b, q_b;
 wire we_b;
+
+wire LSctrl;
+wire [15:0] mem_addr_a; //output of LSctrl mux
+
+
 
 //0 since b unused
 assign data_b = 0;
@@ -62,7 +68,7 @@ true_dual_port_ram_single_clock my_ram
 (
 	.data_a(data_a),
 	.data_b(data_b),
-	.addr_a(pc),
+	.addr_a(mem_addr_a),
 	.addr_b(addr_b),
 	.we_a(we_a),
 	.we_b(we_b),
@@ -75,6 +81,8 @@ program_counter my_pc(
 	.en(pc_en), 
 	.clk(clk), 
 	.rst_n(reset),
+	.pc_mux(pc_mux_ctrl),
+	.disp(disp),
 	.pc(pc) //[15:0]
 );
 
@@ -85,7 +93,8 @@ control_and_decoder my_control_decode(
 	.flags(flags),
 	.ir_reg(ir_reg),
 	
-	.pc_en(pc_en), //outputs
+	.pc_en(pc_en),	//outputs
+	.pc_mux_ctrl(pc_mux_ctrl),
 	.ir_en(ir_en),
 	.reg_we(reg_we), //CHECK: not needed? just set reg_en = 0
 	.imm_en(imm_en),
@@ -93,7 +102,9 @@ control_and_decoder my_control_decode(
 	.rsrc(rsrc),
 	.rdest(rdest),
 	.imm8(imm8),        
-    .reg_en(reg_en),
+   .reg_en(reg_en),
+	.disp(disp),
+	.LS_ctrl(LS_ctrl),
 	
 	.alu_mux_ctrl(alu_mux_ctrl) //added	
 );
@@ -105,6 +116,15 @@ instruction_register my_ir
 	.ir_en(ir_en),
 	.DOUT(q_a),
 	.ir_out(ir_reg)
+);
+
+// Load/Store ctrl mux
+twoToOneMux LSmux 
+(
+	.a(pc),
+	.b(rdataB),
+	.sel(LS_ctrl),
+	.y(mem_addr_a)
 );
 
 // A or B for register input? A because A = dest
