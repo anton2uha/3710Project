@@ -21,7 +21,7 @@ module tb_cpu_top();
         #15;
         reset = 1;
 
-        #500;
+        #800;
         $stop;
     end
 

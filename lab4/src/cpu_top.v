@@ -6,7 +6,7 @@ module cpu_top (
 );
 
 //enable and control wires (from control FSM)
-wire pc_en, pc_mux_crtl, LS_ctrl, ir_en, reg_we, imm_en, alu_mux_ctrl;
+wire pc_en, mem_we, pc_mux_crtl, LS_ctrl, ir_en, reg_we, imm_en, alu_mux_ctrl;
 wire [15:0] reg_en;
 
 
@@ -34,9 +34,7 @@ assign data_b = 0;
 assign addr_b = 0;
 assign we_b = 0;
 
-//since no data yet (simple version)
-assign data_a = 0;
-assign we_a = 0;
+
 
 //program counter
 wire [15:0] pc;
@@ -51,6 +49,11 @@ wire [15:0] dataB; //wire from imm mux to port B of ALU
 wire [15:0] aluOut;
 reg [4:0] flags_reg;   // Stored flags
 wire [4:0] flags_next; // New flags from ALU
+
+assign data_a = rdataA;
+assign we_a = mem_we;
+
+
 
 // Add a flag register with clock and reset
 always @(posedge clk or negedge reset) begin
@@ -105,6 +108,7 @@ control_and_decoder my_control_decode(
    .reg_en(reg_en),
 	.disp(disp),
 	.LS_ctrl(LS_ctrl),
+	.mem_we(mem_we),
 	
 	.alu_mux_ctrl(alu_mux_ctrl) //added	
 );

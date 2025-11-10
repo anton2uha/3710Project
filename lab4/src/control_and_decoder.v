@@ -40,7 +40,7 @@
 `timescale 1ns / 1ps
 
 module control_and_decoder #(
-    parameter [3:0] instrs = 4'd13 // number of instructions to execute before pausing
+    parameter [4:0] instrs = 5'd18 // number of instructions to execute before pausing
 )(
     input  wire        clk,
     input  wire        reset,     
@@ -49,6 +49,7 @@ module control_and_decoder #(
     input  wire [15:0] ir_reg,
 
     output reg         pc_en,         // to do PC+1 
+	 output reg			  mem_we,
     output reg         pc_mux_ctrl,   // PC mux cntrl
     output reg         LS_ctrl,
     output reg         ir_en,         // IR <= DOUT during S1
@@ -92,13 +93,16 @@ module control_and_decoder #(
                 end
                 
                 S1: begin
-                    if (instr[15:12] == 4'b0100 && instr[7:4] == 4'b0000) 
-                        state <= S4;
-                    else 
-                        state <= S2;
+                    if (instr[15:12]==4'b0100 && instr[7:4]==4'b0100)
+								 state <= S3; // STORE
+						  else if (instr[15:12]==4'b0100 && instr[7:4]==4'b0000)
+								 state <= S4; // LOAD
+						  else
+								 state <= S2;
                 end
                 
                 S2: state <= (paused) ? S2 : S0;
+					 S3: state <= S0;
                 S4: state <= S5;
                 S5: state <= S0;
                 
@@ -111,7 +115,7 @@ module control_and_decoder #(
     always @(*) begin
         case (state)
             S0: begin 
-                // ALU ctrls
+					 // ALU ctrls
                 rsrc         = 0;
                 rdest        = 0;
                 op           = 4'd0;
@@ -131,6 +135,9 @@ module control_and_decoder #(
                 // LOAD/STORE ctrls
                 LS_ctrl = 0;
                 ir_en   = 0;
+					 
+					 // Memory write
+					 mem_we  = 0;
             end
             
             S1: begin
@@ -154,6 +161,9 @@ module control_and_decoder #(
                 // LOAD/STORE ctrls
                 LS_ctrl = 0;
                 ir_en   = 0;
+					 
+					 // Memory write
+					 mem_we  = 0;
 
                 if (instr[15:12] == 4'b0000) begin
                     op = instr[7:4];
@@ -166,6 +176,7 @@ module control_and_decoder #(
                 if (instr[15:12] == 4'b0100 && instr[7:4] == 4'b0000) 
                     ir_en = 1;
             end
+				
             
             S2: begin
                 // ALU ctrls
@@ -188,6 +199,9 @@ module control_and_decoder #(
                 // LOAD/STORE ctrls
                 LS_ctrl = 0;
                 ir_en   = 0;
+					 
+					 // Memory write
+					 mem_we  = 0;
 
                 if (!paused) begin
                     // Normal execution & writeback
@@ -198,11 +212,39 @@ module control_and_decoder #(
                     pc_en = 1;
                 end
             end
+				
+				S3: begin
+					 // ALU controls
+					 rsrc   = instr[3:0]; 
+					 rdest  = instr[11:8];  
+					 op     = 4'd0;
+					 imm8   = 8'd0;
+					 imm_en = 0;
+					 alu_mux_ctrl = 0;
+
+					 // Regfile write off
+					 reg_en = 16'd0;
+					 reg_we = 0;
+
+					 // PC control
+					 pc_en       = 1; 
+					 pc_mux_ctrl = 0;
+					 disp        = 16'd0;
+
+					 // LS / IR control
+					 LS_ctrl = 1;  // Raddr → mem_addr
+					 ir_en   = 0;
+
+					 // Memory write
+					 mem_we  = 1; 
+					 
+				
+				end
             
             S4: begin
                 // ALU ctrls
-                rsrc         = 0;
-                rdest        = ir_reg[3:0];
+                rsrc         = ir_reg[3:0];
+                rdest        = 0;
                 op           = 4'd0;
                 imm8         = 8'd0;
                 imm_en       = 0;
@@ -220,12 +262,15 @@ module control_and_decoder #(
                 // LOAD/STORE ctrls
                 LS_ctrl = 1;
                 ir_en   = 0;
+					 
+					 // Memory write
+					 mem_we  = 0;
             end
             
             S5: begin
                 // ALU ctrls
                 rsrc         = 0;
-                rdest        = 0;
+                rdest        = ir_reg[11:8];
                 op           = 4'd0;
                 imm8         = 8'd0;
                 imm_en       = 0;
@@ -243,15 +288,15 @@ module control_and_decoder #(
                 // LOAD/STORE ctrls
                 LS_ctrl = 0;
                 ir_en   = 0;
+					 
+					 // Memory write
+					 mem_we  = 0;
 
-                if (!paused) begin
-                    // Normal execution & writeback
-                    if (op != CMP && op != NOP) begin
-                        reg_en = 16'd1 << rdest;
-                        reg_we = 1;
-                    end
-                    pc_en = 1;
-                end
+
+                reg_en = 16'd1 << rdest;
+                reg_we = 1;
+
+                pc_en = 1;
             end
         endcase
     end
