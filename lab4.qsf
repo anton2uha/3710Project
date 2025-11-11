@@ -1,0 +1,82 @@
+set_location_assignment PIN_AF14 -to clk
+set_location_assignment PIN_AA14 -to reset
+set_location_assignment PIN_AE26 -to seven_seg[0]
+set_location_assignment PIN_AE27 -to seven_seg[1]
+set_location_assignment PIN_AE28 -to seven_seg[2]
+set_location_assignment PIN_AG27 -to seven_seg[3]
+set_location_assignment PIN_AF28 -to seven_seg[4]
+set_location_assignment PIN_AG28 -to seven_seg[5]
+set_location_assignment PIN_AH28 -to seven_seg[6]
+set_location_assignment PIN_AJ29 -to seven_seg2[0]
+set_location_assignment PIN_AH29 -to seven_seg2[1]
+set_location_assignment PIN_AH30 -to seven_seg2[2]
+set_location_assignment PIN_AG30 -to seven_seg2[3]
+set_location_assignment PIN_AF29 -to seven_seg2[4]
+set_location_assignment PIN_AF30 -to seven_seg2[5]
+set_location_assignment PIN_AD27 -to seven_seg2[6]
+set_location_assignment PIN_AB23 -to seven_seg3[0]
+set_location_assignment PIN_AE29 -to seven_seg3[1]
+set_location_assignment PIN_AD29 -to seven_seg3[2]
+set_location_assignment PIN_AC28 -to seven_seg3[3]
+set_location_assignment PIN_AD30 -to seven_seg3[4]
+set_location_assignment PIN_AC29 -to seven_seg3[5]
+set_location_assignment PIN_AC30 -to seven_seg3[6]
+set_location_assignment PIN_AD26 -to seven_seg4[0]
+set_location_assignment PIN_AC27 -to seven_seg4[1]
+set_location_assignment PIN_AD25 -to seven_seg4[2]
+set_location_assignment PIN_AC25 -to seven_seg4[3]
+set_location_assignment PIN_AB28 -to seven_seg4[4]
+set_location_assignment PIN_AB25 -to seven_seg4[5]
+set_location_assignment PIN_AB22 -to seven_seg4[6]
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name FAMILY "Cyclone V"
+set_global_assignment -name DEVICE 5CSEMA5F31C6
+set_global_assignment -name TOP_LEVEL_ENTITY to_fpga_lab4
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 24.1STD.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "14:09:57  NOVEMBER 02, 2025"
+set_global_assignment -name LAST_QUARTUS_VERSION "24.1std.0 Lite Edition"
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name BOARD "DE1-SoC Board"
+set_global_assignment -name EDA_SIMULATION_TOOL "Questa Intel FPGA (Verilog)"
+set_global_assignment -name EDA_TIME_SCALE "1 ps" -section_id eda_simulation
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT "VERILOG HDL" -section_id eda_simulation
+set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_board_design_timing
+set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_board_design_symbol
+set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_board_design_signal_integrity
+set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_board_design_boundary_scan
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name EDA_TEST_BENCH_ENABLE_STATUS TEST_BENCH_MODE -section_id eda_simulation
+set_global_assignment -name EDA_NATIVELINK_SIMULATION_TEST_BENCH tb_fpga -section_id eda_simulation
+set_global_assignment -name EDA_TEST_BENCH_NAME tb_program_counter -section_id eda_simulation
+set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id tb_program_counter
+set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME tb_program_counter -section_id tb_program_counter
+set_global_assignment -name EDA_TEST_BENCH_NAME tb_cpu_top -section_id eda_simulation
+set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id tb_cpu_top
+set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME tb_cpu_top -section_id tb_cpu_top
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/src/instruction_register.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/test/tb_cpu_top.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/src/twoToOneMux.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/src/true_dual_port_ram_single_clock.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/src/Regfile_ALU_Datapath.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/src/regfile.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/src/hex_to_7seg.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/src/cpu_top.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/src/control_and_decoder.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/src/alu.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/test/tb_program_counter.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/src/program_counter.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/test/tb_true_dual_port_ram_single_clock.v
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/test/to_fpga_lab4.v
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name VERILOG_FILE ../3710Project/lab4/test/tb_fpga.v
+set_global_assignment -name EDA_TEST_BENCH_FILE ../3710Project/lab4/test/tb_program_counter.v -section_id tb_program_counter
+set_global_assignment -name EDA_TEST_BENCH_FILE ../3710Project/lab4/test/tb_cpu_top.v -section_id tb_cpu_top
+set_global_assignment -name EDA_TEST_BENCH_NAME tb_fpga -section_id eda_simulation
+set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id tb_fpga
+set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME tb_fpga -section_id tb_fpga
+set_global_assignment -name EDA_TEST_BENCH_FILE ../3710Project/lab4/test/tb_fpga.v -section_id tb_fpga
