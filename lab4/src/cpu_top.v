@@ -27,6 +27,10 @@ wire we_b;
 wire LSctrl;
 wire [15:0] mem_addr_a; //output of LSctrl mux
 
+// wires for jump
+wire pc_load;
+wire [15:0] tgt_addr;
+
 
 
 //0 since b unused
@@ -52,7 +56,7 @@ wire [4:0] flags_next; // New flags from ALU
 
 assign data_a = rdataA;
 assign we_a = mem_we;
-
+assign tgt_addr = rdataB;
 
 
 // Add a flag register with clock and reset
@@ -86,6 +90,8 @@ program_counter my_pc(
 	.rst_n(reset),
 	.pc_mux(pc_mux_ctrl),
 	.disp(disp),
+	.tgt_addr(tgt_addr), //[15:0]
+	.pc_load(pc_load),
 	.pc(pc) //[15:0]
 );
 
@@ -93,7 +99,7 @@ control_and_decoder my_control_decode(
 	.clk(clk), //inputs
 	.reset(reset),     
 	.instr(q_a),        
-	.flags(flags),
+	.flags(flags_reg), // is this flags or flags_reg?
 	.ir_reg(ir_reg),
 	
 	.pc_en(pc_en),	//outputs
