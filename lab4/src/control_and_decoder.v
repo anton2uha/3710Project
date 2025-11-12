@@ -61,7 +61,8 @@ module control_and_decoder #(
     output reg  [3:0]  rdest,         // dest reg index (instr[8:5])
     output reg  [7:0]  imm8,        
     output reg  [15:0] reg_en,
-    output reg  [15:0] disp
+    output reg  [15:0] disp,
+	 output reg			  pc_load
 );
 
     // States
@@ -110,6 +111,8 @@ module control_and_decoder #(
             endcase
         end
     end
+	 
+	 reg branch_taken;
 
     // Output logic
     always @(*) begin
@@ -131,6 +134,7 @@ module control_and_decoder #(
                 pc_en       = 0;
                 pc_mux_ctrl = 0;
                 disp        = 16'd0;
+					 pc_load		 = 0;
                 
                 // LOAD/STORE ctrls
                 LS_ctrl = 0;
@@ -138,6 +142,7 @@ module control_and_decoder #(
 					 
 					 // Memory write
 					 mem_we  = 0;
+					 branch_taken = 0;
             end
             
             S1: begin
@@ -175,6 +180,11 @@ module control_and_decoder #(
                 // LOAD instruction
                 if (instr[15:12] == 4'b0100 && instr[7:4] == 4'b0000) 
                     ir_en = 1;
+						  
+					 // LOAD instruction
+                if (instr[15:12] == 4'b0100 && instr[7:4] == 4'b1100) 
+                    rsrc = instr[3:0];
+						  
             end
 				
             
@@ -187,7 +197,8 @@ module control_and_decoder #(
                 imm_en       = (instr[15:12] == 4'b0000) ? 1'b0 : 1'b1;
                 alu_mux_ctrl = 0;
                 
-                // Reg ctrls
+                /*
+					 // Reg ctrls
                 reg_en = 16'd0;
                 reg_we = 0;
                 
@@ -202,15 +213,64 @@ module control_and_decoder #(
 					 
 					 // Memory write
 					 mem_we  = 0;
+					 */
+					 
+					 // Bcond disp (1100 cond disp)
+					 if (instr[15:12] == 4'b1100) begin
+						  case (instr[11:8])
+							   4'b0000: branch_taken = (flags[0]==1'b1); // EQ
+							   4'b0001: branch_taken = (flags[0]==1'b0); // NE
+							   4'b0010: branch_taken = (flags[2]==1'b1); // CS
+							   4'b0011: branch_taken = (flags[2]==1'b0); // CC
+							   4'b1000: branch_taken = (flags[3]==1'b1); // GT
+							   4'b1001: branch_taken = (flags[3]==1'b0); // LE
+							   4'b1010: branch_taken = (flags[4]==1'b1); // FS
+							   4'b1011: branch_taken = (flags[4]==1'b0); // FC
+							   4'b1110: branch_taken = 1'b1;             // UC
+							   default: branch_taken = 1'b0;
+						  endcase
+						  
+						  if (branch_taken) begin
+							   pc_mux_ctrl = 1'b1;                // PC += disp
+							   disp        = {{8{instr[7]}}, instr[7:0]};
+						  end
+						  
+						  reg_en = 16'd0; 
+						  reg_we = 1'b0;
+						  
+						  if (!paused) pc_en = 1'b1;
+					 end
 
-                if (!paused) begin
-                    // Normal execution & writeback
-                    if (op != CMP && op != NOP) begin
-                        reg_en = 16'd1 << rdest;
-                        reg_we = 1;
-                    end
-                    pc_en = 1;
-                end
+					// Jcond Rtarget (0100 cond 1100 Rtarget)
+					 else if (instr[15:12]==4'b0100 && instr[7:4]==4'b1100) begin
+						  case (instr[11:8])
+							   4'b0000: branch_taken = (flags[0]==1'b1); // EQ
+							   4'b0001: branch_taken = (flags[0]==1'b0); // NE
+							   4'b0010: branch_taken = (flags[2]==1'b1); // CS
+							   4'b0011: branch_taken = (flags[2]==1'b0); // CC
+							   4'b1000: branch_taken = (flags[3]==1'b1); // GT
+							   4'b1001: branch_taken = (flags[3]==1'b0); // LE
+							   4'b1010: branch_taken = (flags[4]==1'b1); // FS
+							   4'b1011: branch_taken = (flags[4]==1'b0); // FC
+							   4'b1110: branch_taken = 1'b1;             // UC
+							   default: branch_taken = 1'b0;
+						  endcase
+						  if (branch_taken) pc_load = 1'b1;     // PC <= Rtarget
+						  reg_en = 16'd0; 
+						  reg_we = 1'b0;
+						  if (!paused) pc_en = 1'b1;
+					 end
+
+					 else begin
+						 if (!paused) begin
+							  // Normal execution & writeback
+							  if (op != CMP && op != NOP) begin
+									reg_en = 16'd1 << rdest;
+									reg_we = 1;
+							  end
+							  pc_en = 1;
+						  end
+					 end
             end
 				
 				S3: begin
