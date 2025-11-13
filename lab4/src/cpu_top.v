@@ -8,7 +8,7 @@ module cpu_top (
 //enable and control wires (from control FSM)
 wire pc_en, mem_we, pc_mux_crtl, LS_ctrl, ir_en, reg_we, imm_en, alu_mux_ctrl;
 wire [15:0] reg_en;
-
+wire [15:0] disp;
 
 //IR reg
 wire[15:0] ir_reg;
@@ -26,6 +26,10 @@ wire we_b;
 
 wire LSctrl;
 wire [15:0] mem_addr_a; //output of LSctrl mux
+
+// wires for jump
+wire pc_load;
+wire [15:0] tgt_addr;
 
 
 
@@ -52,6 +56,7 @@ wire [4:0] flags_next; // New flags from ALU
 
 assign data_a = rdataA;
 assign we_a = mem_we;
+assign tgt_addr = rdataB;
 
 
 
@@ -63,7 +68,13 @@ always @(posedge clk or negedge reset) begin
         flags_reg <= flags_next;
 end
 
-
+/* //DEBUG PRINT
+always @(posedge clk) begin
+    if (pc_en) begin  // When instruction completes
+        $display("Time=%0t S2: op=%b, rdest=%d, rsrc=%d, rdataA=%h, rdataB=%h", 
+                 $time, op, rdest, rsrc, rdataA, rdataB);
+    end
+end */
 
 
 //only port a used for now
@@ -86,6 +97,8 @@ program_counter my_pc(
 	.rst_n(reset),
 	.pc_mux(pc_mux_ctrl),
 	.disp(disp),
+	.tgt_addr(tgt_addr), //[15:0]
+	.pc_load(pc_load),
 	.pc(pc) //[15:0]
 );
 
@@ -93,7 +106,7 @@ control_and_decoder my_control_decode(
 	.clk(clk), //inputs
 	.reset(reset),     
 	.instr(q_a),        
-	.flags(flags),
+	.flags(flags_reg), // is this flags or flags_reg?
 	.ir_reg(ir_reg),
 	
 	.pc_en(pc_en),	//outputs
@@ -110,7 +123,8 @@ control_and_decoder my_control_decode(
 	.LS_ctrl(LS_ctrl),
 	.mem_we(mem_we),
 	
-	.alu_mux_ctrl(alu_mux_ctrl) //added	
+	.alu_mux_ctrl(alu_mux_ctrl), //added	
+	.pc_load(pc_load)
 );
 
 instruction_register my_ir

@@ -8,7 +8,8 @@ module regfile #(
 	 parameter [15:0] INIT_R6 = 16'heeee,
 	 parameter [15:0] INIT_R7 = 16'h0001,
 	 parameter [15:0] INIT_R8 = 16'h0001,
-	 parameter [15:0] INIT_R10 = 16'h5555
+	 parameter [15:0] INIT_R10 = 16'h5555,
+	 parameter [15:0] INIT_R11 = 16'h0015
 )(
     input      	  clk,
     input         reset,
@@ -40,6 +41,7 @@ module regfile #(
 				else if(i == 7) r[i] <= INIT_R7;
 				else if(i == 8) r[i] <= INIT_R8;
 				else if(i == 10) r[i] <= INIT_R10;
+				else if(i == 11) r[i] <= INIT_R11;
 				else r[i]<= 16'd0;
 			end
 			else
