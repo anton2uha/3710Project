@@ -31,14 +31,10 @@ wire [15:0] mem_addr_a; //output of LSctrl mux
 wire pc_load;
 wire [15:0] tgt_addr;
 
-
-
 //0 since b unused
 assign data_b = 0;
 assign addr_b = 0;
 assign we_b = 0;
-
-
 
 //program counter
 wire [15:0] pc;
@@ -58,8 +54,6 @@ assign data_a = rdataA;
 assign we_a = mem_we;
 assign tgt_addr = rdataB;
 
-
-
 // Add a flag register with clock and reset
 always @(posedge clk or negedge reset) begin
     if (!reset)
@@ -75,7 +69,6 @@ always @(posedge clk) begin
                  $time, op, rdest, rsrc, rdataA, rdataB);
     end
 end */
-
 
 //only port a used for now
 true_dual_port_ram_single_clock my_ram

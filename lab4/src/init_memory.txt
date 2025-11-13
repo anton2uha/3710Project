@@ -7,21 +7,21 @@
 0234 // XOR 0033 1111, out = 1122
 0480 // NOT 1111 0000, out = eeee
 0455 // ADD eeee 1112, out = 0000, make carry = 1
-0274 //ADDC 1122 0000, out = 1123
-0274 //ADDC 1123 0000, out = 1123, check that carry got cleared
+0274 // ADDC 1122 0000, out = 1123
+0274 // ADDC 1123 0000, out = 1123, check that carry got cleared
 0655 // ADD eeee 1112, out = 0000, make carry = 1
-05A0 //SUBC 1112 0000, out = 1111
+05A0 // SUBC 1112 0000, out = 1111
 0547 // LSH 1111 0001, out = 2222
 // LOAD/SHIFT test
-4908 //LOAD reg8_mem_addr_contents -> reg9
+4908 // LOAD reg8_mem_addr_contents -> reg9
 0950 // ADD reg 9 + 0, to see if register got updates properly
-4A40 //STOR A = 5555 into addr[0]
-4200 //LOAD reg0_mem_addr_contents -> reg 2
+4A40 // STOR A = 5555 into addr[0]
+4200 // LOAD reg0_mem_addr_contents -> reg 2
 0250 // ADD reg 2 + 0, out = 5555
 // BRANCH/JUMP TEST
-02BA //CMP 5555 5555, should set Z=1
-40CB //JCOND to addr[B]= line 25 when Z=1
-0257 //ADD 5555 0001
-0250 //ADD 5555 0000, want to see 5555, not 5556
-00B2 //CMP 5555 0000, since rsrc > rdest, L = 1
-C4EB //BCOND back to address 2, out = 0022 + 5555 = 5577
+02BA // CMP 5555 5555, should set Z=1
+40CB // JCOND to addr[B] = line 25 when Z=1
+0257 // ADD 5555 0001
+0250 // ADD 5555 0000, want to see 5555, not 5556
+00B2 // CMP 5555 0000, since rsrc > rdest, L = 1
+C4EB // BCOND back to address 2, out = 0022 + 5555 = 5577

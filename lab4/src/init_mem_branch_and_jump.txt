@@ -1,0 +1,48 @@
+// Ian's branch and jump TEST
+// q: using the information above and knowing that these are hex representaions of instructions adhering to the EECS 427 RISC PROCESSOR ISA but with some opcodes slightly modified, 
+// write me a test that tests our BCOND instruction and JCOND instructions. For now, I don't need you to write the actual instructions, just write the psudo code so that I know what instructions will be executed and using what values
+// a:
+// 1. Initialize registers with known values
+// r1 = 0, r2 = 26  // Load immediate values into registers
+// 2. Compare registers to set condition flags  
+// CMP r1, r2       // This should set L = 1 since r1 < r2
+// 3. Test BCOND instruction for 'less than' condition
+// BCOND to address_A if L == 1  // Branch to address_A if the
+// 4. If branch is taken, execute instructions at address_A
+// At address_A:
+// ADD r3, r1, r2  // r3 = r1 + r2
+// 5. Test JCOND instruction for 'equal' condition
+// CMP r1, r1       // This should set Z = 1 since r1
+// JCOND to address_B if Z == 1  // Jump to address_B if equal
+// At address_B:
+// SUB r4, r2, r1  // r4 = r2 - r
+// 6. Verify results in registers
+// Expected Outcomes:
+// r3 should equal 26 after the branch
+// r4 should equal 26 after the jump
+
+// q: this is a memory file for quartus memory. How do I specify an address to start loading from?
+// a: In a Quartus memory initialization file, you can specify the starting address for loading
+// by using the "@address" directive. For example, if you want to start loading data from address 0x10, you would write:
+// @0010
+// followed by the data values you want to load starting from that address. Each subsequent
+
+// load r1 = 0
+D100
+// load r2 = 1
+D201
+// load r3 = -1
+D3FF
+// load r4 = 0x66
+D466 // load immediate 0x66 into r4
+8444 // shift left r4 by 4 -> r4 = 0x660
+5406 // add r4 + 0x6 -> r4 = 0x666
+
+// load r5 = 0
+D500
+// load r6 = instruction address of after jump
+// TODO:
+
+@666
+5505 // add 5 to r5
+40CB // jump back to instruction after jump (stored in r6)

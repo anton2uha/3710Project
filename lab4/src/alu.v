@@ -132,6 +132,12 @@ begin
 
 		end
 	//MOV: Without a reg file I am not sure how to implement this
+	MOV: 
+		begin
+
+		C = B;
+
+		end
 	LSH: // does not set flags. Also supports negative shifts (right shifts) per CR16a manual
 		begin
         if ($signed(B) >= 0)
@@ -155,6 +161,8 @@ begin
 
 		end
 	NOP: begin end // No operation, do nothing
+
+	// q: what's the difference between ashu and lsh? both seem to do logical left shifts and right shifts based on sign of B. 
 
 	default: // undefined behavior
 		begin

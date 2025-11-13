@@ -1,42 +1,4 @@
 // Control and decoder FSM from instruction opcodes following the CR16a architecture
-
-/*
-    List of all control signals we need to account for
-
-    ALU:
-        - A ()
-        - B ()
-        - Opcode
-        - cin
-    Regfile:
-        - opcode [4bit]
-        - rdest [4bit]
-        - rsrc [4bit]
-        - regenable [16bit]
-        - regFileWriteEnable 
-        - wdata [16bit]
-        - immediate [16bit]
-        - useImmediate
-
-    List of opcodes so far:
-
-        parameter ADD   = 4'b0101;
-        parameter ADDU  = 4'b0110;
-        parameter ADDC  = 4'b0111;
-        parameter SUB   = 4'b1001;
-        parameter SUBC  = 4'b1010;
-        parameter CMP   = 4'b1011;
-        parameter AND   = 4'b0001;
-        parameter OR    = 4'b0010;
-        parameter XOR   = 4'b0011;
-        parameter MOV   = 4'b1101; // havent implemented yet
-        parameter LSH   = 4'b0100;
-        parameter NOT   = 4'b1000;
-        parameter ASHU  = 4'b1100;
-        parameter NOP   = 4'b0000;
-
-*/
-
 `timescale 1ns / 1ps
 
 module control_and_decoder #(
@@ -220,16 +182,16 @@ module control_and_decoder #(
                     case (instr[11:8])
                         4'b0000: branch_taken = (flags[4] == 1'b1);                    // EQ
                         4'b0001: branch_taken = (flags[4] == 1'b0);                    // NE
-                        4'b1101: branch_taken = (flags[0] == 1'b1 || flags[4] == 1'b1); // GE
+                        4'b1101: branch_taken = (flags[0] == 1'b1 || flags[4] == 1'b1);// GE
                         4'b0010: branch_taken = (flags[3] == 1'b1);                    // CS
                         4'b0011: branch_taken = (flags[3] == 1'b0);                    // CC
                         4'b0100: branch_taken = (flags[1] == 1'b1);                    // HI
                         4'b0101: branch_taken = (flags[1] == 1'b0);                    // LS
-                        4'b1010: branch_taken = (flags[1] == 1'b0 && flags[4] == 1'b0); // LO
-                        4'b1011: branch_taken = (flags[1] == 1'b1 && flags[4] == 1'b1); // HS
+                        4'b1010: branch_taken = (flags[1] == 1'b0 && flags[4] == 1'b0);// LO
+                        4'b1011: branch_taken = (flags[1] == 1'b1 && flags[4] == 1'b1);// HS
                         4'b0110: branch_taken = (flags[0] == 1'b1);                    // GT
                         4'b0111: branch_taken = (flags[0] == 1'b0);                    // LE
-                        4'b1100: branch_taken = (flags[0] == 1'b0 && flags[4] == 1'b0); // LT
+                        4'b1100: branch_taken = (flags[0] == 1'b0 && flags[4] == 1'b0);// LT
                         4'b1110: branch_taken = 1'b1;                                  // UC
                         4'b1111: branch_taken = 1'b0;                                  // NEVER JMP
                         default: branch_taken = 1'b0;
@@ -252,16 +214,16 @@ module control_and_decoder #(
                     case (instr[11:8])
                         4'b0000: branch_taken = (flags[4] == 1'b1);                    // EQ
                         4'b0001: branch_taken = (flags[4] == 1'b0);                    // NE
-                        4'b1101: branch_taken = (flags[0] == 1'b1 || flags[4] == 1'b1); // GE
+                        4'b1101: branch_taken = (flags[0] == 1'b1 || flags[4] == 1'b1);// GE
                         4'b0010: branch_taken = (flags[3] == 1'b1);                    // CS
                         4'b0011: branch_taken = (flags[3] == 1'b0);                    // CC
                         4'b0100: branch_taken = (flags[1] == 1'b1);                    // HI
                         4'b0101: branch_taken = (flags[1] == 1'b0);                    // LS
-                        4'b1010: branch_taken = (flags[1] == 1'b0 && flags[4] == 1'b0); // LO
-                        4'b1011: branch_taken = (flags[1] == 1'b1 && flags[4] == 1'b1); // HS
+                        4'b1010: branch_taken = (flags[1] == 1'b0 && flags[4] == 1'b0);// LO
+                        4'b1011: branch_taken = (flags[1] == 1'b1 && flags[4] == 1'b1);// HS
                         4'b0110: branch_taken = (flags[0] == 1'b1);                    // GT
                         4'b0111: branch_taken = (flags[0] == 1'b0);                    // LE
-                        4'b1100: branch_taken = (flags[0] == 1'b0 && flags[4] == 1'b0); // LT
+                        4'b1100: branch_taken = (flags[0] == 1'b0 && flags[4] == 1'b0);// LT
                         4'b1110: branch_taken = 1'b1;                                  // UC
                         4'b1111: branch_taken = 1'b0;                                  // NEVER JMP
                         default: branch_taken = 1'b0;
