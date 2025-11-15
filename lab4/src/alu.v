@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 
+// A is destination register, B is source register
 module alu( A, B, C, Opcode, cin, Flags);
 input [15:0] A, B;
 input [3:0] Opcode;
@@ -18,20 +19,22 @@ ADD, ADDI, ADDU, ADDUI, ADDC, ADDCU, ADDCUI, ADDCI, SUB, SUBI, CMP, CMPI, CMPU/I
 OR, XOR, NOT, LSH, LSHI, RSH, RSHI, ALSH, ARSH, NOP/WAIT
 */
 
-parameter ADD   = 4'b0101;
-parameter ADDU  = 4'b0110;
-parameter ADDC  = 4'b0111;
-parameter SUB   = 4'b1001;
-parameter SUBC  = 4'b1010;
-parameter CMP   = 4'b1011;
+parameter NOP   = 4'b0000;
 parameter AND   = 4'b0001;
 parameter OR    = 4'b0010;
 parameter XOR   = 4'b0011;
-parameter MOV   = 4'b1101; // havent implemented yet
-parameter LSH   = 4'b0100;
+// 0100 reserved for jcond
+parameter ADD   = 4'b0101;
+parameter ADDU  = 4'b0110;
+parameter ADDC  = 4'b0111;
 parameter NOT   = 4'b1000;
-parameter ASHU  = 4'b1100;
-parameter NOP   = 4'b0000;
+parameter SUB   = 4'b1001;
+parameter SUBC  = 4'b1010;
+parameter CMP   = 4'b1011;
+// 1100 reserved for bcond
+parameter MOV   = 4'b1101;
+parameter ASHU  = 4'b1110;
+parameter LSH   = 4'b1111;
 
 
 /*
@@ -108,9 +111,9 @@ begin
 		// If A==B is zero, set the Zero flag
 		if (A == B) Flags[4] = 1'b1;
 		// Set the negative flag if A < B (signed)
-		if ($signed(A) < $signed(B)) Flags[0] = 1'b1;
+		if ($signed(A) > $signed(B)) Flags[0] = 1'b1;
 		// Set the low flag if A < B (unsigned)
-		if ($unsigned(A) < $unsigned(B)) Flags[1] = 1'b1;
+		if ($unsigned(A) > $unsigned(B)) Flags[1] = 1'b1;
 
 		end
 	AND: // does not set flags

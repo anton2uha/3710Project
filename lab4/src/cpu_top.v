@@ -15,7 +15,7 @@ wire[15:0] ir_reg;
 
 //instruction info (from control FSM)
 wire [3:0] op, rsrc, rdest;
-wire [7:0] imm8;
+wire [15:0] imm;
 
 //memory port wires
 wire [15:0] data_a, addr_a, q_a;
@@ -110,7 +110,7 @@ control_and_decoder my_control_decode(
 	.op(op),
 	.rsrc(rsrc),
 	.rdest(rdest),
-	.imm8(imm8),        
+	.imm(imm),        
    .reg_en(reg_en),
 	.disp(disp),
 	.LS_ctrl(LS_ctrl),
@@ -142,7 +142,7 @@ twoToOneMux LSmux
 twoToOneMux immMux 
 (
 	.a(rdataB),
-	.b(imm8), //CHECK: signed or zero extend?
+	.b(imm), //CHECK: signed or zero extend?
 	.sel(imm_en),
 	.y(dataB)
 );

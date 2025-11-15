@@ -32,17 +32,18 @@ module regfile #(
 		always @(posedge clk)
 		begin
 			if (reset == 1'b0) begin
-				if(i == 1) r[i] <= INIT_R1;
-				else if(i == 2) r[i] <= INIT_R2;
-				else if(i == 3) r[i] <= INIT_R3;
-				else if(i == 4) r[i] <= INIT_R4;
-				else if(i == 5) r[i] <= INIT_R5;
-				else if(i == 6) r[i] <= INIT_R6;
-				else if(i == 7) r[i] <= INIT_R7;
-				else if(i == 8) r[i] <= INIT_R8;
-				else if(i == 10) r[i] <= INIT_R10;
-				else if(i == 11) r[i] <= INIT_R11;
-				else r[i]<= 16'd0;
+				// if(i == 1) r[i] <= INIT_R1;
+				// else if(i == 2) r[i] <= INIT_R2;
+				// else if(i == 3) r[i] <= INIT_R3;
+				// else if(i == 4) r[i] <= INIT_R4;
+				// else if(i == 5) r[i] <= INIT_R5;
+				// else if(i == 6) r[i] <= INIT_R6;
+				// else if(i == 7) r[i] <= INIT_R7;
+				// else if(i == 8) r[i] <= INIT_R8;
+				// else if(i == 10) r[i] <= INIT_R10;
+				// else if(i == 11) r[i] <= INIT_R11;
+				// else r[i]<= 16'd0;
+				r[i] <= 16'd0;
 			end
 			else
 				if(regEnable[i]==1'b1)
