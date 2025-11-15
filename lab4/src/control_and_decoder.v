@@ -202,7 +202,7 @@ module control_and_decoder #(
                         4'b0100: branch_taken = (flags[1] == 1'b1);                    // HI
                         4'b0101: branch_taken = (flags[1] == 1'b0);                    // LS
                         4'b1010: branch_taken = (flags[1] == 1'b0 && flags[4] == 1'b0);// LO
-                        4'b1011: branch_taken = (flags[1] == 1'b1 && flags[4] == 1'b1);// HS
+                        4'b1011: branch_taken = (flags[1] == 1'b1 || flags[4] == 1'b1);// HS
                         4'b0110: branch_taken = (flags[0] == 1'b1);                    // GT
                         4'b0111: branch_taken = (flags[0] == 1'b0);                    // LE
                         4'b1100: branch_taken = (flags[0] == 1'b0 && flags[4] == 1'b0);// LT
@@ -234,7 +234,7 @@ module control_and_decoder #(
                         4'b0100: branch_taken = (flags[1] == 1'b1);                    // HI
                         4'b0101: branch_taken = (flags[1] == 1'b0);                    // LS
                         4'b1010: branch_taken = (flags[1] == 1'b0 && flags[4] == 1'b0);// LO
-                        4'b1011: branch_taken = (flags[1] == 1'b1 && flags[4] == 1'b1);// HS
+                        4'b1011: branch_taken = (flags[1] == 1'b1 || flags[4] == 1'b1);// HS
                         4'b0110: branch_taken = (flags[0] == 1'b1);                    // GT
                         4'b0111: branch_taken = (flags[0] == 1'b0);                    // LE
                         4'b1100: branch_taken = (flags[0] == 1'b0 && flags[4] == 1'b0);// LT

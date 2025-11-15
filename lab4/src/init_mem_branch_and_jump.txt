@@ -13,10 +13,10 @@ D60E // load r6 = E as return address           r5 = 10;
 01B1 // CMP r1, r1
 C059 // test BCOND (equal)
 D611 // load r6 = 11 as return address          r5 = 15;
-01B2 // CMP r1, r2
+0352 // ADD r3, r2
 C256 // test BCOND (carry set) 
 D614 // load r6 = 14 as return address          r5 = 20;
-01B2 // CMP r1, r2
+0152 // ADD r1, r2
 C353 // test BCOND (carry clear)
 D617 // load r6 = 17 as return address          r5 = 25;
 02B1 // CMP r2, r1
@@ -25,7 +25,7 @@ D61A // load r6 = 1A as return address          r5 = 30;
 01B1 // CMP r1, r1
 C54D // test BCOND (lower than or same as)
 D61D // load r6 = 1D as return address          r5 = 35; 
-01B2 // CMP r1, r2
+0152 // ADD r1, r2
 CA4A // test BCOND (lower than)
 D620 // load r6 = 20 as return address          r5 = 40;
 02B1 // CMP r2, r1
@@ -46,10 +46,10 @@ D62F // load r6 = 2F as return address          r5 = 65;
 02B2 // CMP r2, r2
 40C4 // test JCOND (equal)
 D632 // load r6 = 32 as return address          r5 = 70;
-01B2 // CMP r1, r2
+0352 // ADD r3, r2
 42C4 // test JCOND (carry set)
 D635 // load r6 = 35 as return address          r5 = 75;
-02B1 // CMP r2, r1
+0152 // ADD r1, r2
 43C4 // test JCOND (carry clear)
 D638 // load r6 = 38 as return address          r5 = 80;
 02B1 // CMP r2, r1
