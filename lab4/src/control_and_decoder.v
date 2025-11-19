@@ -2,12 +2,13 @@
 `timescale 1ns / 1ps
 
 module control_and_decoder #(
+	 parameter can_be_paused = 1'b0,
     parameter [4:0] instrs = 5'd24 // number of instructions to execute before pausing
 )(
     input  wire        clk,
     input  wire        reset,     
     input  wire [4:0]  flags,
-    input  wire [15:0] instr,  
+    input  wire [15:0] instr, 
     input  wire [15:0] ir_reg,
 
     output reg         pc_en,
@@ -21,7 +22,7 @@ module control_and_decoder #(
     output reg  [3:0]  op,
     output reg  [3:0]  rsrc,
     output reg  [3:0]  rdest,
-    output reg  [7:0]  imm8,        
+    output reg  [15:0] imm,        
     output reg  [15:0] reg_en,
     output reg  [15:0] disp,
     output reg         pc_load
@@ -42,7 +43,7 @@ module control_and_decoder #(
     integer i = 0;
     reg branch_taken;
 
-    wire paused = (state == S2) && (i >= instrs);
+    wire paused = (state == S2) && (i >= instrs) && can_be_paused;
 
     // State machine
     always @(posedge clk or negedge reset) begin
@@ -77,13 +78,14 @@ module control_and_decoder #(
 
     // Output logic
     always @(*) begin
+        branch_taken = 0;
         case (state)
             S0: begin 
                 // ALU ctrls
                 rsrc         = 0;
                 rdest        = 0;
                 op           = 4'd0;
-                imm8         = 8'd0;
+                imm         = 16'd0;
                 imm_en       = 0;
                 alu_mux_ctrl = 0;
                 
@@ -111,7 +113,7 @@ module control_and_decoder #(
                 rsrc         = instr[3:0];
                 rdest        = instr[11:8];
                 op           = 4'd0;
-                imm8         = instr[7:0];
+                imm         = instr[7:0];
                 imm_en       = 0;
                 alu_mux_ctrl = 0;
                 
@@ -153,11 +155,11 @@ module control_and_decoder #(
                 rsrc         = instr[3:0];
                 rdest        = instr[11:8];
                 op           = (instr[15:12] == 4'b0000) ? instr[7:4] : instr[15:12];
-                imm8         = instr[7:0];
+                imm          = instr[7:0];
                 imm_en       = (instr[15:12] == 4'b0000) ? 1'b0 : 1'b1;
                 alu_mux_ctrl = 0;
                 
-                $display("S2 instr=%h rdest=%d rsrc=%d", instr, instr[11:8], instr[3:0]);
+                // $display("S2 instr=%h rdest=%d rsrc=%d", instr, instr[11:8], instr[3:0]);
                 
                 // Reg ctrls
                 reg_en = 16'd0;
@@ -175,7 +177,19 @@ module control_and_decoder #(
                 
                 // Memory write
                 mem_we = 0;
-                
+
+                // Handle sign extension for immediate values
+                // check if imm_en and if opcode is not one of the following:
+                // 0001 (AND), 0010 (OR), 0011 (XOR), 1000 (NOT), 1110 (ASHU), 1111 (LSHU), 1100 (Bcond), 0100 (Jcond)
+                if (imm_en && (op != 4'b0001) && (op != 4'b0010) && (op != 4'b0011) && (op != 4'b1000) && (op != 4'b1110) && (op != 4'b1111) && (op != 4'b1100) && (op != 4'b0100)) begin
+                    if (instr[7] == 1'b1)
+                        imm = {8'hFF, instr[7:0]};
+                    else
+                        imm = {8'h00, instr[7:0]};
+                end else begin
+                    imm = {8'd0, instr[7:0]};
+                end
+
                 // Bcond disp (1100 cond disp)
                 // Flags[4,3,2,1,0] = Zero(Z), Carry(C), Overflow(O), Low(L), Negative(N)
                 if (instr[15:12] == 4'b1100) begin
@@ -188,7 +202,7 @@ module control_and_decoder #(
                         4'b0100: branch_taken = (flags[1] == 1'b1);                    // HI
                         4'b0101: branch_taken = (flags[1] == 1'b0);                    // LS
                         4'b1010: branch_taken = (flags[1] == 1'b0 && flags[4] == 1'b0);// LO
-                        4'b1011: branch_taken = (flags[1] == 1'b1 && flags[4] == 1'b1);// HS
+                        4'b1011: branch_taken = (flags[1] == 1'b1 || flags[4] == 1'b1);// HS
                         4'b0110: branch_taken = (flags[0] == 1'b1);                    // GT
                         4'b0111: branch_taken = (flags[0] == 1'b0);                    // LE
                         4'b1100: branch_taken = (flags[0] == 1'b0 && flags[4] == 1'b0);// LT
@@ -220,7 +234,7 @@ module control_and_decoder #(
                         4'b0100: branch_taken = (flags[1] == 1'b1);                    // HI
                         4'b0101: branch_taken = (flags[1] == 1'b0);                    // LS
                         4'b1010: branch_taken = (flags[1] == 1'b0 && flags[4] == 1'b0);// LO
-                        4'b1011: branch_taken = (flags[1] == 1'b1 && flags[4] == 1'b1);// HS
+                        4'b1011: branch_taken = (flags[1] == 1'b1 || flags[4] == 1'b1);// HS
                         4'b0110: branch_taken = (flags[0] == 1'b1);                    // GT
                         4'b0111: branch_taken = (flags[0] == 1'b0);                    // LE
                         4'b1100: branch_taken = (flags[0] == 1'b0 && flags[4] == 1'b0);// LT
@@ -258,7 +272,7 @@ module control_and_decoder #(
                 rsrc         = instr[3:0]; 
                 rdest        = instr[11:8];  
                 op           = 4'd0;
-                imm8         = 8'd0;
+                imm          = 16'd0;
                 imm_en       = 0;
                 alu_mux_ctrl = 0;
 
@@ -285,7 +299,7 @@ module control_and_decoder #(
                 rsrc         = ir_reg[3:0];
                 rdest        = 0;
                 op           = 4'd0;
-                imm8         = 8'd0;
+                imm          = 16'd0;
                 imm_en       = 0;
                 alu_mux_ctrl = 0;
                 
@@ -312,7 +326,7 @@ module control_and_decoder #(
                 rsrc         = 0;
                 rdest        = ir_reg[11:8];
                 op           = 4'd0;
-                imm8         = 8'd0;
+                imm          = 16'd0;
                 imm_en       = 0;
                 alu_mux_ctrl = 1;
                 
