@@ -5,10 +5,7 @@ module vga_control
     output reg  hsync,
     output reg  vsync,
     output wire bright,
-
-    // this is the ONLY pixel clock output
     output wire pix_clk_out,
-
     output reg [9:0] hcount,
     output reg [9:0] vcount
 );
@@ -23,11 +20,6 @@ always @(posedge clk) begin
 end
 
 assign pix_clk_out = pix_clk_internal;
-
-
-// ===============================
-// VGA Timing
-// ===============================
 
 localparam H_VISIBLE = 10'd640,
            H_FRONT   = 10'd16,
