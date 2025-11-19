@@ -2,7 +2,6 @@
 
 module bitgen(
     input wire clk,
-    input wire reset,
     input wire bright,
     input wire [9:0] hcount,
     input wire [9:0] vcount,
@@ -22,10 +21,8 @@ localparam MOVE_Y = 50;
 localparam MOVE_SPEED = 2;
 
 
-always @(posedge clk or posedge reset) begin
-    if (reset) begin
-        move_x <= 0;
-    end else if (vcount == 0 && hcount == 0) begin
+always @(posedge clk) begin
+    if (vcount == 0 && hcount == 0) begin
         if (move_x >= 640 - MOVE_W)
             move_x <= 0;
         else

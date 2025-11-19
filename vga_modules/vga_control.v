@@ -1,54 +1,63 @@
 `timescale 1ns / 1ps
-
-module vga_control(
-    input wire clk,
-    input wire reset,
-    output reg hsync,
-    output reg vsync,
+module vga_control
+(
+    input  wire clk,
+    output reg  hsync,
+    output reg  vsync,
     output wire bright,
-    output reg [9:0] hcount,  // 0-799
-    output reg [9:0] vcount   // 0-524
+
+    // this is the ONLY pixel clock output
+    output wire pix_clk_out,
+
+    output reg [9:0] hcount,
+    output reg [9:0] vcount
 );
 
-localparam H_VISIBLE = 640;
-localparam H_FRONT   = 16;
-localparam H_SYNC    = 96;
-localparam H_BACK    = 48;
-localparam H_TOTAL   = 800;
+reg [1:0] clkdiv;
+reg pix_clk_internal;
 
-localparam V_VISIBLE = 480;
-localparam V_FRONT   = 10;
-localparam V_SYNC    = 2;
-localparam V_BACK    = 33;
-localparam V_TOTAL   = 525;
-
-// Counters
-always @(posedge clk or posedge reset) begin
-    if (reset) begin
-        hcount <= 0;
-        vcount <= 0;
-    end else begin
-        if (hcount == H_TOTAL - 1) begin
-            hcount <= 0;
-            if (vcount == V_TOTAL - 1)
-                vcount <= 0;
-            else
-                vcount <= vcount + 1;
-        end else begin
-            hcount <= hcount + 1;
-        end
-    end
-end
-
-//sync pulses
+// Clock divider: 100 MHz → 25 MHz
 always @(posedge clk) begin
-    hsync <= ~((hcount >= H_VISIBLE + H_FRONT) && 
-               (hcount < H_VISIBLE + H_FRONT + H_SYNC));
-    vsync <= ~((vcount >= V_VISIBLE + V_FRONT) && 
-               (vcount < V_VISIBLE + V_FRONT + V_SYNC));
+    clkdiv <= clkdiv + 1;
+    pix_clk_internal <= clkdiv[1];
 end
 
-// Only high on visible
+assign pix_clk_out = pix_clk_internal;
+
+
+// ===============================
+// VGA Timing
+// ===============================
+
+localparam H_VISIBLE = 10'd640,
+           H_FRONT   = 10'd16,
+           H_SYNC    = 10'd96,
+           H_BACK    = 10'd48,
+           H_TOTAL   = 10'd800;
+
+localparam V_VISIBLE = 10'd480,
+           V_FRONT   = 10'd10,
+           V_SYNC    = 10'd2,
+           V_BACK    = 10'd33,
+           V_TOTAL   = 10'd525;
+
+always @(posedge pix_clk_internal) begin
+	  if (hcount == H_TOTAL - 1) begin
+			hcount <= 0;
+			vcount <= (vcount == V_TOTAL - 1) ? 0 : vcount + 1;
+	  end else begin
+			hcount <= hcount + 1;
+	  end
+end
+
+always @(posedge pix_clk_internal) begin
+    hsync <= ~((hcount >= H_VISIBLE + H_FRONT) &&
+               (hcount <  H_VISIBLE + H_FRONT + H_SYNC));
+
+    vsync <= ~((vcount >= V_VISIBLE + V_FRONT) &&
+               (vcount <  V_VISIBLE + V_FRONT + V_SYNC));
+end
+
 assign bright = (hcount < H_VISIBLE) && (vcount < V_VISIBLE);
 
 endmodule
