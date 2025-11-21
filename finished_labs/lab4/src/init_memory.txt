@@ -1,3 +1,21 @@
+D111 // load r1 = 0x11
+D222 // load r2 = 0x22
+D333 // load r3 = 0x33
+D411 // load r4 = 0x1111 - set the high bits first
+F408 // shift r4 left by 8 to make space for low bits
+D411 // load r4 = 0x11 - load in the lower bits
+D511 // load r5 = 0x1112 - set the high bits first
+F508 // shift r5 left by 8 to make space for low bits
+D512 // load r5 = 0x12 - load in the lower bits
+D6EE // load r6 = 0xeeee - set the high bits first
+F608 // shift r6 left by 8 to make space for low bits
+D6EE // load r6 = 0xee - load in the lower bits
+D701 // load r7 = 0x01
+D801 // load r8 = 0x01
+DA55 // load r10 = 0x5555
+FA08 // shift r10 left by 8 to make space for low bits
+DA55 // load r10 = 0x55 - load in the lower bits
+DB15 // load r11 = 0x15
 // 0000 0001 0101 0010 add r1, r2 | add dest, src
 0152 // ADD 0011 0022, out = 0033
 0192 // SUB 0033 0022, out = 0011
@@ -11,7 +29,7 @@
 0274 // ADDC 1123 0000, out = 1123, check that carry got cleared
 0655 // ADD eeee 1112, out = 0000, make carry = 1
 05A0 // SUBC 1112 0000, out = 1111
-0547 // LSH 1111 0001, out = 2222
+05F7 // LSH 1111 0001, out = 2222
 // LOAD/SHIFT test
 4908 // LOAD reg8_mem_addr_contents -> reg9
 0950 // ADD reg 9 + 0, to see if register got updates properly

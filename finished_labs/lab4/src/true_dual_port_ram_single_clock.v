@@ -14,8 +14,8 @@ module true_dual_port_ram_single_clock
 	reg [DATA_WIDTH-1:0] ram[2**ADDR_WIDTH-1:0];
 
 	// load memory using $readmemh
-	initial begins
-		$readmemh("C:/Users/IT Admin/Desktop/3710_MainFiles/3710Project/lab4/src/init_memory.txt", ram);
+	initial begin
+		$readmemh("C:/Users/toaoi/Documents/Repos/school/ECE3710/lab4/init_mem_branch_and_jump.txt", ram);
 	end
 
 	// Port A 
