@@ -2,14 +2,14 @@
 module regfile #(
     parameter [15:0] INIT_R1 = 16'h0011,
     parameter [15:0] INIT_R2 = 16'h0022,
-	 parameter [15:0] INIT_R3 = 16'h0033,
-	 parameter [15:0] INIT_R4 = 16'h1111,
-	 parameter [15:0] INIT_R5 = 16'h1112,
-	 parameter [15:0] INIT_R6 = 16'heeee,
-	 parameter [15:0] INIT_R7 = 16'h0001,
-	 parameter [15:0] INIT_R8 = 16'h0001,
-	 parameter [15:0] INIT_R10 = 16'h5555,
-	 parameter [15:0] INIT_R11 = 16'h0015
+	parameter [15:0] INIT_R3 = 16'h0033,
+	parameter [15:0] INIT_R4 = 16'h1111,
+	parameter [15:0] INIT_R5 = 16'h1112,
+	parameter [15:0] INIT_R6 = 16'heeee,
+	parameter [15:0] INIT_R7 = 16'h0001,
+	parameter [15:0] INIT_R8 = 16'h0001,
+	parameter [15:0] INIT_R10 = 16'h5555,
+	parameter [15:0] INIT_R11 = 16'h0015
 )(
     input      	  clk,
     input         reset,
