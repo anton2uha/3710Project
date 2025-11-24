@@ -28,12 +28,21 @@ module vga_top(
     assign VGA_BLANK_N = bright;
     assign VGA_SYNC_N  = 1'b0;
 
-    bitgen_red bg (
-        .bright(bright),
-        .hcount(hcount),
-        .vcount(vcount),
-        .vga_r(VGA_R),
-        .vga_g(VGA_G),
-        .vga_b(VGA_B)
-    );
+//    bitgen_red bg (
+//        .bright(bright),
+//        .hcount(hcount),
+//        .vcount(vcount),
+//        .vga_r(VGA_R),
+//        .vga_g(VGA_G),
+//        .vga_b(VGA_B)
+//    );
+	 
+	 bitgen_rgb_bars bars (
+		.bright(bright),
+      .hcount(hcount),
+      .vcount(vcount),
+      .vga_r(VGA_R),
+      .vga_g(VGA_G),
+      .vga_b(VGA_B)
+	 );
 endmodule
