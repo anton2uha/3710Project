@@ -14,7 +14,7 @@ module true_dual_port_ram_single_clock
 	reg [DATA_WIDTH-1:0] ram[2**ADDR_WIDTH-1:0];
 
 	// load memory using $readmemh
-	initial begins
+	initial begin
 		$readmemh("C:/Users/IT Admin/Desktop/3710_MainFiles/3710Project/lab4/src/init_memory.txt", ram);
 	end
 
