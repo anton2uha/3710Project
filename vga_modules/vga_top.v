@@ -38,11 +38,32 @@ module vga_top(
 //    );
 	 
 	 bitgen_rgb_bars bars (
-		.bright(bright),
+	  .bright(bright),
       .hcount(hcount),
       .vcount(vcount),
       .vga_r(VGA_R),
       .vga_g(VGA_G),
       .vga_b(VGA_B)
 	 );
+
+     bitgen_background bg (
+        .bright(bright),
+        .hcount(hcount),
+        .vcount(vcount),
+        .vga_r(VGA_R),
+        .vga_g(VGA_G),
+        .vga_b(VGA_B)
+    );
+
+    bitgen_game_character gc (
+        .bright(bright),
+        .hcount(hcount),
+        .vcount(vcount),
+        .vga_r(VGA_R),
+        .vga_g(VGA_G),
+        .vga_b(VGA_B)
+    );
+
+    
+
 endmodule
