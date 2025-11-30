@@ -1,0 +1,52 @@
+# Copyright (C) 2024  Intel Corporation. All rights reserved.
+# Your use of Intel Corporation's design tools, logic functions 
+# and other software and tools, and any partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Intel Program License 
+# Subscription Agreement, the Intel Quartus Prime License Agreement,
+# the Intel FPGA IP License Agreement, or other applicable license
+# agreement, including, without limitation, that your use is for
+# the sole purpose of programming logic devices manufactured by
+# Intel and sold by Intel or its authorized distributors.  Please
+# refer to the applicable agreement for further details, at
+# https://fpgasoftware.intel.com/eula.
+
+# Quartus Prime Version 23.1std.1 Build 993 05/14/2024 SC Lite Edition
+# File: C:\Users\IT Admin\Desktop\3710_vga\3710Project\vga_modules\FPGA_VGA_PinPlanner.csv
+# Generated on: Sun Nov 30 00:34:33 2025
+
+# Note: The column header names should not be changed if you wish to import this .csv file into the Quartus Prime software.
+
+To,Direction,Location,I/O Bank,VREF Group,Fitter Location,I/O Standard,Reserved,Current Strength,Slew Rate,Differential Pair,Transceiver Analog Settings Protocol,VCCR_GXB/VCCT_GXB Voltage,Transceiver I/O Pin Termination,Transceiver Dedicated Refclk Pin Termination,Transmitter Common Mode Driver Voltage,Transmitter Slew Rate Control,Transmitter Differential Output Voltage,Receiver Buffer Common Mode Voltage,Strict Preservation
+VGA_B[7],Output,PIN_J14,8A,B8A_N0,PIN_J14,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_B[6],Output,PIN_G15,8A,B8A_N0,PIN_G15,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_B[5],Output,PIN_F15,8A,B8A_N0,PIN_F15,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_B[4],Output,PIN_H14,8A,B8A_N0,PIN_H14,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_B[3],Output,PIN_F14,8A,B8A_N0,PIN_F14,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_B[2],Output,PIN_H13,8A,B8A_N0,PIN_H13,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_B[1],Output,PIN_G13,8A,B8A_N0,PIN_G13,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_B[0],Output,PIN_B13,8A,B8A_N0,PIN_B13,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_BLANK_N,Output,PIN_F10,8A,B8A_N0,PIN_F10,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_CLK,Output,PIN_A11,8A,B8A_N0,PIN_A11,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_G[7],Output,PIN_E11,8A,B8A_N0,PIN_E11,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_G[6],Output,PIN_F11,8A,B8A_N0,PIN_F11,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_G[5],Output,PIN_G12,8A,B8A_N0,PIN_G12,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_G[4],Output,PIN_G11,8A,B8A_N0,PIN_G11,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_G[3],Output,PIN_G10,8A,B8A_N0,PIN_G10,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_G[2],Output,PIN_H12,8A,B8A_N0,PIN_H12,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_G[1],Output,PIN_J10,8A,B8A_N0,PIN_J10,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_G[0],Output,PIN_J9,8A,B8A_N0,PIN_J9,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_HS,Output,PIN_B11,8A,B8A_N0,PIN_B11,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_R[7],Output,PIN_F13,8A,B8A_N0,PIN_F13,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_R[6],Output,PIN_E12,8A,B8A_N0,PIN_E12,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_R[5],Output,PIN_D12,8A,B8A_N0,PIN_D12,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_R[4],Output,PIN_C12,8A,B8A_N0,PIN_C12,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_R[3],Output,PIN_B12,8A,B8A_N0,PIN_B12,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_R[2],Output,PIN_E13,8A,B8A_N0,PIN_E13,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_R[1],Output,PIN_C13,8A,B8A_N0,PIN_C13,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_R[0],Output,PIN_A13,8A,B8A_N0,PIN_A13,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_SYNC_N,Output,PIN_C10,8A,B8A_N0,PIN_C10,3.3-V LVTTL,,,,,,,,,,,,,
+VGA_VS,Output,PIN_D11,8A,B8A_N0,PIN_D11,3.3-V LVTTL,,,,,,,,,,,,,
+sys_clk,Input,PIN_AF14,3B,B3B_N0,PIN_AF14,3.3-V LVTTL,,,,,,,,,,,,,
