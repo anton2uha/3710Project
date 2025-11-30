@@ -8,6 +8,15 @@ module vga_top(
     output wire [7:0]  VGA_R,
     output wire [7:0]  VGA_G,
     output wire [7:0]  VGA_B
+    input  wire        sys_clk,     // 50 MHz
+    output wire        VGA_HS,
+    output wire        VGA_VS,
+    output wire        VGA_CLK,
+    output wire        VGA_BLANK_N,
+    output wire        VGA_SYNC_N,
+    output wire [7:0]  VGA_R,
+    output wire [7:0]  VGA_G,
+    output wire [7:0]  VGA_B
 );
     wire bright;
     wire pix_clk;
