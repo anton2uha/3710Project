@@ -8,15 +8,6 @@ module vga_top(
     output wire [7:0]  VGA_R,
     output wire [7:0]  VGA_G,
     output wire [7:0]  VGA_B
-    input  wire        sys_clk,     // 50 MHz
-    output wire        VGA_HS,
-    output wire        VGA_VS,
-    output wire        VGA_CLK,
-    output wire        VGA_BLANK_N,
-    output wire        VGA_SYNC_N,
-    output wire [7:0]  VGA_R,
-    output wire [7:0]  VGA_G,
-    output wire [7:0]  VGA_B
 );
     wire bright;
     wire pix_clk;
@@ -24,7 +15,7 @@ module vga_top(
 	 
 	 // Sprite ROM signals
     wire [15:0] sprite_data;  // 16-bit RGB565 data from ROM
-    wire [9:0] sprite_addr;   // Address into sprite ROM
+    wire [11:0] sprite_addr;   // Address into sprite ROM
 
     vga_control vc (
         .clk(sys_clk),
@@ -61,7 +52,7 @@ module vga_top(
 // Sprite ROM - stores the glyph data
     sprite_rom #(
         .DATA_WIDTH(16),
-        .ADDR_WIDTH(10)
+        .ADDR_WIDTH(12)
     ) srom (
         .clk(pix_clk),
         .addr(sprite_addr),
@@ -69,7 +60,20 @@ module vga_top(
     );
 
     // Sprite renderer
-    bitgen_sprite sprite_gen (
+//    bitgen_sprite sprite_gen (
+//        .bright(bright),
+//        .hcount(hcount),
+//        .vcount(vcount),
+//        .sprite_data(sprite_data),
+//        .sprite_addr(sprite_addr),
+//        .vga_r(VGA_R),
+//        .vga_g(VGA_G),
+//        .vga_b(VGA_B)
+//    );
+//	 
+	 // Sprite renderer (animated)
+    bitgen_animated_sprite sprite_gen (
+        .pix_clk(pix_clk),
         .bright(bright),
         .hcount(hcount),
         .vcount(vcount),
