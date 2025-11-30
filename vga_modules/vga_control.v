@@ -13,10 +13,8 @@ module vga_control
 reg [1:0] clkdiv;
 reg pix_clk_internal;
 
-// Clock divider: 100 MHz → 25 MHz
 always @(posedge clk) begin
-    clkdiv <= clkdiv + 1;
-    pix_clk_internal <= clkdiv[1];
+    pix_clk_internal <= ~pix_clk_internal;
 end
 
 assign pix_clk_out = pix_clk_internal;
