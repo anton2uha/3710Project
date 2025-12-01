@@ -8,14 +8,14 @@ module cpu_top (
 //enable and control wires (from control FSM)
 wire pc_en, mem_we, pc_mux_crtl, LS_ctrl, ir_en, reg_we, imm_en, alu_mux_ctrl;
 wire [15:0] reg_en;
-
+wire [15:0] disp;
 
 //IR reg
 wire[15:0] ir_reg;
 
 //instruction info (from control FSM)
 wire [3:0] op, rsrc, rdest;
-wire [7:0] imm8;
+wire [15:0] imm;
 
 //memory port wires
 wire [15:0] data_a, addr_a, q_a;
@@ -30,14 +30,6 @@ wire [15:0] mem_addr_a; //output of LSctrl mux
 // wires for jump
 wire pc_load;
 wire [15:0] tgt_addr;
-
-
-
-//0 since b unused
-assign data_b = 0;
-assign addr_b = 0;
-assign we_b = 0;
-
 
 
 //program counter
@@ -58,7 +50,6 @@ assign data_a = rdataA;
 assign we_a = mem_we;
 assign tgt_addr = rdataB;
 
-
 // Add a flag register with clock and reset
 always @(posedge clk or negedge reset) begin
     if (!reset)
@@ -67,8 +58,13 @@ always @(posedge clk or negedge reset) begin
         flags_reg <= flags_next;
 end
 
-
-
+/* //DEBUG PRINT
+always @(posedge clk) begin
+    if (pc_en) begin  // When instruction completes
+        $display("Time=%0t S2: op=%b, rdest=%d, rsrc=%d, rdataA=%h, rdataB=%h", 
+                 $time, op, rdest, rsrc, rdataA, rdataB);
+    end
+end */
 
 //only port a used for now
 true_dual_port_ram_single_clock my_ram
@@ -110,13 +106,14 @@ control_and_decoder my_control_decode(
 	.op(op),
 	.rsrc(rsrc),
 	.rdest(rdest),
-	.imm8(imm8),        
+	.imm(imm),        
    .reg_en(reg_en),
 	.disp(disp),
 	.LS_ctrl(LS_ctrl),
 	.mem_we(mem_we),
 	
-	.alu_mux_ctrl(alu_mux_ctrl) //added	
+	.alu_mux_ctrl(alu_mux_ctrl), //added	
+	.pc_load(pc_load)
 );
 
 instruction_register my_ir
@@ -141,7 +138,7 @@ twoToOneMux LSmux
 twoToOneMux immMux 
 (
 	.a(rdataB),
-	.b(imm8), //CHECK: signed or zero extend?
+	.b(imm), //CHECK: signed or zero extend?
 	.sel(imm_en),
 	.y(dataB)
 );
@@ -174,6 +171,17 @@ alu my_alu
 	.Opcode(op), 
 	.cin(flags_reg[3]),
 	.Flags(flags_next)
+);
+
+// writing the state of the PS/2 spacebar
+space_to_memory ps2_io (
+    .clk     (clk),       
+    .n_reset (reset),     
+    .PS2_CLK (PS2_CLK),
+    .PS2_DAT (PS2_DAT),
+    .addr_b  (addr_b),
+    .data_b  (data_b),
+    .we_b    (we_b)
 );
 
 assign out = aluOut;
