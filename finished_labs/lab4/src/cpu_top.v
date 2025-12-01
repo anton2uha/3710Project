@@ -32,9 +32,9 @@ wire pc_load;
 wire [15:0] tgt_addr;
 
 //0 since b unused
-assign data_b = 0;
-assign addr_b = 0;
-assign we_b = 0;
+//assign data_b = 0;
+//assign addr_b = 0;
+//assign we_b = 0;
 
 //program counter
 wire [15:0] pc;
@@ -177,6 +177,17 @@ alu my_alu
 	.Flags(flags_next)
 );
 
+// writing the state of the PS/2 spacebar
+space_to_memory ps2_io (
+    .clk     (clk),       
+    .n_reset (reset),     
+    .PS2_CLK (PS2_CLK),
+    .PS2_DAT (PS2_DAT),
+    .addr_b  (addr_b),
+    .data_b  (data_b),
+    .we_b    (we_b)
+);
+	
 assign out = aluOut;
 
 endmodule
