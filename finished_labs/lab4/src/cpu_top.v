@@ -168,6 +168,7 @@ regfile my_regs
 	.regEnable(reg_en),
 	.raddrA(rdest),
 	.raddrB(rsrc),
+	.space_is_down(space_is_down),
 	.rdataA(rdataA),
 	.rdataB(rdataB)
 );
