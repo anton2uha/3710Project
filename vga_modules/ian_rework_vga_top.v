@@ -61,17 +61,6 @@ module ian_rework_vga_top #(
     reg [9:0] cactus_x_reg;
     reg [9:0] man_y_reg;
 
-<<<<<<< Updated upstream
-    // Simple loader to pull two words during vertical blank.
-    // Uses one-cycle issue, one-cycle capture; ram_addr_b is driven here while loading.
-    reg loading;
-    reg [1:0] load_phase; // 0=idle, 1=issue addr, 2=capture
-    reg [1:0] load_index; // 0=cactus_x, 1=man_y
-
-    wire vblank_start = (hcount == 10'd0) && (vcount == 10'd480); // start of vertical blank for 640x480
-
-    always @(posedge pix_clk) begin
-=======
     
     wire vblank_start = (hcount == 10'd0) && (vcount == 10'd480); // start of vertical blank for 640x480
     // State encoding
@@ -90,7 +79,6 @@ module ian_rework_vga_top #(
     reg [15:0] man_y_reg;
     // Next state logic for loading positions
     always @(posedge sys_clk or posedge reset) begin
->>>>>>> Stashed changes
         if (reset) begin
             state       <= S_IDLE;
         end else begin
