@@ -61,6 +61,7 @@ module ian_rework_vga_top #(
     reg [9:0] cactus_x_reg;
     reg [9:0] man_y_reg;
 
+<<<<<<< Updated upstream
     // Simple loader to pull two words during vertical blank.
     // Uses one-cycle issue, one-cycle capture; ram_addr_b is driven here while loading.
     reg loading;
@@ -70,43 +71,74 @@ module ian_rework_vga_top #(
     wire vblank_start = (hcount == 10'd0) && (vcount == 10'd480); // start of vertical blank for 640x480
 
     always @(posedge pix_clk) begin
+=======
+    
+    wire vblank_start = (hcount == 10'd0) && (vcount == 10'd480); // start of vertical blank for 640x480
+    // State encoding
+    localparam S_IDLE       = 2'd0;
+    localparam S_ISSUE_ADDR = 2'd1;   // issue address to RAM
+    localparam S_CAPTURE    = 2'd2;   // capture RAM data
+
+    // Reg's for FSM
+    reg [1:0] state;       // current state
+
+    // reg       loading;
+    reg [1:0] load_index;  // which position word is being loaded
+    // reg [1:0] load_phase;  // will be driven by combinational "output" block
+
+    reg [15:0] cactus_x_reg;
+    reg [15:0] man_y_reg;
+    // Next state logic for loading positions
+    always @(posedge sys_clk or posedge reset) begin
+>>>>>>> Stashed changes
         if (reset) begin
-            loading      <= 1'b0;
-            load_phase   <= 2'd0;
-            load_index   <= 2'd0;
-            cactus_x_reg <= 10'd0;
-            man_y_reg    <= 10'd0;
-        end else if (vblank_start) begin
-            // Kick off the two-word burst at vblank start
-            loading      <= 1'b1;
-            load_phase   <= 2'd1; // issue first address
-            load_index   <= 2'd0;
-        end else if (loading) begin
-            case (load_phase)
-                2'd1: begin
-                    // Issue address for current word (RAM drive happens in address block)
-                    load_phase      <= 2'd2; // next cycle will capture
-                end
-                2'd2: begin
-                    // Capture returned data from RAM after one-cycle latency (ram_q_b corresponds to POS_BASE + load_index issued last cycle)
-                    if (load_index == 2'd0)
-                        cactus_x_reg <= ram_q_b[9:0];
-                    else
-                        man_y_reg <= ram_q_b[9:0];
-                    // Move to next word or finish
-                    if (load_index == 2'd1) begin
-                        loading    <= 1'b0; // done with both words
-                        load_phase <= 2'd0;
-                    end else begin
-                        load_index <= load_index + 1'b1;
-                        load_phase <= 2'd1; // issue next address
+            state       <= S_IDLE;
+        end else begin
+            case (state)
+                S_IDLE: begin
+                    // if vblank start, begin loading positions
+                    if (vblank_start) begin
+                        state <= S_ISSUE_ADDR;
+                    end
+                    // else remain in idle
+                    else begin
+                        state <= S_IDLE;
                     end
                 end
-                default: begin
-                    load_phase      <= 2'd0;
+                S_ISSUE_ADDR: begin
+                    state <= S_CAPTURE;
                 end
-            endcase
+                S_CAPTURE: begin
+                    if (load_index == 2'd1) begin
+                        state <= S_IDLE;
+                    end else begin
+                        state <= S_ISSUE_ADDR;
+                    end
+                end
+                default: state <= S_IDLE;
         end
+    end
+
+    // Output logic for loading positions
+    always @(*) begin
+        load_index  = 2'd0;
+        case (state)
+            S_IDLE: begin
+                load_index  = 2'd0;
+            end
+            S_ISSUE_ADDR: begin
+                load_index  = load_index; // keep current index
+                ram_addr_b = POS_BASE + load_index; // RAM read for positions
+            end
+            S_CAPTURE: begin
+                cactus_x_reg = (load_index == 2'd0) ? ram_q_b : cactus_x_reg;
+                man_y_reg = (load_index == 2'd1) ? ram_q_b : man_y_reg;
+                load_index  = load_index + 2'd1; // increment index
+            end
+            default: begin
+                load_index  = 2'd0;
+            end
+        endcase
     end
 
     // Sprite helpers
