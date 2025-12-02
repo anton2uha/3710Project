@@ -2,6 +2,8 @@
 module cpu_top (
 	input clk,
 	input reset,
+	inout  wire PS2_CLK,    
+    inout  wire PS2_DAT,  
 	output [15:0] out // output of the ALU to show on 7 seg on fpga.
 );
 
@@ -49,6 +51,9 @@ wire [15:0] dataB; //wire from imm mux to port B of ALU
 wire [15:0] aluOut;
 reg [4:0] flags_reg;   // Stored flags
 wire [4:0] flags_next; // New flags from ALU
+
+wire space_is_down;
+wire space_pressed_pulse;
 
 assign data_a = rdataA;
 assign we_a = mem_we;
@@ -163,6 +168,7 @@ regfile my_regs
 	.regEnable(reg_en),
 	.raddrA(rdest),
 	.raddrB(rsrc),
+	.space_is_down(space_is_down),
 	.rdataA(rdataA),
 	.rdataB(rdataB)
 );
@@ -177,15 +183,13 @@ alu my_alu
 	.Flags(flags_next)
 );
 
-// writing the state of the PS/2 spacebar
-space_to_memory ps2_io (
-    .clk     (clk),       
-    .n_reset (reset),     
-    .PS2_CLK (PS2_CLK),
-    .PS2_DAT (PS2_DAT),
-    .addr_b  (addr_b),
-    .data_b  (data_b),
-    .we_b    (we_b)
+space_key_detector my_space (
+    .CLOCK_50          (clk),
+    .n_reset           (reset),
+    .PS2_CLK           (PS2_CLK),
+    .PS2_DAT           (PS2_DAT),
+    .space_pressed_pulse(space_pressed_pulse), 
+    .space_is_down     (space_is_down)
 );
 	
 assign out = aluOut;

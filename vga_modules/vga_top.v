@@ -1,5 +1,6 @@
 module vga_top(
     input  wire        sys_clk,     // 50 MHz
+	 input wire jump_btn,
     output wire        VGA_HS,
     output wire        VGA_VS,
     output wire        VGA_CLK,
@@ -9,14 +10,20 @@ module vga_top(
     output wire [7:0]  VGA_G,
     output wire [7:0]  VGA_B
 );
+
     wire bright;
     wire pix_clk;
     wire [9:0] hcount, vcount;
 	 wire [15:0] sprite_data;
     wire [11:0] sprite_addr;
+	 reg jump_active;
+	 reg [19:0] jump_timer; // adjust width as needed
+	 reg [9:0] man_y_offset; // signed via two’s complement if needed, but for small values 10 bits is fine
 
 	 localparam MAN_BASE_ADDR    = 13'd0;
 	 localparam CACTUS_BASE_ADDR = 13'd4096;
+	 localparam JUMP_HEIGHT = 10'd100; // pixels up
+	 localparam JUMP_DURATION = 20'd500000; // how long jump lasts (tune this)
 
     vga_control vc (
         .clk(sys_clk),
@@ -66,7 +73,8 @@ module vga_top(
 		 .vga_r(man_r),
 		 .vga_g(man_g),
 		 .vga_b(man_b),
-		 .pixel_opaque(man_opaque)
+		 .pixel_opaque(man_opaque),
+		 .y_offset(man_y_offset)
 	);
 
 	// cactus sprite
@@ -116,6 +124,30 @@ module vga_top(
 			  vga_b_reg = 8'h88;
 		 end
 	end
+	
+	always @(posedge pix_clk) begin
+		if (!jump_active) begin
+		// idle: waiting for button press
+		man_y_offset <= 10'd0;
+		jump_timer <= 20'd0;
+		 if (jump_btn) begin
+			  jump_active   <= 1'b1;
+			  jump_timer    <= JUMP_DURATION;
+			  man_y_offset  <= -JUMP_HEIGHT; // goes up; wrap is fine for small value
+		 end
+		end else begin
+			 // jump active
+			 if (jump_timer > 0) begin
+				  jump_timer <= jump_timer - 1'b1;
+				  man_y_offset <= -JUMP_HEIGHT;
+			 end else begin
+				  // jump finished, return to base Y
+				  jump_active   <= 1'b0;
+				  man_y_offset  <= 10'd0;
+			 end
+		end
+
+end
 
 
 	 
