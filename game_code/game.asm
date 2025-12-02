@@ -102,6 +102,7 @@ SKIP_JUMP:
     ; Apply velocity to position
     ADD R2, R1            ; player_y += velocity
     
+    ; ------ This might be unecessary? ------
     ; --- 4. GROUND COLLISION ---
     ; Check if player is below ground
     CMP R8, R1            ; Compare ground with player_y
@@ -166,6 +167,7 @@ CHECK_POSITIVE_X:
     
     ; COLLISION DETECTED - Game Over
     MOVI 1, R5            ; Set game state to game over
+    ; branch to the end? (skip no collision routine?)
 
 NO_COLLISION:
 

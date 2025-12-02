@@ -12,6 +12,10 @@ module vga_top(
     wire bright;
     wire pix_clk;
     wire [9:0] hcount, vcount;
+	 
+	 // Sprite ROM signals
+    wire [15:0] sprite_data;  // 16-bit RGB565 data from ROM
+    wire [11:0] sprite_addr;   // Address into sprite ROM
 
     vga_control vc (
         .clk(sys_clk),
@@ -22,9 +26,8 @@ module vga_top(
         .hcount(hcount),
         .vcount(vcount)
     );
-    // drive the external pixel clock
-    assign VGA_CLK     = pix_clk;
 
+    assign VGA_CLK     = pix_clk;
     assign VGA_BLANK_N = bright;
     assign VGA_SYNC_N  = 1'b0;
 
@@ -37,33 +40,48 @@ module vga_top(
 //        .vga_b(VGA_B)
 //    );
 	 
-	 bitgen_rgb_bars bars (
-	  .bright(bright),
-      .hcount(hcount),
-      .vcount(vcount),
-      .vga_r(VGA_R),
-      .vga_g(VGA_G),
-      .vga_b(VGA_B)
-	 );
+//	 bitgen_rgb_bars bars (
+//		.bright(bright),
+//      .hcount(hcount),
+//      .vcount(vcount),
+//      .vga_r(VGA_R),
+//      .vga_g(VGA_G),
+//      .vga_b(VGA_B)
+//	 );
+	 
+// Sprite ROM - stores the glyph data
+    sprite_rom #(
+        .DATA_WIDTH(16),
+        .ADDR_WIDTH(12)
+    ) srom (
+        .clk(pix_clk),
+        .addr(sprite_addr),
+        .data_out(sprite_data)
+    );
 
-     bitgen_background bg (
+    // Sprite renderer
+//    bitgen_sprite sprite_gen (
+//        .bright(bright),
+//        .hcount(hcount),
+//        .vcount(vcount),
+//        .sprite_data(sprite_data),
+//        .sprite_addr(sprite_addr),
+//        .vga_r(VGA_R),
+//        .vga_g(VGA_G),
+//        .vga_b(VGA_B)
+//    );
+//	 
+	 // Sprite renderer (animated)
+    bitgen_animated_sprite sprite_gen (
+        .pix_clk(pix_clk),
         .bright(bright),
         .hcount(hcount),
         .vcount(vcount),
+        .sprite_data(sprite_data),
+        .sprite_addr(sprite_addr),
         .vga_r(VGA_R),
         .vga_g(VGA_G),
         .vga_b(VGA_B)
     );
-
-    bitgen_game_character gc (
-        .bright(bright),
-        .hcount(hcount),
-        .vcount(vcount),
-        .vga_r(VGA_R),
-        .vga_g(VGA_G),
-        .vga_b(VGA_B)
-    );
-
-    
-
+	 
 endmodule
