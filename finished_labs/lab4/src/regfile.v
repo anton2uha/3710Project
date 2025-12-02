@@ -17,7 +17,7 @@ module regfile #(
     input  [15:0] regEnable,    // enables for each register
     input  [3:0]  raddrA,       // read address A, selects which register to output.
     input  [3:0]  raddrB,	     // read address B
-	 input			space,
+	input		  space_is_down,
     output [15:0] rdataA,       // read data A
     output [15:0] rdataB        // read data B
 );
@@ -48,7 +48,7 @@ module regfile #(
 			end
 			else begin
 				if(i == 13) begin
-					r[i] <= {15'b0, space};
+					r[i] <= {15'b0, space_is_down};
 				end else if(regEnable[i]==1'b1) begin
 					r[i] <= wdata;
 				end
