@@ -20,7 +20,6 @@ module ian_rework_vga_top #(
     input  wire                  reset,
     // External memory interface (hook to cpu_top RAM port B)
     output reg  [ADDR_WIDTH-1:0] ram_addr_b,
-    output wire [15:0]           ram_dout_b,
     output wire                  ram_we_b,
     input  wire [15:0]           ram_q_b,
     // VGA pins
@@ -55,11 +54,10 @@ module ian_rework_vga_top #(
 
     // External RAM is read-only here
     assign ram_we_b   = 1'b0;
-    assign ram_dout_b = 16'h0000;
 
     // Cached positions (loaded from RAM during vblank)
-    reg [9:0] cactus_x_reg;
-    reg [9:0] man_y_reg;
+    reg [15:0] cactus_x_reg;
+    reg [15:0] man_y_reg;
 
     // Simple loader to pull two words during vertical blank.
     // Uses one-cycle issue, one-cycle capture; ram_addr_b is driven here while loading.
@@ -68,7 +66,7 @@ module ian_rework_vga_top #(
     reg [1:0] load_index; // 0=cactus_x, 1=man_y
 
     wire vblank_start = (hcount == 10'd0) && (vcount == 10'd480); // start of vertical blank for 640x480
-
+    
     always @(posedge pix_clk) begin
         if (reset) begin
             loading      <= 1'b0;
