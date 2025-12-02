@@ -65,45 +65,71 @@ module ian_rework_vga_top #(
     reg [1:0] load_phase; // 0=idle, 1=issue addr, 2=capture
     reg [1:0] load_index; // 0=cactus_x, 1=man_y
 
+    // Next-state signals for loader FSM
+    reg loading_next;
+    reg [1:0] load_phase_next;
+    reg [1:0] load_index_next;
+    reg [15:0] cactus_x_next;
+    reg [15:0] man_y_next;
+
     wire vblank_start = (hcount == 10'd0) && (vcount == 10'd480); // start of vertical blank for 640x480
-    
+
+    // Combinational block: compute next state for loader FSM
+    always @(*) begin
+        // Default: hold current values
+        loading_next    = loading;
+        load_phase_next = load_phase;
+        load_index_next = load_index;
+        cactus_x_next   = cactus_x_reg;
+        man_y_next      = man_y_reg;
+
+        if (vblank_start) begin
+            // Kick off the two-word burst at vblank start
+            loading_next    = 1'b1;
+            load_phase_next = 2'd1; // issue first address
+            load_index_next = 2'd0;
+        end else if (loading) begin
+            case (load_phase)
+                2'd1: begin
+                    // Issue address for current word (RAM drive happens in address block)
+                    load_phase_next = 2'd2; // next cycle will capture
+                end
+                2'd2: begin
+                    // Capture returned data from RAM after one-cycle latency
+                    if (load_index == 2'd0)
+                        cactus_x_next = ram_q_b[9:0];
+                    else
+                        man_y_next = ram_q_b[9:0];
+                    // Move to next word or finish
+                    if (load_index == 2'd1) begin
+                        loading_next    = 1'b0; // done with both words
+                        load_phase_next = 2'd0;
+                    end else begin
+                        load_index_next = load_index + 1'b1;
+                        load_phase_next = 2'd1; // issue next address
+                    end
+                end
+                default: begin
+                    load_phase_next = 2'd0;
+                end
+            endcase
+        end
+    end
+
+    // Sequential block: register next state on clock edge
     always @(posedge pix_clk) begin
         if (reset) begin
             loading      <= 1'b0;
             load_phase   <= 2'd0;
             load_index   <= 2'd0;
-            cactus_x_reg <= 10'd0;
-            man_y_reg    <= 10'd0;
-        end else if (vblank_start) begin
-            // Kick off the two-word burst at vblank start
-            loading      <= 1'b1;
-            load_phase   <= 2'd1; // issue first address
-            load_index   <= 2'd0;
-        end else if (loading) begin
-            case (load_phase)
-                2'd1: begin
-                    // Issue address for current word (RAM drive happens in address block)
-                    load_phase      <= 2'd2; // next cycle will capture
-                end
-                2'd2: begin
-                    // Capture returned data from RAM after one-cycle latency (ram_q_b corresponds to POS_BASE + load_index issued last cycle)
-                    if (load_index == 2'd0)
-                        cactus_x_reg <= ram_q_b[9:0];
-                    else
-                        man_y_reg <= ram_q_b[9:0];
-                    // Move to next word or finish
-                    if (load_index == 2'd1) begin
-                        loading    <= 1'b0; // done with both words
-                        load_phase <= 2'd0;
-                    end else begin
-                        load_index <= load_index + 1'b1;
-                        load_phase <= 2'd1; // issue next address
-                    end
-                end
-                default: begin
-                    load_phase      <= 2'd0;
-                end
-            endcase
+            cactus_x_reg <= 16'd0;
+            man_y_reg    <= 16'd0;
+        end else begin
+            loading      <= loading_next;
+            load_phase   <= load_phase_next;
+            load_index   <= load_index_next;
+            cactus_x_reg <= cactus_x_next;
+            man_y_reg    <= man_y_next;
         end
     end
 
