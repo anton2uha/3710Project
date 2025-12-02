@@ -17,7 +17,7 @@ module space_to_memory (
     wire space_is_down;
 
     // MOVI 0x03 => 0x0003
-    localparam [15:0] INPUT_ADDR = 16'h0003;
+    localparam [15:0] INPUT_ADDR = 16'h00E0;
 
     // PS2 space key detector
     space_key_detector skd (
