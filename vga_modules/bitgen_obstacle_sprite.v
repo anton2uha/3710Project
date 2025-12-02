@@ -25,7 +25,7 @@ module bitgen_obstacle_sprite #(
     localparam SCALED_HEIGHT  = SPRITE_HEIGHT * SCALE;
 
     // Fixed Y in center
-    localparam [9:0] OBSTACLE_Y = (SCREEN_HEIGHT - SCALED_HEIGHT) / 2;
+    localparam [9:0] OBSTACLE_Y = 200;
 
     localparam BG_R = 8'h88;
     localparam BG_G = 8'hCC;
