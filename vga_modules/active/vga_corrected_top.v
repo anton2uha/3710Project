@@ -32,8 +32,8 @@ module vga_corrected_top(
     assign VGA_BLANK_N = bright;
     assign VGA_SYNC_N  = 1'b0;
 
-    wire [9:0] obstacle_x;
-    wire [9:0] player_y;
+    wire [15:0] obstacle_x;
+    wire [15:0] player_y;
 
 	 // TEMPORARY: LATER CHANGE TO MEMORY MAPPED
     assign obstacle_x = 10'd400;
@@ -97,6 +97,75 @@ module vga_corrected_top(
     assign VGA_R = vga_r_reg;
     assign VGA_G = vga_g_reg;
     assign VGA_B = vga_b_reg;
+
+    
+    // Start of loading position logic
+    wire vblank_start = (hcount == 10'd0) && (vcount == 10'd480); // start of vertical blank for 640x480
+    // State encoding
+    localparam S_IDLE       = 2'd0;
+    localparam S_ISSUE_ADDR = 2'd1;   // issue address to RAM
+    localparam S_CAPTURE    = 2'd2;   // capture RAM data
+
+    // Reg's for FSM
+    reg [1:0] state;       // current state
+
+    // reg       loading;
+    reg [1:0] load_index;  // which position word is being loaded
+    // reg [1:0] load_phase;  // will be driven by combinational "output" block
+
+    // reg [15:0] cactus_x_reg;
+    // reg [15:0] man_y_reg;
+    // Next state logic for loading positions
+    always @(posedge sys_clk or posedge reset) begin
+        if (reset) begin
+            state       <= S_IDLE;
+        end else begin
+            case (state)
+                S_IDLE: begin
+                    // if vblank start, begin loading positions
+                    if (vblank_start) begin
+                        state <= S_ISSUE_ADDR;
+                    end
+                    // else remain in idle
+                    else begin
+                        state <= S_IDLE;
+                    end
+                end
+                S_ISSUE_ADDR: begin
+                    state <= S_CAPTURE;
+                end
+                S_CAPTURE: begin
+                    if (load_index == 2'd1) begin
+                        state <= S_IDLE;
+                    end else begin
+                        state <= S_ISSUE_ADDR;
+                    end
+                end
+                default: state <= S_IDLE;
+        end
+    end
+
+    // Output logic for loading positions
+    always @(*) begin
+        load_index  = 2'd0;
+        case (state)
+            S_IDLE: begin
+                load_index  = 2'd0;
+            end
+            S_ISSUE_ADDR: begin
+                load_index  = load_index; // keep current index
+                ram_addr_b = POS_BASE + load_index; // RAM read for positions
+            end
+            S_CAPTURE: begin
+                obstacle_x = (load_index == 2'd0) ? ram_q_b : obstacle_x;
+                player_y = (load_index == 2'd1) ? ram_q_b : player_y;
+                load_index  = load_index + 2'd1; // increment index
+            end
+            default: begin
+                load_index  = 2'd0;
+            end
+        endcase
+    end
 
     always @(*) begin
         if (!bright) begin
