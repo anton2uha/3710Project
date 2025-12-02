@@ -11,12 +11,13 @@ module bitgen_animated_sprite #(
     input  wire        bright,
     input  wire [9:0]  hcount,
     input  wire [9:0]  vcount,
-    input  wire [15:0] sprite_data,
+    input  wire [15:0] sprite_data, 
     output reg  [12:0] sprite_addr,
     output reg  [7:0]  vga_r,
     output reg  [7:0]  vga_g,
     output reg  [7:0]  vga_b,
-	 output reg pixel_opaque
+	 output reg pixel_opaque,
+	 input wire [9:0] y_offset
 );
     
     localparam SCALED_WIDTH = SPRITE_WIDTH * SCALE;
@@ -25,7 +26,7 @@ module bitgen_animated_sprite #(
     
     parameter SCREEN_WIDTH = 640;
     parameter SCREEN_HEIGHT = 480;
-	 parameter SPRITE_Y = (SCREEN_HEIGHT - SCALED_HEIGHT) / 2;
+	 parameter BASE_Y = (SCREEN_HEIGHT - SCALED_HEIGHT) / 2;
     
     parameter BG_R = 8'h88;
     parameter BG_G = 8'hcc;
@@ -76,15 +77,17 @@ module bitgen_animated_sprite #(
                 current_frame <= current_frame + 1;
         end
     end
+	 
+	 wire [9:0] sprite_y_base = BASE_Y - y_offset;
     
     wire in_sprite_x = (hcount >= sprite_x_pos) && 
                        (hcount < sprite_x_pos + SCALED_WIDTH);
-    wire in_sprite_y = (vcount >= SPRITE_Y) && 
-                       (vcount < SPRITE_Y + SCALED_HEIGHT);
+    wire in_sprite_y = (vcount >= sprite_y_base) && 
+                       (vcount < sprite_y_base + SCALED_HEIGHT);
     wire in_sprite = in_sprite_x && in_sprite_y;
     
     wire [9:0] sprite_x_scaled = hcount - sprite_x_pos;
-    wire [9:0] sprite_y_scaled = vcount - SPRITE_Y;
+    wire [9:0] sprite_y_scaled = vcount - sprite_y_base;
     
     wire [9:0] sprite_x = (SPRITE_WIDTH - 1) - (sprite_x_scaled / SCALE);
     wire [9:0] sprite_y = sprite_y_scaled / SCALE;
