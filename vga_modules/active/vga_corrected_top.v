@@ -1,6 +1,5 @@
 module vga_corrected_top(
     input  wire        sys_clk,     // 50 MHz
-    input  wire        jump_btn,    // likely unused now
     output wire        VGA_HS,
     output wire        VGA_VS,
     output wire        VGA_CLK,
@@ -81,16 +80,17 @@ module vga_corrected_top(
         .obstacle_x(obstacle_x)
     );
 
-    sprite_rom_dp #(
-        .DATA_WIDTH(16),
-        .ADDR_WIDTH(13)
-    ) srom (
-        .clk(pix_clk),
-        .addr_a(player_addr),
-        .addr_b(obstacle_addr),
-        .q_a(player_data),
-        .q_b(obstacle_data)
-    );
+    // We need to get rid of this. 
+    // sprite_rom_dp #(
+    //     .DATA_WIDTH(16),
+    //     .ADDR_WIDTH(13)
+    // ) srom (
+    //     .clk(pix_clk),
+    //     .addr_a(player_addr),
+    //     .addr_b(obstacle_addr),
+    //     .q_a(player_data),
+    //     .q_b(obstacle_data)
+    // );
 
     reg [7:0] vga_r_reg, vga_g_reg, vga_b_reg;
 
