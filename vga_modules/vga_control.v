@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+// Used for defining the monitor, back yard, front yard, hsync, vsync, and pixel clock
 module vga_control
 (
     input  wire clk,
