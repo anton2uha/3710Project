@@ -15,7 +15,7 @@ module true_dual_port_ram_single_clock
 
 	// load memory using $readmemh
 	initial begin
-		$readmemh("C:/Users/toaoi/Documents/Repos/school/ECE3710/lab4/init_mem_branch_and_jump.txt", ram);
+        $readmemh("C:/Users/IT Admin/Documents/3710_SpritetoHexConverter/Sprites/Combined_manWalking+Cactus.hex", ram);
 	end
 
 	// Port A 
