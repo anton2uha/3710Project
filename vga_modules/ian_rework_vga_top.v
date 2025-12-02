@@ -97,9 +97,9 @@ module ian_rework_vga_top #(
                 2'd2: begin
                     // Capture returned data from RAM after one-cycle latency
                     if (load_index == 2'd0)
-                        cactus_x_next = ram_q_b[9:0];
+                        cactus_x_next = {6'b0, ram_q_b[9:0]};
                     else
-                        man_y_next = ram_q_b[9:0];
+                        man_y_next = {6'b0, ram_q_b[9:0]};
                     // Move to next word or finish
                     if (load_index == 2'd1) begin
                         loading_next    = 1'b0; // done with both words
