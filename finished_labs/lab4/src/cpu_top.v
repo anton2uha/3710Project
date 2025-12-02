@@ -3,7 +3,15 @@ module cpu_top (
 	input clk,
 	input reset,
 	inout  wire PS2_CLK,    
-    inout  wire PS2_DAT,  
+    inout  wire PS2_DAT,
+    output wire VGA_HS,
+    output wire VGA_VS,
+    output wire VGA_CLK,
+    output wire VGA_BLANK_N,
+    output wire VGA_SYNC_N,
+    output wire [7:0] VGA_R,
+    output wire [7:0] VGA_G,
+    output wire [7:0] VGA_B,
 	output [15:0] out // output of the ALU to show on 7 seg on fpga.
 );
 
@@ -25,6 +33,8 @@ wire we_a;
 
 wire [15:0] data_b, addr_b, q_b;
 wire we_b;
+wire [15:0] vga_addr_b;
+wire vga_we_b;
 
 wire LSctrl;
 wire [15:0] mem_addr_a; //output of LSctrl mux
@@ -32,11 +42,6 @@ wire [15:0] mem_addr_a; //output of LSctrl mux
 // wires for jump
 wire pc_load;
 wire [15:0] tgt_addr;
-
-//0 since b unused
-//assign data_b = 0;
-//assign addr_b = 0;
-//assign we_b = 0;
 
 //program counter
 wire [15:0] pc;
@@ -58,6 +63,9 @@ wire space_pressed_pulse;
 assign data_a = rdataA;
 assign we_a = mem_we;
 assign tgt_addr = rdataB;
+assign data_b = 16'd0; // VGA uses port B read-only
+assign addr_b = vga_addr_b;
+assign we_b   = vga_we_b;
 
 // Add a flag register with clock and reset
 always @(posedge clk or negedge reset) begin
@@ -75,7 +83,7 @@ always @(posedge clk) begin
     end
 end */
 
-//only port a used for now
+// Port A: CPU. Port B: VGA (read-only fetches).
 true_dual_port_ram_single_clock my_ram
 (
 	.data_a(data_a),
@@ -190,6 +198,21 @@ space_key_detector my_space (
     .PS2_DAT           (PS2_DAT),
     .space_pressed_pulse(space_pressed_pulse), 
     .space_is_down     (space_is_down)
+);
+
+vga_corrected_top my_vga (
+    .sys_clk(clk),
+    .ram_addr_b(vga_addr_b),
+    .ram_we_b(vga_we_b),
+    .ram_q_b(q_b),
+    .VGA_HS(VGA_HS),
+    .VGA_VS(VGA_VS),
+    .VGA_CLK(VGA_CLK),
+    .VGA_BLANK_N(VGA_BLANK_N),
+    .VGA_SYNC_N(VGA_SYNC_N),
+    .VGA_R(VGA_R),
+    .VGA_G(VGA_G),
+    .VGA_B(VGA_B)
 );
 	
 assign out = aluOut;
