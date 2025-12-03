@@ -43,7 +43,7 @@ module tb_cpu_top_space;
         .VGA_R(VGA_R),
         .VGA_G(VGA_G),
         .VGA_B(VGA_B),
-        .space_led(space_led)
+        .space_is_down(space_led)
     );
 
     // PS/2 timing: ~10 kHz clock (100 us period)

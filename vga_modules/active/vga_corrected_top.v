@@ -22,6 +22,7 @@ module vga_corrected_top(
     localparam CACTUS_BASE_ADDR = 13'd4096;
 
     vga_control vc (
+        .reset(reset),
         .clk(sys_clk),
         .hsync(VGA_HS),
         .vsync(VGA_VS),
@@ -114,67 +115,146 @@ module vga_corrected_top(
     end
     wire vblank_start = vb_sync1 & ~vb_sync2; // rising edge, now in sys_clk domain
 
-
     // State encoding
     localparam S_IDLE       = 2'd0;
     localparam S_ISSUE_ADDR = 2'd1;   // issue address to RAM
     localparam S_CAPTURE    = 2'd2;   // capture RAM data
 
-    // Reg's for FSM
-    reg [1:0] state;       // current state
-    reg [1:0] load_index;  // which position word is being loaded
-    // Next state logic for loading positions
+    reg [1:0] state, state_next;
+    reg [1:0] load_index, load_index_next;
+
+    reg [15:0] obstacle_x_next;
+    reg [15:0] player_y_next;
+    reg [15:0] ram_addr_b_next;
+
+    // Sequential: update registers
     always @(posedge sys_clk or negedge reset) begin
         if (!reset) begin
-            state <= S_IDLE;
+            state      <= S_IDLE;
+            load_index <= 2'd0;
+            obstacle_x <= 16'd0;
+            player_y   <= 16'd0;
+            ram_addr_b <= POS_BASE;
         end else begin
-            case (state)
-                S_IDLE: begin
-                    // if vblank start, begin loading positions
-                    if (vblank_start) begin
-                        state <= S_ISSUE_ADDR;
-                    end
-                    // else remain in idle
-                    else begin
-                        state <= S_IDLE;
-                    end
-                end
-                S_ISSUE_ADDR: begin
-                    state <= S_CAPTURE;
-                end
-                S_CAPTURE: begin
-                    if (load_index == 2'd1) begin
-                        state <= S_IDLE;
-                    end else begin
-                        state <= S_ISSUE_ADDR;
-                    end
-                end
-                default: state <= S_IDLE;
-            endcase
-        end  
+            state      <= state_next;
+            load_index <= load_index_next;
+            obstacle_x <= obstacle_x_next;
+            player_y   <= player_y_next;
+            ram_addr_b <= ram_addr_b_next;
+        end
     end
 
-    // Output logic for loading positions
+    // Combinational: next-state and next-data logic
     always @(*) begin
-        load_index  = 2'd0;
+        // defaults: hold values
+        state_next       = state;
+        load_index_next  = load_index;
+        obstacle_x_next  = obstacle_x;
+        player_y_next    = player_y;
+        ram_addr_b_next  = ram_addr_b;
+
         case (state)
             S_IDLE: begin
-                load_index  = 2'd0;
+                if (vblank_start) begin
+                    load_index_next = 2'd0;
+                    ram_addr_b_next = POS_BASE;   // first word
+                    state_next      = S_ISSUE_ADDR;
+                end
             end
+
             S_ISSUE_ADDR: begin
-                load_index  = load_index; // keep current index
-                ram_addr_b = POS_BASE + load_index; // RAM read for positions
+                // address already set; just move to capture on next cycle
+                state_next = S_CAPTURE;
             end
+
             S_CAPTURE: begin
-                obstacle_x = (load_index == 2'd0) ? ram_q_b : obstacle_x;
-                player_y = (load_index == 2'd1) ? ram_q_b : player_y;
-                load_index  = load_index + 2'd1; // increment index
+                // capture current RAM word based on index
+                if (load_index == 2'd0) begin
+                    player_y_next = ram_q_b;
+                end else if (load_index == 2'd1) begin
+                    obstacle_x_next = ram_q_b;
+                end
+
+                // decide whether to keep loading or finish
+                if (load_index == 2'd1) begin
+                    // loaded both words: POS_BASE (x), POS_BASE+1 (y)
+                    state_next      = S_IDLE;
+                end else begin
+                    // increment index and issue next address
+                    load_index_next = load_index + 2'd1;
+                    ram_addr_b_next = POS_BASE + (load_index + 2'd1);
+                    state_next      = S_ISSUE_ADDR;
+                end
             end
+
             default: begin
-                load_index  = 2'd0;
+                state_next      = S_IDLE;
+                load_index_next = 2'd0;
             end
         endcase
     end
+
+
+    // // State encoding
+    // localparam S_IDLE       = 2'd0;
+    // localparam S_ISSUE_ADDR = 2'd1;   // issue address to RAM
+    // localparam S_CAPTURE    = 2'd2;   // capture RAM data
+
+    // // Reg's for FSM
+    // reg [1:0] state;       // current state
+    // reg [1:0] load_index;  // which position word is being loaded
+    // // Next state logic for loading positions
+    // always @(posedge sys_clk or negedge reset) begin
+    //     if (!reset) begin
+    //         state <= S_IDLE;
+    //     end else begin
+    //         case (state)
+    //             S_IDLE: begin
+    //                 // if vblank start, begin loading positions
+    //                 if (vblank_start) begin
+    //                     state <= S_ISSUE_ADDR;
+    //                 end
+    //                 // else remain in idle
+    //                 else begin
+    //                     state <= S_IDLE;
+    //                 end
+    //             end
+    //             S_ISSUE_ADDR: begin
+    //                 state <= S_CAPTURE;
+    //             end
+    //             S_CAPTURE: begin
+    //                 if (load_index == 2'd1) begin
+    //                     state <= S_IDLE;
+    //                 end else begin
+    //                     state <= S_ISSUE_ADDR;
+    //                 end
+    //             end
+    //             default: state <= S_IDLE;
+    //         endcase
+    //     end  
+    // end
+
+    // // Output logic for loading positions
+    // always @(*) begin
+    //     load_index  = 2'd0;
+    //     case (state)
+    //         S_IDLE: begin
+    //             load_index  = 2'd0;
+    //         end
+    //         S_ISSUE_ADDR: begin
+    //             load_index  = load_index; // keep current index
+    //             ram_addr_b = POS_BASE + load_index; // RAM read for positions
+    //         end
+    //         S_CAPTURE: begin
+    //             obstacle_x = (load_index == 2'd0) ? ram_q_b : obstacle_x;
+    //             player_y = (load_index == 2'd1) ? ram_q_b : player_y;
+    //             load_index  = load_index + 2'd1; // increment index
+    //         end
+    //         default: begin
+    //             load_index  = 2'd0;
+    //         end
+    //     endcase
+    // end
 
 // q: how does this work? How does each pixel know if it's a player pixel or obstacle pixel?
 // A: The pixel being drawn is determined by hcount and vcount. Each sprite module

@@ -125,7 +125,7 @@ class Assembler:
             if current_addr is None:
                 raise ValueError(f"Cannot calculate displacement for label {imm_str}")
             # Calculate displacement (relative to next instruction)
-            displacement = target_addr - (current_addr + 1)
+            displacement = target_addr - current_addr
             return displacement
         
         try:

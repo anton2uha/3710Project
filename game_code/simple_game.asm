@@ -16,7 +16,9 @@
 ; Obstacle wrap X: 608 (640 - 32 sprite width)
 
 INIT:
-    MOVI 0xC8, R1         ; player starts near ground
+    ; Move 0xC8 (200) into R1 for player_y start. Have to do 2 adds because MOVI is sign extended
+    MOVI 0x64, R1        ; 100
+    ADDI 0x64, R1        ; +100 = 200 = 0xC8
     MOVI 0x02, R3        ; build 0x0260 = 608
     LSHI 0x08, R3
     ADDI 0x60, R3
@@ -49,9 +51,10 @@ OBSTACLE_OK:
     STOR R2, R12
 
     ; Simple delay to slow movement a bit
-    MOVI 0xFF, R0
+    MOVI 0x7F, R0
 DELAY_LOOP:
     SUBI 1, R0
+    CMPI 0, R0
     BNE DELAY_LOOP
 
     BUC GAME_LOOP

@@ -12,7 +12,7 @@ module cpu_top (
     output wire [7:0] VGA_R,
     output wire [7:0] VGA_G,
     output wire [7:0] VGA_B,
-	output wire space_led
+	output wire space_is_down
 );
 
 //enable and control wires (from control FSM)
@@ -57,10 +57,10 @@ wire [15:0] aluOut;
 reg [4:0] flags_reg;   // Stored flags
 wire [4:0] flags_next; // New flags from ALU
 
-wire space_is_down;
+// wire space_is_down;
 wire space_pressed_pulse;
 
-assign space_led = space_is_down;
+// assign space_led = space_is_down;
 
 assign data_a = rdataA;
 assign we_a = mem_we;
