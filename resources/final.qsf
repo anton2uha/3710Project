@@ -29,7 +29,7 @@ set_location_assignment PIN_C10 -to VGA_SYNC_N
 set_location_assignment PIN_D11 -to VGA_VS
 set_location_assignment PIN_AF14 -to clk
 set_location_assignment PIN_AD7 -to PS2_CLK
-set_location_assignment PIN_AD9 -to PS2_DAT
+set_location_assignment PIN_AE7 -to PS2_DAT
 set_location_assignment PIN_AA14 -to reset
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_R[3]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to reset
