@@ -1,50 +1,26 @@
 ; ============================================================
 ; DINO RUNNER GAME - 16-bit Assembly
-; Simple jumping game similar to Chrome's T-Rex runner
 ; ============================================================
 
 ; ============================================================
-; MEMORY MAP (adjust these based on your VGA controller)
+; REGISTER ALLOCATION
 ; ============================================================
-; 0x0000 - 0x00FF : Program variables (RAM)
-; 0x0100+        : VGA display memory (memory-mapped)
-;
-; VGA Memory Layout (example - adjust to your design):
-;   PLAYER_DISPLAY_ADDR = 0x0100   ; Where VGA reads player Y
-;   OBSTACLE_DISPLAY_ADDR = 0x0101 ; Where VGA reads obstacle X
-;   SCORE_DISPLAY_ADDR = 0x0102    ; Where VGA reads score
-;   INPUT_ADDR = 0x0103            ; Where input button state is read
-
-; ============================================================
-; REGISTER ALLOCATION (Convention for this game)
-; ============================================================
-; R0  - Zero register / temp
+; R0  - vblank address (0xFFFE)
 ; R1  - Player Y position
 ; R2  - Player Y velocity
 ; R3  - Obstacle X position  
-; R4  - Score
+; R4  - Score / Zero register
 ; R5  - Game state (0 = running, 1 = game over)
 ; R6  - Temp / calculations
 ; R7  - Temp / calculations
-; R8  - Ground level constant
+; R8  - Ground level constant (200)
 ; R9  - Gravity constant
 ; R10 - Jump velocity constant
-; R11 - Screen width constant
+; R11 - Wrap X constant (608) / vblank value
 ; R12 - Memory address pointer
-; R13 - Input value
+; R13 - Input value (driven externally)
 ; R14 - Collision box size
 ; R15 - Temp / loop counter
-
-; ============================================================
-; GAME CONSTANTS (load these at startup)
-; ============================================================
-; GROUND_Y       = 200    ; Y position of ground (bottom of screen area)
-; GRAVITY        = 2      ; Downward acceleration per frame
-; JUMP_VELOCITY  = -20    ; Initial upward velocity when jumping (negative = up)
-; OBSTACLE_SPEED = 3      ; How fast obstacles move left
-; SCREEN_WIDTH   = 320    ; Or whatever your display width is
-; PLAYER_X       = 40     ; Player's fixed X position
-; COLLISION_BOX  = 10     ; Size for collision detection
 
 ; ============================================================
 ; PROGRAM START
@@ -52,17 +28,28 @@
 
 INIT:
     ; --- Load constants into registers ---
-    MOVI 200, R8          ; R8 = Ground level (Y=200)
+    ; Ground level = 200 (0xC8)
+    MOVI 0x64, R8         ; 100
+    ADDI 0x64, R8         ; +100 = 200
+    
     MOVI 2, R9            ; R9 = Gravity 
     MOVI -20, R10         ; R10 = Jump velocity (negative = upward)
-    MOVI 0xFF, R11        ; R11 = Screen width (255 for 8-bit, adjust as needed)
+    
+    ; Screen wrap X = 608 (0x0260) - matches working code
+    MOVI 0x02, R11
+    LSHI 0x08, R11
+    ADDI 0x60, R11        ; R11 = 608
+    
     MOVI 10, R14          ; R14 = Collision box size
+    MOVI 0, R4            ; R4 = 0 (for resets)
+    
+    ; vblank address = 0xFFFE
+    MOVI 0xFE, R0         ; R0 = 0xFFFE (sign-extended)
     
     ; --- Initialize game state ---
-    MOV R8, R1            ; R1 = Player Y starts at ground
-    MOVI 0, R2            ; R2 = Player velocity = 0 (not moving)
-    MOV R11, R3           ; R3 = Obstacle X starts at right edge
-    MOVI 0, R4            ; R4 = Score = 0
+    MOV R8, R1            ; R1 = Player Y starts at ground (200)
+    MOVI 0, R2            ; R2 = Player velocity = 0
+    MOV R11, R3           ; R3 = Obstacle X starts at 608 (right edge)
     MOVI 0, R5            ; R5 = Game state = 0 (running)
 
 ; ============================================================
@@ -70,44 +57,43 @@ INIT:
 ; ============================================================
 
 GAME_LOOP:
+    ; --- 0. WAIT FOR VBLANK ---
+WAIT_FOR_VBLANK:
+    LOAD R15, R0          ; R15 = mem[0xFFFE]
+    CMPI 1, R15
+    BNE WAIT_FOR_VBLANK   ; Wait until vblank flag == 1
+    
+    STOR R4, R0           ; Reset vblank flag to 0
+
     ; Check if game is over
     CMPI 0, R5
     BNE GAME_OVER_STATE   ; If game state != 0, go to game over
     
-    ; --- 1. READ INPUT ---
-    MOVI 0x01, R12        ; Load input address (0x0103) - adjust to your hardware
-    LSHI 0x08, R12
-    ; If your address space allows: you might need to build address differently
-    ; For now assuming low memory for simplicity
-    LOAD R13, R12         ; R13 = input button state
-    
-    ; --- 2. HANDLE JUMP INPUT ---
+    ; --- 1. HANDLE JUMP INPUT ---
+    ; R13 is driven externally (1 = pressed, 0 = idle)
     ; Only allow jump if player is on ground
     CMP R8, R1            ; Compare player Y with ground
     BNE SKIP_JUMP         ; If not on ground, skip jump
     
-    ; Check if jump button pressed (assume bit 0 = jump)
-    ANDI 0x01, R13        ; Mask to check bit 0
-    CMPI 0, R13
-    BEQ SKIP_JUMP         ; If button not pressed, skip
+    CMPI 1, R13           ; Check if jump button pressed
+    BNE SKIP_JUMP         ; If button not pressed, skip
     
     ; Start jump - set upward velocity
     MOV R10, R2           ; velocity = JUMP_VELOCITY (negative = up)
 
 SKIP_JUMP:
 
-    ; --- 3. UPDATE PLAYER PHYSICS ---
+    ; --- 2. UPDATE PLAYER PHYSICS ---
     ; Apply gravity to velocity
     ADD R9, R2            ; velocity += gravity
     
     ; Apply velocity to position
     ADD R2, R1            ; player_y += velocity
     
-    ; ------ This might be unecessary? ------
-    ; --- 4. GROUND COLLISION ---
+    ; --- 3. GROUND COLLISION ---
     ; Check if player is below ground
     CMP R8, R1            ; Compare ground with player_y
-    BGE PLAYER_NOT_BELOW  ; If ground >= player_y, player is above/at ground
+    BLT PLAYER_NOT_BELOW  ; If ground < player_y, player is above ground
     
     ; Player hit ground - clamp position and stop
     MOV R8, R1            ; player_y = ground
@@ -115,25 +101,23 @@ SKIP_JUMP:
 
 PLAYER_NOT_BELOW:
 
-    ; --- 5. UPDATE OBSTACLE ---
-    ; Move obstacle left
-    MOVI 3, R6            ; R6 = obstacle speed
-    SUB R6, R3            ; obstacle_x -= speed
+    ; --- 4. UPDATE OBSTACLE ---
+    ; Move obstacle left by 3 pixels
+    SUBI 3, R3            ; obstacle_x -= 3
     
     ; Check if obstacle went off left edge
     CMPI 0, R3
     BGE OBSTACLE_ON_SCREEN ; If obstacle_x >= 0, still on screen
     
-    ; Reset obstacle to right side
-    MOV R11, R3           ; obstacle_x = screen_width
+    ; Reset obstacle to right side (608)
+    MOV R11, R3           ; obstacle_x = 608
     
     ; Increment score (player survived one obstacle)
     ADDI 1, R4            ; score++
 
 OBSTACLE_ON_SCREEN:
 
-    ; --- 6. COLLISION DETECTION ---
-    ; Simple box collision between player and obstacle
+    ; --- 5. COLLISION DETECTION ---
     ; Player is at fixed X (around 40), obstacle moves
     ; Check if obstacle X is near player X AND player Y is low (near ground)
     
@@ -142,60 +126,49 @@ OBSTACLE_ON_SCREEN:
     MOV R3, R7            ; R7 = obstacle X
     SUB R6, R7            ; R7 = obstacle_x - player_x
     
-    ; Check if difference is small (within collision range)
-    ; Need absolute value - check both positive and negative
+    ; Get absolute value of X distance
     CMPI 0, R7
     BGE CHECK_POSITIVE_X
     
     ; R7 is negative, negate it
     MOVI 0, R6
-    SUB R7, R6            ; R6 = 0 - R7 = -R7 (absolute value)
+    SUB R7, R6            ; R6 = -R7 (absolute value)
     MOV R6, R7
 
 CHECK_POSITIVE_X:
     ; R7 now has absolute X distance
     CMP R14, R7           ; Compare collision_box with distance
-    BLT NO_COLLISION      ; If collision_box < distance, no collision
+    BGT NO_COLLISION      ; If collision_box > distance, no X overlap
     
     ; X overlaps - now check Y
-    ; Obstacle is on ground (Y = ground level)
     ; Check if player is close to ground
-    MOV R8, R6            ; R6 = ground level
+    MOV R8, R6            ; R6 = ground level (200)
     SUB R1, R6            ; R6 = ground - player_y (how high player is)
     
     CMP R14, R6           ; Compare collision_box with height
-    BLT NO_COLLISION      ; If collision_box < height, player jumped over
+    BGT NO_COLLISION      ; If collision_box > height, player jumped over
     
     ; COLLISION DETECTED - Game Over
     MOVI 1, R5            ; Set game state to game over
-    ; branch to the end? (skip no collision routine?)
 
 NO_COLLISION:
 
-    ; --- 7. UPDATE VGA MEMORY ---
-    ; Write player Y position to display memory
+    ; --- 6. UPDATE VGA MEMORY ---
+    ; Write player Y position to 0x0100
     MOVI 0x01, R12 
-    LSHI 0x08, R12       ; R12 = 0x0100
-    STOR R1, R12          ; Store player Y to VGA memory
+    LSHI 0x08, R12        ; R12 = 0x0100
+    STOR R1, R12          ; Store player Y
     
-    MOVI 0x01, R12        ; Display address for obstacle (0x0101)
-    STOR R3, R12          ; Store obstacle X to VGA memory
+    ; Write obstacle X to 0x0101
+    ADDI 0x01, R12        ; R12 = 0x0101
+    STOR R3, R12          ; Store obstacle X
     
-    MOVI 0x02, R12        ; Display address for score (0x0102)
-    STOR R4, R12          ; Store score to VGA memory
+    ; Write score to 0x0102 (if VGA supports it)
+    ADDI 0x01, R12        ; R12 = 0x0102
+    MOV R4, R6            ; Get score from R4
+    STOR R6, R12          ; Store score
 
-    ; --- 8. FRAME DELAY ---
-    ; Simple delay loop to control game speed
-    MOVI 0xFF, R15        ; Outer loop counter
-DELAY_OUTER:
-    MOVI 0xFF, R6         ; Inner loop counter  
-DELAY_INNER:
-    SUBI 1, R6
-    BNE DELAY_INNER
-    SUBI 1, R15
-    BNE DELAY_OUTER
-
-    ; --- 9. LOOP BACK ---
+    ; --- 7. LOOP BACK ---
     BUC GAME_LOOP
 
 ; ============================================================
@@ -203,21 +176,23 @@ DELAY_INNER:
 ; ============================================================
 
 GAME_OVER_STATE:
-    ; Read input to check for restart
-    MOVI 0x03, R12
-    LOAD R13, R12
+    ; Wait for vblank even in game over
+WAIT_VBLANK_GAMEOVER:
+    LOAD R15, R0
+    CMPI 1, R15
+    BNE WAIT_VBLANK_GAMEOVER
+    STOR R4, R0
     
-    ; Check if restart button pressed (assume bit 1 = restart)
+    ; Check if restart button pressed (bit 1 of R13)
     ANDI 0x02, R13
     CMPI 0, R13
     BEQ GAME_OVER_WAIT    ; If not pressed, keep waiting
     
-    ; Restart game - jump back to init
+    ; Restart game
     BUC INIT
 
 GAME_OVER_WAIT:
-    ; Could flash display or show game over indicator
-    ; For now, just loop back and wait for restart
+    ; Keep displaying game over state
     BUC GAME_OVER_STATE
 
 ; ============================================================
