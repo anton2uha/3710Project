@@ -174,9 +174,8 @@ NO_COLLISION:
 
     ; --- 7. UPDATE VGA MEMORY ---
     ; Write player Y position to display memory
-    MOVI 0x00, R12        ; Display address for player (0x0100)
-    ; NOTE: You may need to construct larger addresses differently
-    ; depending on your memory architecture
+    MOVI 0x01, R12 
+    LSHI 0x08, R12       ; R12 = 0x0100
     STOR R1, R12          ; Store player Y to VGA memory
     
     MOVI 0x01, R12        ; Display address for obstacle (0x0101)
