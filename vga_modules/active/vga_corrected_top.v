@@ -1,6 +1,7 @@
 module vga_corrected_top(
+    input  wire        reset,
     input  wire        sys_clk,     // 50 MHz
-	 input wire [15:0] ram_q_b,
+	input  wire [15:0] ram_q_b,
     output wire        VGA_HS,
     output wire        VGA_VS,
     output wire        VGA_CLK,
@@ -9,14 +10,12 @@ module vga_corrected_top(
     output wire [7:0]  VGA_R,
     output wire [7:0]  VGA_G,
     output wire [7:0]  VGA_B,
-	 output reg [15:0] ram_addr_b
+	output reg  [15:0] ram_addr_b
 );
 
     wire bright;
     wire pix_clk;
     wire [9:0] hcount, vcount;
-	 
-//	 reg [15:0] ram_addr_b = ram_addr_b_out;
 
 	localparam POS_BASE = 16'h100;
     localparam MAN_BASE_ADDR    = 13'd0;
@@ -86,16 +85,16 @@ module vga_corrected_top(
     );
 
     // We need to get rid of this. 
-    // sprite_rom_dp #(
-    //     .DATA_WIDTH(16),
-    //     .ADDR_WIDTH(13)
-    // ) srom (
-    //     .clk(pix_clk),
-    //     .addr_a(player_addr),
-    //     .addr_b(obstacle_addr),
-    //     .q_a(player_data),
-    //     .q_b(obstacle_data)
-    // );
+    sprite_rom_dp #(
+        .DATA_WIDTH(16),
+        .ADDR_WIDTH(13)
+    ) srom (
+        .clk(pix_clk),
+        .addr_a(player_addr),
+        .addr_b(obstacle_addr),
+        .q_a(player_data),
+        .q_b(obstacle_data)
+    );
 
     reg [7:0] vga_r_reg, vga_g_reg, vga_b_reg;
 
@@ -103,9 +102,19 @@ module vga_corrected_top(
     assign VGA_G = vga_g_reg;
     assign VGA_B = vga_b_reg;
 
-    
-    // Start of loading position logic
-    wire vblank_start = (hcount == 10'd0) && (vcount == 10'd480); // start of vertical blank for 640x480
+
+    // pixel domain
+    wire vblank_start_pix = (hcount == 10'd0) && (vcount == 10'd480);
+
+    // sync into sys_clk
+    reg vb_sync1, vb_sync2;
+    always @(posedge sys_clk) begin
+        vb_sync1 <= vblank_start_pix;
+        vb_sync2 <= vb_sync1;
+    end
+    wire vblank_start = vb_sync1 & ~vb_sync2; // rising edge, now in sys_clk domain
+
+
     // State encoding
     localparam S_IDLE       = 2'd0;
     localparam S_ISSUE_ADDR = 2'd1;   // issue address to RAM
@@ -113,15 +122,12 @@ module vga_corrected_top(
 
     // Reg's for FSM
     reg [1:0] state;       // current state
-
-    // reg       loading;
     reg [1:0] load_index;  // which position word is being loaded
-    // reg [1:0] load_phase;  // will be driven by combinational "output" block
-
-    // reg [15:0] cactus_x_reg;
-    // reg [15:0] man_y_reg;
     // Next state logic for loading positions
-    always @(posedge sys_clk ) begin
+    always @(posedge sys_clk or negedge reset) begin
+        if (!reset) begin
+            state <= S_IDLE;
+        end else begin
             case (state)
                 S_IDLE: begin
                     // if vblank start, begin loading positions
@@ -144,8 +150,8 @@ module vga_corrected_top(
                     end
                 end
                 default: state <= S_IDLE;
-					 endcase
-		  
+            endcase
+        end  
     end
 
     // Output logic for loading positions
@@ -170,6 +176,11 @@ module vga_corrected_top(
         endcase
     end
 
+// q: how does this work? How does each pixel know if it's a player pixel or obstacle pixel?
+// A: The pixel being drawn is determined by hcount and vcount. Each sprite module
+//    checks if the current hcount/vcount is within its sprite area, and outputs the appropriate color and opacity signals.
+// q: where do those get assigned to vga_r/g/b?
+// A: At the end of this module, there's a combinational block that decides the final VGA_R/G/B values based on the opacity of the player and obstacle sprites.
     always @(*) begin
         if (!bright) begin
             vga_r_reg = 8'h00;

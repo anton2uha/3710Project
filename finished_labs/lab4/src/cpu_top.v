@@ -12,7 +12,7 @@ module cpu_top (
     output wire [7:0] VGA_R,
     output wire [7:0] VGA_G,
     output wire [7:0] VGA_B,
-	output [15:0] out // output of the ALU to show on 7 seg on fpga.
+	output wire space_led
 );
 
 //enable and control wires (from control FSM)
@@ -60,6 +60,8 @@ wire [4:0] flags_next; // New flags from ALU
 wire space_is_down;
 wire space_pressed_pulse;
 
+assign space_led = space_is_down;
+
 assign data_a = rdataA;
 assign we_a = mem_we;
 assign tgt_addr = rdataB;
@@ -91,7 +93,7 @@ true_dual_port_ram_single_clock my_ram
 	.addr_a(mem_addr_a),
 	.addr_b(addr_b),
 	.we_a(we_a),
-	.we_b(we_b),
+	.we_b(1'b0), // VGA port is read-only
 	.clk(clk),
 	.q_a(q_a),
 	.q_b(q_b)
@@ -201,6 +203,7 @@ space_key_detector my_space (
 );
 
 vga_corrected_top my_vga (
+	.reset(reset),
     .sys_clk(clk),
     .ram_addr_b(vga_addr_b),
     .ram_q_b(q_b),

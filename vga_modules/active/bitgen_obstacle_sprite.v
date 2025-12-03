@@ -17,7 +17,7 @@ module bitgen_obstacle_sprite #(
     output reg  [7:0]  vga_r,
     output reg  [7:0]  vga_g,
     output reg  [7:0]  vga_b,
-    output reg         pixel_opaque,
+    output reg         pixel_opaque, // 1 if the pixel is part of the sprite, 0 if background
     input  wire [9:0]  obstacle_x
 );
 
