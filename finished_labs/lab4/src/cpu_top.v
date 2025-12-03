@@ -99,6 +99,18 @@ true_dual_port_ram_single_clock my_ram
 	.q_b(q_b)
 );
 
+// This block is to handle vblank status output from VGA. We need vblank to sync our game state updates to frames.
+wire [15:0] mem_data_a_raw = q_a;   // raw RAM output
+wire [15:0] mem_data_a;            // what CPU actually sees
+
+// Example: map address 0xFFFE to a vblank flag in bit 0
+wire is_vblank_addr = (mem_addr_a == 16'hFFFE);
+
+// Option 1: single-bit vblank (latched or raw pulse)
+assign mem_data_a = is_vblank_addr
+                  ? {15'b0, vblank_start}   // or a latched flag/frame_ctr
+                  : mem_data_a_raw;
+
 program_counter my_pc(
 	.en(pc_en), 
 	.clk(clk), 
@@ -113,7 +125,7 @@ program_counter my_pc(
 control_and_decoder my_control_decode(
 	.clk(clk), //inputs
 	.reset(reset),     
-	.instr(q_a),        
+	.instr(mem_data_a),        
 	.flags(flags_reg), // is this flags or flags_reg?
 	.ir_reg(ir_reg),
 	
@@ -140,7 +152,8 @@ instruction_register my_ir
 	.clk(clk),
 	.reset(reset),
 	.ir_en(ir_en),
-	.DOUT(q_a),
+	.DOUT(mem_data_a),
+	// .DOUT(q_a),
 	.ir_out(ir_reg)
 );
 
@@ -165,7 +178,7 @@ twoToOneMux immMux
 twoToOneMux regFileInputMux 
 (
 	.a(aluOut),
-	.b(q_a), //CHECK: is this same as Data_from_mem in diagram?
+	.b(mem_data_a),
 	.sel(alu_mux_ctrl),
 	.y(regFileInput)
 );
@@ -202,6 +215,8 @@ space_key_detector my_space (
     .space_is_down     (space_is_down)
 );
 
+wire vblank_start;
+
 vga_corrected_top my_vga (
 	.reset(reset),
     .sys_clk(clk),
@@ -214,7 +229,8 @@ vga_corrected_top my_vga (
     .VGA_SYNC_N(VGA_SYNC_N),
     .VGA_R(VGA_R),
     .VGA_G(VGA_G),
-    .VGA_B(VGA_B)
+    .VGA_B(VGA_B),
+	.vblank_start_o (vblank_start)
 );
 	
 assign out = aluOut;

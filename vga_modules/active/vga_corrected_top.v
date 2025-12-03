@@ -7,6 +7,7 @@ module vga_corrected_top(
     output wire        VGA_CLK,
     output wire        VGA_BLANK_N,
     output wire        VGA_SYNC_N,
+    output wire        vblank_start_o,   // one-cycle pulse per frame in sys_clk domain
     output wire [7:0]  VGA_R,
     output wire [7:0]  VGA_G,
     output wire [7:0]  VGA_B,
@@ -114,6 +115,7 @@ module vga_corrected_top(
         vb_sync2 <= vb_sync1;
     end
     wire vblank_start = vb_sync1 & ~vb_sync2; // rising edge, now in sys_clk domain
+    assign vblank_start_o = vblank_start;
 
     // State encoding
     localparam S_IDLE       = 2'd0;
