@@ -48,7 +48,7 @@ WAIT_FOR_VBLANK:
     BNE WAIT_FOR_VBLANK  ; stay here until vblank flag == 1
 
     ; Reset vblank to 0
-    STOR R4, R11
+    STOR R4, R0
 
 
     ;----------------------------------------------------------
