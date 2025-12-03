@@ -51,7 +51,7 @@ OBSTACLE_OK:
     STOR R2, R12
 
     ; Simple delay to slow movement a bit
-    MOVI 0x7F, R0
+    MOVI 0xFF, R0
 DELAY_LOOP:
     SUBI 1, R0
     CMPI 0, R0
