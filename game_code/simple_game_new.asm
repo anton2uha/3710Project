@@ -10,6 +10,7 @@
 ; R1  = player_y
 ; R2  = obstacle_x
 ; R3  = wrap_x (reset position when obstacle leaves screen)
+; R4  = 0 
 ; R12 = address pointer
 ; R0  = vblank address (0xFFFE)
 ; R11 = vblank value (scratch)
@@ -22,6 +23,9 @@ INIT:
     ; Move 0xC8 (200) into R1 for player_y start. Have to do 2 adds because MOVI is sign extended
     MOVI 0x64, R1        ; 100
     ADDI 0x64, R1        ; +100 = 200 = 0xC8
+
+    ; Load R4 with 0
+    MOVI 0, R4
 
     ; build 0x0260 = 608
     MOVI 0x02, R3
@@ -42,6 +46,10 @@ WAIT_FOR_VBLANK:
     LOAD R11, R0         ; R11 = mem[0xFFFE]
     CMPI 1, R11
     BNE WAIT_FOR_VBLANK  ; stay here until vblank flag == 1
+
+    ; Reset vblank to 0
+    STOR R4, R11
+
 
     ;----------------------------------------------------------
     ; 1) If space pressed, nudge player up by 10 px

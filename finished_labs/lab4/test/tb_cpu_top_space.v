@@ -1,9 +1,9 @@
 `timescale 1ns / 1ps
 
 // Simple CPU top testbench:
-// - Run for 100 us
+// - Run for ~10 s
 // - Assert reset for a few cycles
-// - Send a PS/2 space make code (0x29) mid-simulation to exercise the space key path
+// - After 1 s, send a PS/2 space make (0x29) then break (F0 29) sequence
 
 module tb_cpu_top_space;
 
@@ -47,7 +47,11 @@ module tb_cpu_top_space;
     );
 
     // PS/2 timing: ~10 kHz clock (100 us period)
-    localparam integer PS2_HALF = 50_000; // ns
+    localparam integer PS2_HALF          = 50_000; // ns
+    localparam integer ONE_SECOND        = 1_000_000_000;
+    localparam integer SPACE_AFTER_1S    = 50_000_000;  // wait 50 ms after 1 s before press
+    localparam integer SPACE_HOLD_TIME   = 50_000_000;  // hold space for 50 ms before release
+    localparam integer RUN_TIME          = 1_000_000_000;
 
     initial begin
         kb_clk_drive_low = 1'b0;
@@ -58,13 +62,20 @@ module tb_cpu_top_space;
         repeat (5) @(posedge clk);
         reset = 1'b1;
 
-        // wait a bit, then send space make code at ~40 us
-        #(40_000);
+        // wait to 1 s, then an extra offset before pressing space
+        #(ONE_SECOND);
+        #(SPACE_AFTER_1S);
         $display("[%0t ns] Sending PS/2 make code for SPACE (0x29)", $time);
         send_ps2_byte(8'h29);
 
-        // run to 100 us total
-        #(60_000);
+        // hold the key, then send break sequence (F0 29)
+        #(SPACE_HOLD_TIME);
+        $display("[%0t ns] Sending PS/2 break code for SPACE (F0 29)", $time);
+        send_ps2_byte(8'hF0);
+        send_ps2_byte(8'h29);
+
+        // run out to ~10 s total
+        #(RUN_TIME - ONE_SECOND - SPACE_AFTER_1S - SPACE_HOLD_TIME);
         $display("[%0t ns] Done", $time);
         $stop;
     end

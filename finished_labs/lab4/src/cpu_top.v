@@ -1,8 +1,8 @@
 `timescale 1ns / 1ps
 module cpu_top (
-	input clk,
-	input reset,
-	inout  wire PS2_CLK,    
+    input clk,
+    input reset,
+    inout  wire PS2_CLK,    
     inout  wire PS2_DAT,
     output wire VGA_HS,
     output wire VGA_VS,
@@ -12,7 +12,7 @@ module cpu_top (
     output wire [7:0] VGA_R,
     output wire [7:0] VGA_G,
     output wire [7:0] VGA_B,
-	output wire space_is_down
+    output wire space_is_down
 );
 
 //enable and control wires (from control FSM)
@@ -21,23 +21,22 @@ wire [15:0] reg_en;
 wire [15:0] disp;
 
 //IR reg
-wire[15:0] ir_reg;
+wire [15:0] ir_reg;
 
 //instruction info (from control FSM)
 wire [3:0] op, rsrc, rdest;
 wire [15:0] imm;
 
 //memory port wires
-wire [15:0] data_a, addr_a, q_a;
+wire [15:0] data_a, q_a;
 wire we_a;
+wire [15:0] mem_addr_a;  // output of LSctrl mux
 
-wire [15:0] data_b, addr_b, q_b;
-wire we_b;
+// RAM port B wires (to VGA)
 wire [15:0] vga_addr_b;
-wire vga_we_b;
-
-wire LSctrl;
-wire [15:0] mem_addr_a; //output of LSctrl mux
+wire [15:0] vga_data_b;
+wire        vga_we_b;
+wire [15:0] q_b;
 
 // wires for jump
 wire pc_load;
@@ -47,192 +46,172 @@ wire [15:0] tgt_addr;
 wire [15:0] pc;
 
 //regFile connections
-wire [15:0] rdataA; //output A from regfile
-wire [15:0] rdataB; //output B from regfile
+wire [15:0] rdataA;
+wire [15:0] rdataB;
 wire [15:0] regFileInput;
 
 //ALU connections
-wire [15:0] dataB; //wire from imm mux to port B of ALU
+wire [15:0] dataB;
 wire [15:0] aluOut;
-reg [4:0] flags_reg;   // Stored flags
-wire [4:0] flags_next; // New flags from ALU
+reg  [4:0] flags_reg;
+wire [4:0] flags_next;
 
-// wire space_is_down;
 wire space_pressed_pulse;
 
-// assign space_led = space_is_down;
-
+// CPU to RAM port A
 assign data_a = rdataA;
-assign we_a = mem_we;
+assign we_a   = mem_we;
 assign tgt_addr = rdataB;
-assign data_b = 16'd0; // VGA uses port B read-only
-assign addr_b = vga_addr_b;
-assign we_b   = vga_we_b;
 
 // Add a flag register with clock and reset
 always @(posedge clk or negedge reset) begin
     if (!reset)
         flags_reg <= 5'b0;
-    else if (pc_en)  // Update flags when instruction completes
+    else if (pc_en)
         flags_reg <= flags_next;
 end
 
-/* //DEBUG PRINT
-always @(posedge clk) begin
-    if (pc_en) begin  // When instruction completes
-        $display("Time=%0t S2: op=%b, rdest=%d, rsrc=%d, rdataA=%h, rdataB=%h", 
-                 $time, op, rdest, rsrc, rdataA, rdataB);
-    end
-end */
-
-// Port A: CPU. Port B: VGA (read-only fetches).
+// ---------------------------
+// Dual-port RAM: 
+//   Port A: CPU
+//   Port B: VGA (read + write)
+// ---------------------------
 true_dual_port_ram_single_clock my_ram
 (
-	.data_a(data_a),
-	.data_b(data_b),
-	.addr_a(mem_addr_a),
-	.addr_b(addr_b),
-	.we_a(we_a),
-	.we_b(1'b0), // VGA port is read-only
-	.clk(clk),
-	.q_a(q_a),
-	.q_b(q_b)
+    .data_a(data_a),
+    .data_b(vga_data_b),
+    .addr_a(mem_addr_a),
+    .addr_b(vga_addr_b),
+    .we_a(we_a),
+    .we_b(vga_we_b),
+    .clk(clk),
+    .q_a(q_a),
+    .q_b(q_b)
 );
 
-// This block is to handle vblank status output from VGA. We need vblank to sync our game state updates to frames.
-wire [15:0] mem_data_a_raw = q_a;   // raw RAM output
-wire [15:0] mem_data_a;            // what CPU actually sees
-
-// Example: map address 0xFFFE to a vblank flag in bit 0
-wire is_vblank_addr = (mem_addr_a == 16'hFFFE);
-
-// Option 1: single-bit vblank (latched or raw pulse)
-assign mem_data_a = is_vblank_addr
-                  ? {15'b0, vblank_start}   // or a latched flag/frame_ctr
-                  : mem_data_a_raw;
-
+// From now on, CPU sees q_a directly
 program_counter my_pc(
-	.en(pc_en), 
-	.clk(clk), 
-	.rst_n(reset),
-	.pc_mux(pc_mux_ctrl),
-	.disp(disp),
-	.tgt_addr(tgt_addr), //[15:0]
-	.pc_load(pc_load),
-	.pc(pc) //[15:0]
+    .en(pc_en), 
+    .clk(clk), 
+    .rst_n(reset),
+    .pc_mux(pc_mux_ctrl),
+    .disp(disp),
+    .tgt_addr(tgt_addr),
+    .pc_load(pc_load),
+    .pc(pc)
 );
 
 control_and_decoder my_control_decode(
-	.clk(clk), //inputs
-	.reset(reset),     
-	.instr(mem_data_a),        
-	.flags(flags_reg), // is this flags or flags_reg?
-	.ir_reg(ir_reg),
-	
-	.pc_en(pc_en),	//outputs
-	.pc_mux_ctrl(pc_mux_ctrl),
-	.ir_en(ir_en),
-	.reg_we(reg_we), //CHECK: not needed? just set reg_en = 0
-	.imm_en(imm_en),
-	.op(op),
-	.rsrc(rsrc),
-	.rdest(rdest),
-	.imm(imm),        
-   .reg_en(reg_en),
-	.disp(disp),
-	.LS_ctrl(LS_ctrl),
-	.mem_we(mem_we),
-	
-	.alu_mux_ctrl(alu_mux_ctrl), //added	
-	.pc_load(pc_load)
+    .clk(clk),
+    .reset(reset),
+    .instr(q_a),      // use raw RAM output now
+    .flags(flags_reg),
+    .ir_reg(ir_reg),
+    
+    .pc_en(pc_en),
+    .pc_mux_ctrl(pc_mux_ctrl),
+    .ir_en(ir_en),
+    .reg_we(reg_we),
+    .imm_en(imm_en),
+    .op(op),
+    .rsrc(rsrc),
+    .rdest(rdest),
+    .imm(imm),
+    .reg_en(reg_en),
+    .disp(disp),
+    .LS_ctrl(LS_ctrl),
+    .mem_we(mem_we),
+    .alu_mux_ctrl(alu_mux_ctrl),
+    .pc_load(pc_load)
 );
 
 instruction_register my_ir
 (
-	.clk(clk),
-	.reset(reset),
-	.ir_en(ir_en),
-	.DOUT(mem_data_a),
-	// .DOUT(q_a),
-	.ir_out(ir_reg)
+    .clk(clk),
+    .reset(reset),
+    .ir_en(ir_en),
+    .DOUT(q_a),      // instruction comes from RAM port A
+    .ir_out(ir_reg)
 );
 
 // Load/Store ctrl mux
 twoToOneMux LSmux 
 (
-	.a(pc),
-	.b(rdataB),
-	.sel(LS_ctrl),
-	.y(mem_addr_a)
+    .a(pc),
+    .b(rdataB),
+    .sel(LS_ctrl),
+    .y(mem_addr_a)
 );
 
-// A or B for register input? A because A = dest
+// Imm mux for ALU B input
 twoToOneMux immMux 
 (
-	.a(rdataB),
-	.b(imm), //CHECK: signed or zero extend?
-	.sel(imm_en),
-	.y(dataB)
+    .a(rdataB),
+    .b(imm),
+    .sel(imm_en),
+    .y(dataB)
 );
 
+// Mux for register writeback: ALU result vs. memory data
 twoToOneMux regFileInputMux 
 (
-	.a(aluOut),
-	.b(mem_data_a),
-	.sel(alu_mux_ctrl),
-	.y(regFileInput)
+    .a(aluOut),
+    .b(q_a),          // LOAD uses q_a directly
+    .sel(alu_mux_ctrl),
+    .y(regFileInput)
 );
 
 regfile my_regs
 (
-	.clk(clk),
-	.reset(reset),
-	.wdata(regFileInput),
-	.regEnable(reg_en),
-	.raddrA(rdest),
-	.raddrB(rsrc),
-	.space_is_down(space_is_down),
-	.rdataA(rdataA),
-	.rdataB(rdataB)
+    .clk(clk),
+    .reset(reset),
+    .wdata(regFileInput),
+    .regEnable(reg_en),
+    .raddrA(rdest),
+    .raddrB(rsrc),
+    .space_is_down(space_is_down),
+    .rdataA(rdataA),
+    .rdataB(rdataB)
 );
 
 alu my_alu 
 (
-	.A(rdataA), 
-	.B(dataB), 
-	.C(aluOut), 
-	.Opcode(op), 
-	.cin(flags_reg[3]),
-	.Flags(flags_next)
+    .A(rdataA), 
+    .B(dataB), 
+    .C(aluOut), 
+    .Opcode(op), 
+    .cin(flags_reg[3]),
+    .Flags(flags_next)
 );
 
 space_key_detector my_space (
     .CLOCK_50          (clk),
-	.n_reset           (~reset),
+    .n_reset           (~reset),
     .PS2_CLK           (PS2_CLK),
     .PS2_DAT           (PS2_DAT),
     .space_pressed_pulse(space_pressed_pulse), 
     .space_is_down     (space_is_down)
 );
 
-wire vblank_start;
+vga_top my_vga (
+    .reset      (reset),
+    .sys_clk    (clk),
 
-vga_corrected_top my_vga (
-	.reset(reset),
-    .sys_clk(clk),
-    .ram_addr_b(vga_addr_b),
-    .ram_q_b(q_b),
-    .VGA_HS(VGA_HS),
-    .VGA_VS(VGA_VS),
-    .VGA_CLK(VGA_CLK),
+    .ram_q_b    (q_b),
+    .ram_addr_b (vga_addr_b),
+    .ram_data_b (vga_data_b),
+    .ram_we_b   (vga_we_b),
+
+    .VGA_HS     (VGA_HS),
+    .VGA_VS     (VGA_VS),
+    .VGA_CLK    (VGA_CLK),
     .VGA_BLANK_N(VGA_BLANK_N),
-    .VGA_SYNC_N(VGA_SYNC_N),
-    .VGA_R(VGA_R),
-    .VGA_G(VGA_G),
-    .VGA_B(VGA_B),
-	.vblank_start_o (vblank_start)
+    .VGA_SYNC_N (VGA_SYNC_N),
+    .VGA_R      (VGA_R),
+    .VGA_G      (VGA_G),
+    .VGA_B      (VGA_B)
 );
-	
-assign out = aluOut;
+
+assign out = aluOut;  // if you still use this somewhere
 
 endmodule
