@@ -99,6 +99,7 @@ true_dual_port_ram_single_clock my_ram
 	.q_b(q_b)
 );
 
+// This block is to handle vblank status output from VGA. We need vblank to sync our game state updates to frames.
 wire [15:0] mem_data_a_raw = q_a;   // raw RAM output
 wire [15:0] mem_data_a;            // what CPU actually sees
 
@@ -124,7 +125,7 @@ program_counter my_pc(
 control_and_decoder my_control_decode(
 	.clk(clk), //inputs
 	.reset(reset),     
-	.instr(q_a),        
+	.instr(mem_data_a),        
 	.flags(flags_reg), // is this flags or flags_reg?
 	.ir_reg(ir_reg),
 	
@@ -152,6 +153,7 @@ instruction_register my_ir
 	.reset(reset),
 	.ir_en(ir_en),
 	.DOUT(mem_data_a),
+	// .DOUT(q_a),
 	.ir_out(ir_reg)
 );
 
@@ -176,7 +178,7 @@ twoToOneMux immMux
 twoToOneMux regFileInputMux 
 (
 	.a(aluOut),
-	.b(q_a), //CHECK: is this same as Data_from_mem in diagram?
+	.b(mem_data_a),
 	.sel(alu_mux_ctrl),
 	.y(regFileInput)
 );
