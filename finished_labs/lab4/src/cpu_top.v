@@ -206,7 +206,7 @@ alu my_alu
 
 space_key_detector my_space (
     .CLOCK_50          (clk),
-    .n_reset           (reset),
+	.n_reset           (~reset),
     .PS2_CLK           (PS2_CLK),
     .PS2_DAT           (PS2_DAT),
     .space_pressed_pulse(space_pressed_pulse), 
