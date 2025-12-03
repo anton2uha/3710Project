@@ -1,7 +1,7 @@
 // Quartus Prime Verilog Template
 // True Dual Port RAM with single clock
 `timescale 1ns / 1ps
-module true_dual_port_ram_single_clock
+module true_dual_port_ram_single_clock_vga
 #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 (
 	input [(DATA_WIDTH-1):0] data_a, data_b,
@@ -15,7 +15,7 @@ module true_dual_port_ram_single_clock
 
 	// load memory using $readmemh
 	initial begin
-        $readmemh("C:/Users/IT Admin/Documents/GithubRepos/3710_project/3710Project/game_code/game.hex", ram);
+        $readmemh("C:/Users/IT Admin/Documents/GithubRepos/3710_project/3710Project/game_code/Combined_manWalking+Cactus.hex", ram);
 	end
 
 	// Port A 

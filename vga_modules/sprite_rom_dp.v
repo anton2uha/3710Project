@@ -10,7 +10,7 @@ module sprite_rom_dp #(
 );
 
     // Reuse your true_dual_port_ram_single_clock as ROM
-    true_dual_port_ram_single_clock #(
+    true_dual_port_ram_single_clock_vga #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH)
     ) ram_inst (

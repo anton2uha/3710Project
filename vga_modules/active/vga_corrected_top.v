@@ -1,5 +1,6 @@
 module vga_corrected_top(
     input  wire        sys_clk,     // 50 MHz
+	 input wire [15:0] ram_q_b,
     output wire        VGA_HS,
     output wire        VGA_VS,
     output wire        VGA_CLK,
@@ -7,13 +8,17 @@ module vga_corrected_top(
     output wire        VGA_SYNC_N,
     output wire [7:0]  VGA_R,
     output wire [7:0]  VGA_G,
-    output wire [7:0]  VGA_B
+    output wire [7:0]  VGA_B,
+	 output reg [15:0] ram_addr_b
 );
 
     wire bright;
     wire pix_clk;
     wire [9:0] hcount, vcount;
+	 
+//	 reg [15:0] ram_addr_b = ram_addr_b_out;
 
+	localparam POS_BASE = 16'h100;
     localparam MAN_BASE_ADDR    = 13'd0;
     localparam CACTUS_BASE_ADDR = 13'd4096;
 
@@ -31,12 +36,12 @@ module vga_corrected_top(
     assign VGA_BLANK_N = bright;
     assign VGA_SYNC_N  = 1'b0;
 
-    wire [15:0] obstacle_x;
-    wire [15:0] player_y;
+    reg [15:0] obstacle_x;
+    reg [15:0] player_y;
 
 	 // TEMPORARY: LATER CHANGE TO MEMORY MAPPED
-    assign obstacle_x = 10'd400;
-    assign player_y   = 10'd200;
+//    obstacle_x = 10'd400;
+//    player_y   = 10'd200;
 
     wire [12:0] player_addr;
     wire [15:0] player_data;
@@ -116,10 +121,7 @@ module vga_corrected_top(
     // reg [15:0] cactus_x_reg;
     // reg [15:0] man_y_reg;
     // Next state logic for loading positions
-    always @(posedge sys_clk or posedge reset) begin
-        if (reset) begin
-            state       <= S_IDLE;
-        end else begin
+    always @(posedge sys_clk ) begin
             case (state)
                 S_IDLE: begin
                     // if vblank start, begin loading positions
@@ -142,7 +144,8 @@ module vga_corrected_top(
                     end
                 end
                 default: state <= S_IDLE;
-        end
+					 endcase
+		  
     end
 
     // Output logic for loading positions

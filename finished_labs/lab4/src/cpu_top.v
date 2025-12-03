@@ -203,7 +203,6 @@ space_key_detector my_space (
 vga_corrected_top my_vga (
     .sys_clk(clk),
     .ram_addr_b(vga_addr_b),
-    .ram_we_b(vga_we_b),
     .ram_q_b(q_b),
     .VGA_HS(VGA_HS),
     .VGA_VS(VGA_VS),

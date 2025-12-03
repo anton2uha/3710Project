@@ -75,7 +75,8 @@ GAME_LOOP:
     BNE GAME_OVER_STATE   ; If game state != 0, go to game over
     
     ; --- 1. READ INPUT ---
-    MOVI 0x03, R12        ; Load input address (0x0103) - adjust to your hardware
+    MOVI 0x01, R12        ; Load input address (0x0103) - adjust to your hardware
+    LSH 0x08, R12
     ; If your address space allows: you might need to build address differently
     ; For now assuming low memory for simplicity
     LOAD R13, R12         ; R13 = input button state
