@@ -121,29 +121,27 @@ OBSTACLE_ON_SCREEN:
     ; Player sprite: 96x96 at X=252, Y=player_y
     ; Obstacle sprite: 96x96 at X=obstacle_x, Y=200 (ground)
     
-    ; X collision: Check if obstacle_x is in range [156, 348]
+    ; X collision: Check if obstacle_x is in range (156, 348)
     
     ; Build 156 (0x9C) in R6
     MOVI 0x4E, R6         ; 78
     ADDI 0x4E, R6         ; +78 = 156
     CMP R3, R6            ; Compare obstacle_x with 156
-    BLT NO_COLLISION      ; Branch if obstacle_x < 156
+    BGE NO_COLLISION      ; FLIPPED: was BLT
     
     ; Build 348 (0x15C) in R6
-    MOVI 0x01, R6
-    LSHI 0x08, R6
-    ADDI 0x5C, R6         ; R6 = 0x015C = 348
+    MOVI 0xAE, R6         ; 174
+    ADDI 0xAE, R6         ; +174 = 348
     CMP R3, R6            ; Compare obstacle_x with 348
-    BGE NO_COLLISION      ; Branch if obstacle_x >= 348
+    BLT NO_COLLISION      ; FLIPPED: was BGE
     
     ; X overlaps - now check Y
-    ; Y collision: player_y + 96 >= 200, or player_y >= 104
     
     ; Build 104 (0x68) in R6
     MOVI 0x34, R6         ; 52
     ADDI 0x34, R6         ; +52 = 104
     CMP R1, R6            ; Compare player_y with 104
-    BLT NO_COLLISION      ; Branch if player_y < 104 (jumped over)
+    BGE NO_COLLISION      ; FLIPPED: was BLT
     
     ; COLLISION DETECTED - Game Over
     MOVI 1, R5            ; Set game state to game over
