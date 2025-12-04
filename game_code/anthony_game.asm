@@ -42,7 +42,7 @@ INIT:
     MOVI 0x64, R8         ; 100
     ADDI 0x64, R8         ; +100 = 200
     
-    MOVI 1, R9            ; R9 = Gravity 
+    MOVI 2, R9            ; R9 = Gravity 
     MOVI -25, R10         ; R10 = Jump velocity (negative = upward)
     
     ; Screen wrap X = 608 (0x0260)
@@ -125,7 +125,7 @@ SKIP_JUMP:
     BGT NOT_AT_APEX       ; velocity > 3, not at apex
     
     ; We're at apex - check if we've floated enough frames
-    CMPI 10, R6            ; Compare float_counter with 5
+    CMPI 20, R6            ; Compare float_counter with 5
     BGE FLOAT_DONE        ; If floated >= 5 frames, stop floating
     
     ; Still floating - skip gravity and increment counter
@@ -199,25 +199,25 @@ OBSTACLE_ON_SCREEN:
     MOV R3, R6            ; R6 = O_left
     ADD R15, R6           ; R6 = O_right = R3 + SPRITE_SIZE
     CMP R14, R6           ; compare P_left vs O_right
-    BGE NO_COLLISION      ; if P_left >= O_right: no overlap
+    BLT NO_COLLISION      ; if P_left >= O_right: no overlap
 
     ; 2) If P_right <= O_left → NO_COLLISION
     MOV R14, R7           ; R7 = P_left
     ADD R15, R7           ; R7 = P_right = P_left + SPRITE_SIZE
     CMP R7, R3            ; compare P_right vs O_left
-    BLE NO_COLLISION      ; if P_right <= O_left: no overlap
+    BGT NO_COLLISION      ; if P_right <= O_left: no overlap
 
     ; 3) If P_top >= O_bottom → NO_COLLISION
     MOV R8, R6            ; R6 = O_top
     ADD R15, R6           ; R6 = O_bottom = O_top + SPRITE_SIZE
     CMP R1, R6            ; compare P_top vs O_bottom
-    BGE NO_COLLISION      ; if P_top >= O_bottom: no overlap
+    BLT NO_COLLISION      ; if P_top >= O_bottom: no overlap
 
     ; 4) If P_bottom <= O_top → NO_COLLISION
     MOV R1, R7            ; R7 = P_top
     ADD R15, R7           ; R7 = P_bottom = P_top + SPRITE_SIZE
-    CMP R7, R8            ; compare P_bottom vs O_top
-    BLE NO_COLLISION      ; if P_bottom <= O_top: no overlap
+    CMP R8, R7            ; compare P_bottom vs O_top
+    BLT NO_COLLISION      ; if P_bottom <= O_top: no overlap
 
     ; If we reach here, all four separating conditions are false:
     ; => boxes overlap → collision
