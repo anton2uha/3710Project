@@ -135,6 +135,22 @@ OBSTACLE_ON_SCREEN:
     SUB R7, R6            ; R6 = -R7 (absolute value)
     MOV R6, R7
 
+CHECK_POSITIVE_X:
+    ; R7 now has absolute X distance
+    CMP R14, R7           ; Compare collision_box with distance
+    BGT NO_COLLISION      ; If collision_box > distance, no X overlap
+    
+    ; X overlaps - now check Y
+    ; Check if player is close to ground
+    MOV R8, R6            ; R6 = ground level (200)
+    SUB R1, R6            ; R6 = ground - player_y (how high player is)
+    
+    CMP R14, R6           ; Compare collision_box with height
+    BGT NO_COLLISION      ; If collision_box > height, player jumped over
+    
+    ; COLLISION DETECTED - Game Over
+    MOVI 1, R5            ; Set game state to game over
+
 NO_COLLISION:
 
     ; --- 6. UPDATE VGA MEMORY ---
