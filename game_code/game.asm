@@ -118,35 +118,30 @@ PLAYER_NOT_BELOW:
 OBSTACLE_ON_SCREEN:
 
     ; --- 5. COLLISION DETECTION ---
-    ; Player is at fixed X (around 40), obstacle moves
-    ; Check if obstacle X is near player X AND player Y is low (near ground)
+    ; Player sprite: 32x32 at X=252, Y=player_y
+    ; Obstacle sprite: 32x32 at X=obstacle_x, Y=200 (ground)
     
-    ; Check X overlap: is obstacle near player's X position?
-    MOVI 40, R6           ; R6 = Player fixed X position
-    MOV R3, R7            ; R7 = obstacle X
-    SUB R6, R7            ; R7 = obstacle_x - player_x
+    ; X collision: Check if obstacle_x is in range [220, 284]
     
-    ; Get absolute value of X distance
-    CMPI 0, R7
-    BGE CHECK_POSITIVE_X
+    ; Build 220 (0xDC) in R6
+    MOVI 0x6E, R6         ; 110
+    ADDI 0x6E, R6         ; +110 = 220
+    CMP R3, R6            ; Compare obstacle_x with 220
+    BLT NO_COLLISION      ; Branch if obstacle_x < 220
     
-    ; R7 is negative, negate it
-    MOVI 0, R6
-    SUB R7, R6            ; R6 = -R7 (absolute value)
-    MOV R6, R7
-
-CHECK_POSITIVE_X:
-    ; R7 now has absolute X distance
-    CMP R14, R7           ; Compare collision_box with distance
-    BGT NO_COLLISION      ; If collision_box > distance, no X overlap
+    ; Build 284 (0x11C) in R6
+    MOVI 0x8E, R6         ; 142
+    ADDI 0x8E, R6         ; +142 = 284
+    CMP R3, R6            ; Compare obstacle_x with 284
+    BGE NO_COLLISION      ; Branch if obstacle_x >= 284
     
     ; X overlaps - now check Y
-    ; Check if player is close to ground
-    MOV R8, R6            ; R6 = ground level (200)
-    SUB R1, R6            ; R6 = ground - player_y (how high player is)
     
-    CMP R14, R6           ; Compare collision_box with height
-    BGT NO_COLLISION      ; If collision_box > height, player jumped over
+    ; Build 168 (0xA8) in R6
+    MOVI 0x54, R6         ; 84
+    ADDI 0x54, R6         ; +84 = 168
+    CMP R1, R6            ; Compare player_y with 168
+    BLT NO_COLLISION      ; Branch if player_y < 168
     
     ; COLLISION DETECTED - Game Over
     MOVI 1, R5            ; Set game state to game over
