@@ -93,7 +93,7 @@ SKIP_JUMP:
     ; --- 3. GROUND COLLISION ---
     ; Check if player is below ground
     CMP R8, R1            ; Compare ground with player_y
-    BGT PLAYER_NOT_BELOW  ; If ground >= player_y, player is above ground
+    BLT PLAYER_NOT_BELOW  ; If ground >= player_y, player is above ground
     
     ; Player hit ground - clamp position and stop
     MOV R8, R1            ; player_y = ground
