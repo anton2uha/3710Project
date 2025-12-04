@@ -6,21 +6,21 @@
 ; REGISTER ALLOCATION
 ; ============================================================
 ; R0  - vblank address (0xFFFE)
-; R1  - Player Y position
+; R1  - Player Y position (top-left)
 ; R2  - Player Y velocity
-; R3  - Obstacle X position  
+; R3  - Obstacle X position (top-left)
 ; R4  - Score / Zero register
 ; R5  - Game state (0 = running, 1 = game over)
 ; R6  - Temp / calculations
 ; R7  - Temp / calculations
-; R8  - Ground level constant (200)
+; R8  - Ground level constant (200) / obstacle Y
 ; R9  - Gravity constant
 ; R10 - Jump velocity constant
 ; R11 - Wrap X constant (608) / vblank value
 ; R12 - Memory address pointer
 ; R13 - Input value (driven externally)
-; R14 - Collision box size
-; R15 - Temp / loop counter
+; R14 - Player X constant (252)
+; R15 - Sprite size (96)
 
 ; ============================================================
 ; PROGRAM START
@@ -33,15 +33,21 @@ INIT:
     ADDI 0x64, R8         ; +100 = 200
     
     MOVI 2, R9            ; R9 = Gravity 
-    MOVI -25, R10         ; R10 = Jump velocity (negative = upward)
+    MOVI -40, R10         ; R10 = Jump velocity (negative = upward)
     
-    ; Screen wrap X = 608 (0x0260) - matches working code
+    ; Screen wrap X = 608 (0x0260)
     MOVI 0x02, R11
     LSHI 0x08, R11
     ADDI 0x60, R11        ; R11 = 608
     
-    MOVI 10, R14          ; R14 = Collision box size
-    MOVI 0, R4            ; R4 = 0 (for resets)
+    ; Player X = 252 = 126 + 126
+    MOVI 0x7E, R14        ; 126
+    ADDI 0x7E, R14        ; +126 = 252
+
+    ; Sprite size = 96
+    MOVI 96, R15          ; 96x96 hitbox
+
+    MOVI 0, R4            ; R4 = 0 (for resets / score)
     
     ; vblank address = 0xFFFE
     MOVI 0xFE, R0         ; R0 = 0xFFFE (sign-extended)
@@ -65,6 +71,9 @@ WAIT_FOR_VBLANK:
     
     STOR R4, R0           ; Reset vblank flag to 0
 
+    ; Reset R15 back to 96
+    MOVI 96, R15          ; R15 = Sprite size (96)
+
     ; Check if game is over
     CMPI 0, R5
     BNE GAME_OVER_STATE   ; If game state != 0, go to game over
@@ -72,7 +81,7 @@ WAIT_FOR_VBLANK:
     ; --- 1. HANDLE JUMP INPUT ---
     ; R13 is driven externally (1 = pressed, 0 = idle)
     ; Only allow jump if player is on ground
-    CMP R8, R1            ; Compare player Y with ground
+    CMP R8, R1            ; Compare ground with player_y
     BNE SKIP_JUMP         ; If not on ground, skip jump
     
     CMPI 1, R13           ; Check if jump button pressed
@@ -93,7 +102,7 @@ SKIP_JUMP:
     ; --- 3. GROUND COLLISION ---
     ; Check if player is below ground
     CMP R8, R1            ; Compare ground with player_y
-    BLT PLAYER_NOT_BELOW  ; If ground >= player_y, player is above ground
+    BLT PLAYER_NOT_BELOW  ; If ground < player_y then below ground
     
     ; Player hit ground - clamp position and stop
     MOV R8, R1            ; player_y = ground
@@ -102,8 +111,8 @@ SKIP_JUMP:
 PLAYER_NOT_BELOW:
 
     ; --- 4. UPDATE OBSTACLE ---
-    ; Move obstacle left by 6 pixels
-    SUBI 6, R3            ; obstacle_x -= 6
+    ; Move obstacle left by 12 pixels
+    SUBI 6, R3            ; obstacle_x -= 12
     
     ; Check if obstacle went off left edge
     CMPI 0, R3
@@ -117,37 +126,55 @@ PLAYER_NOT_BELOW:
 
 OBSTACLE_ON_SCREEN:
 
-    ; --- 5. COLLISION DETECTION ---
-    ; Player sprite: 32x32 at X=252, Y=player_y
-    ; Obstacle sprite: 32x32 at X=obstacle_x, Y=200 (ground)
-    
-    ; X collision: Check if obstacle_x is in range [220, 284]
-    ; (Player spans 252-284, obstacle spans obstacle_x to obstacle_x+32)
-    
-    ; Build 220 (0xDC) in R6
-    MOVI 0x6E, R6         ; 110
-    ADDI 0x6E, R6         ; +110 = 220
-    CMP R3, R6            ; Compare obstacle_x with min_x
-    BLT NO_COLLISION      ; If obstacle_x < 220, no collision
-    
-    ; Build 284 (0x11C) in R6
-    MOVI 0x8E, R6         ; 142
-    ADDI 0x8E, R6         ; +142 = 284
-    CMP R3, R6            ; Compare obstacle_x with max_x
-    BGE NO_COLLISION      ; If obstacle_x >= 284, no collision
-    
-    ; X overlaps - now check Y
-    ; Y collision: Check if player's bottom edge (player_y + 32) >= obstacle top (200)
-    ; This means: player_y + 32 >= 200, or player_y >= 168
-    
-    ; Build 168 (0xA8) in R6
-    MOVI 0x54, R6         ; 84
-    ADDI 0x54, R6         ; +84 = 168
-    CMP R1, R6            ; Compare player_y with threshold
-    BLT NO_COLLISION      ; If player_y < 168, player jumped over obstacle
-    
-    ; COLLISION DETECTED - Game Over
-    MOVI 1, R5            ; Set game state to game over
+    ; --- 5. COLLISION DETECTION (AABB, 96x96) ---
+    ; Player:
+    ;   P_left   = R14          (252)
+    ;   P_right  = R14 + 96
+    ;   P_top    = R1
+    ;   P_bottom = R1  + 96
+    ; Obstacle:
+    ;   O_left   = R3
+    ;   O_right  = R3 + 96
+    ;   O_top    = R8           (200)
+    ;   O_bottom = R8  + 96
+    ;
+    ; Non-overlap conditions (any true -> NO_COLLISION):
+    ; 1) P_left   >= O_right
+    ; 2) P_right  <= O_left
+    ; 3) P_top    >= O_bottom
+    ; 4) P_bottom <= O_top
+
+    ; 1) If P_left >= O_right → NO_COLLISION
+    MOV R3, R6            ; R6 = O_left
+    ADD R15, R6           ; R6 = O_right = R3 + SPRITE_SIZE
+    CMP R14, R6           ; compare P_left vs O_right
+    ;BGE NO_COLLISION      ; if P_left >= O_right: no overlap
+    BLT NO_COLLISION      ; if P_left >= O_right: no overlap
+
+    ; 2) If P_right <= O_left → NO_COLLISION
+    MOV R14, R7           ; R7 = P_left
+    ADD R15, R7           ; R7 = P_right = P_left + SPRITE_SIZE
+    CMP R3, R7            ; compare O_left vs P_right
+    ;BGE NO_COLLISION      ; if O_left >= P_right: no overlap
+    BLT NO_COLLISION      ; if O_left >= P_right: no overlap
+
+    ; 3) If P_top >= O_bottom → NO_COLLISION
+    MOV R8, R6            ; R6 = O_top
+    ADD R15, R6           ; R6 = O_bottom = O_top + SPRITE_SIZE
+    CMP R1, R6            ; compare P_top vs O_bottom
+    ;BGE NO_COLLISION      ; if P_top >= O_bottom: no overlap
+    BLT NO_COLLISION      ; if P_top >= O_bottom: no overlap
+
+    ; 4) If P_bottom <= O_top → NO_COLLISION
+    MOV R1, R7            ; R7 = P_top
+    ADD R15, R7           ; R7 = P_bottom = P_top + SPRITE_SIZE
+    CMP R8, R7            ; compare O_top vs P_bottom
+    ;BGE NO_COLLISION      ; if O_top >= P_bottom: no overlap
+    BLT NO_COLLISION      ; if O_top >= P_bottom: no overlap
+
+    ; If we reach here, all four separating conditions are false:
+    ; => boxes overlap → collision
+    MOVI 1, R5            ; Collision detected, game over
 
 NO_COLLISION:
 
