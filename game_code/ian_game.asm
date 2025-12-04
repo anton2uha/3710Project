@@ -33,7 +33,7 @@ INIT:
     ADDI 0x64, R8         ; +100 = 200
     
     MOVI 1, R9            ; R9 = Gravity 
-    MOVI -20, R10         ; R10 = Jump velocity (negative = upward)
+    MOVI -30, R10         ; R10 = Jump velocity (negative = upward)
     
     ; Screen wrap X = 608 (0x0260)
     MOVI 0x02, R11
