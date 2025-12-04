@@ -122,29 +122,26 @@ OBSTACLE_ON_SCREEN:
     ; Obstacle sprite: 32x32 at X=obstacle_x, Y=200 (ground)
     
     ; X collision: Check if obstacle_x is in range [220, 284]
-    ; (Player spans 252-284, obstacle spans obstacle_x to obstacle_x+32)
     
     ; Build 220 (0xDC) in R6
     MOVI 0x6E, R6         ; 110
     ADDI 0x6E, R6         ; +110 = 220
-    CMP R3, R6            ; Compare obstacle_x with min_x
-    BLT NO_COLLISION      ; If obstacle_x < 220, no collision
+    CMP R6, R3            ; SWAPPED: Compare min_x with obstacle_x
+    BLT NO_COLLISION      ; If 220 > obstacle_x, no collision
     
     ; Build 284 (0x11C) in R6
     MOVI 0x8E, R6         ; 142
     ADDI 0x8E, R6         ; +142 = 284
-    CMP R3, R6            ; Compare obstacle_x with max_x
-    BGE NO_COLLISION      ; If obstacle_x >= 284, no collision
+    CMP R6, R3            ; SWAPPED: Compare max_x with obstacle_x
+    BGE NO_COLLISION      ; If 284 <= obstacle_x, no collision
     
     ; X overlaps - now check Y
-    ; Y collision: Check if player's bottom edge (player_y + 32) >= obstacle top (200)
-    ; This means: player_y + 32 >= 200, or player_y >= 168
     
     ; Build 168 (0xA8) in R6
     MOVI 0x54, R6         ; 84
     ADDI 0x54, R6         ; +84 = 168
-    CMP R1, R6            ; Compare player_y with threshold
-    BLT NO_COLLISION      ; If player_y < 168, player jumped over obstacle
+    CMP R6, R1            ; SWAPPED: Compare threshold with player_y
+    BLT NO_COLLISION      ; If 168 > player_y, player jumped over
     
     ; COLLISION DETECTED - Game Over
     MOVI 1, R5            ; Set game state to game over
