@@ -19,7 +19,7 @@
 ; R11 - Wrap X constant (608) / vblank value
 ; R12 - Memory address pointer
 ; R13 - Input value (driven externally)
-; R14 - Player X constant (252)
+; R14 - Player X constant (0)
 ; R15 - Sprite size (96)
 
 ; ============================================================
@@ -40,9 +40,8 @@ INIT:
     LSHI 0x08, R11
     ADDI 0x60, R11        ; R11 = 608
     
-    ; Player X = 252 = 126 + 126
-    MOVI 0x7E, R14        ; 126
-    ADDI 0x7E, R14        ; +126 = 252
+    ; Player X = 0 (left edge)
+    MOVI 0, R14
 
     ; Sprite size = 96
     MOVI 96, R15          ; 96x96 hitbox
@@ -111,8 +110,8 @@ SKIP_JUMP:
 PLAYER_NOT_BELOW:
 
     ; --- 4. UPDATE OBSTACLE ---
-    ; Move obstacle left by 12 pixels
-    SUBI 6, R3            ; obstacle_x -= 12
+    ; Move obstacle left by 6 pixels
+    SUBI 6, R3            ; obstacle_x -= 6
     
     ; Check if obstacle went off left edge
     CMPI 0, R3
@@ -128,7 +127,7 @@ OBSTACLE_ON_SCREEN:
 
     ; --- 5. COLLISION DETECTION (AABB, 96x96) ---
     ; Player:
-    ;   P_left   = R14          (252)
+    ;   P_left   = R14          (0)
     ;   P_right  = R14 + 96
     ;   P_top    = R1
     ;   P_bottom = R1  + 96
@@ -147,30 +146,26 @@ OBSTACLE_ON_SCREEN:
     ; 1) If P_left >= O_right → NO_COLLISION
     MOV R3, R6            ; R6 = O_left
     ADD R15, R6           ; R6 = O_right = R3 + SPRITE_SIZE
-    CMP R14, R6           ; compare P_left vs O_right
-    ;BGE NO_COLLISION      ; if P_left >= O_right: no overlap
-    BLT NO_COLLISION      ; if P_left >= O_right: no overlap
+    CMP R14, R6           ; compare P_left vs O_right (dest=P_left, src=O_right)
+    BLT NO_COLLISION      ; if P_left < O_right: no overlap
 
     ; 2) If P_right <= O_left → NO_COLLISION
     MOV R14, R7           ; R7 = P_left
     ADD R15, R7           ; R7 = P_right = P_left + SPRITE_SIZE
-    CMP R3, R7            ; compare O_left vs P_right
-    ;BGE NO_COLLISION      ; if O_left >= P_right: no overlap
-    BLT NO_COLLISION      ; if O_left >= P_right: no overlap
+    CMP R3, R7            ; compare O_left vs P_right (dest=O_left, src=P_right)
+    BLT NO_COLLISION      ; if O_left < P_right: no overlap
 
     ; 3) If P_top >= O_bottom → NO_COLLISION
     MOV R8, R6            ; R6 = O_top
     ADD R15, R6           ; R6 = O_bottom = O_top + SPRITE_SIZE
-    CMP R1, R6            ; compare P_top vs O_bottom
-    ;BGE NO_COLLISION      ; if P_top >= O_bottom: no overlap
-    BLT NO_COLLISION      ; if P_top >= O_bottom: no overlap
+    CMP R1, R6            ; compare P_top vs O_bottom (dest=P_top, src=O_bottom)
+    BLT NO_COLLISION      ; if P_top < O_bottom: no overlap
 
     ; 4) If P_bottom <= O_top → NO_COLLISION
     MOV R1, R7            ; R7 = P_top
     ADD R15, R7           ; R7 = P_bottom = P_top + SPRITE_SIZE
-    CMP R8, R7            ; compare O_top vs P_bottom
-    ;BGE NO_COLLISION      ; if O_top >= P_bottom: no overlap
-    BLT NO_COLLISION      ; if O_top >= P_bottom: no overlap
+    CMP R8, R7            ; compare O_top vs P_bottom (dest=O_top, src=P_bottom)
+    BLT NO_COLLISION      ; if O_top < P_bottom: no overlap
 
     ; If we reach here, all four separating conditions are false:
     ; => boxes overlap → collision
