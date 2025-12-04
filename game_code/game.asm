@@ -126,22 +126,22 @@ OBSTACLE_ON_SCREEN:
     ; Build 220 (0xDC) in R6
     MOVI 0x6E, R6         ; 110
     ADDI 0x6E, R6         ; +110 = 220
-    CMP R6, R3            ; SWAPPED: Compare min_x with obstacle_x
-    BLT NO_COLLISION      ; If 220 > obstacle_x, no collision
+    CMP R6, R3            ; Compare 220 with obstacle_x
+    BGE NO_COLLISION      ; Branch if 220 >= obstacle_x (obstacle too far left)
     
     ; Build 284 (0x11C) in R6
     MOVI 0x8E, R6         ; 142
     ADDI 0x8E, R6         ; +142 = 284
-    CMP R6, R3            ; SWAPPED: Compare max_x with obstacle_x
-    BGE NO_COLLISION      ; If 284 <= obstacle_x, no collision
+    CMP R6, R3            ; Compare 284 with obstacle_x
+    BLT NO_COLLISION      ; Branch if 284 < obstacle_x (obstacle too far right)
     
     ; X overlaps - now check Y
     
     ; Build 168 (0xA8) in R6
     MOVI 0x54, R6         ; 84
     ADDI 0x54, R6         ; +84 = 168
-    CMP R6, R1            ; SWAPPED: Compare threshold with player_y
-    BLT NO_COLLISION      ; If 168 > player_y, player jumped over
+    CMP R6, R1            ; Compare 168 with player_y
+    BGE NO_COLLISION      ; Branch if 168 >= player_y (player jumped high enough)
     
     ; COLLISION DETECTED - Game Over
     MOVI 1, R5            ; Set game state to game over
