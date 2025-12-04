@@ -10,7 +10,8 @@
 ; R1  = player_y
 ; R2  = obstacle_x
 ; R3  = wrap_x (reset position when obstacle leaves screen)
-; R4  = 0 
+; R4  = 0 (constant zero)
+; R6  = jump_active flag (0 = on ground, 1 = in air)
 ; R12 = address pointer
 ; R0  = vblank address (0xFFFE)
 ; R11 = vblank value (scratch)
@@ -26,6 +27,9 @@ INIT:
 
     ; Load R4 with 0
     MOVI 0, R4
+
+    ; jump_active = 0 (player starts on ground)
+    MOVI 0, R6
 
     ; build 0x0260 = 608
     MOVI 0x02, R3
@@ -50,17 +54,42 @@ WAIT_FOR_VBLANK:
     ; Reset vblank to 0
     STOR R4, R0
 
+    ;----------------------------------------------------------
+    ; 1) Jump logic
+    ;    TODOs implemented:
+    ;    - Only jump if player is "on the ground" (jump_active == 0).
+    ;    - Bring the player back to the ground after a jump.
+    ;
+    ;  We treat "on ground" as "not currently in a jump":
+    ;    R6 == 0 -> on ground
+    ;    R6 == 1 -> jump in progress
+    ;----------------------------------------------------------
 
-    ;----------------------------------------------------------
-    ; 1) If space pressed, nudge player up by 10 px
-    ;----------------------------------------------------------
-    CMPI 1, R13
-    BNE NO_JUMP
-    SUBI 10, R1
-    CMPI 0, R1           ; clamp so it never wraps negative
-    BGE NO_JUMP
-    MOVI 0, R1
-NO_JUMP:
+    ; --- Jump start: only if space is pressed AND not already jumping ---
+    CMPI 1, R13          ; is space pressed?
+    BNE NO_JUMP_START    ; if not pressed, skip
+
+    CMPI 0, R6           ; are we on the ground? (jump_active == 0)
+    BNE NO_JUMP_START    ; if already jumping, skip
+
+    ; Start jump: move up 10 px and mark jump as active
+    SUBI 10, R1          ; go up
+    MOVI 1, R6           ; jump_active = 1
+    BUC AFTER_JUMP_LOGIC
+
+NO_JUMP_START:
+    ; --- Return to ground: if jump_active == 1 and space released ---
+    CMPI 1, R6           ; are we in a jump?
+    BNE AFTER_JUMP_LOGIC ; if not jumping, nothing to do
+
+    CMPI 0, R13          ; has space been released?
+    BNE AFTER_JUMP_LOGIC ; if still holding space, stay in air
+
+    ; bring player back down to ground level
+    ADDI 10, R1          ; go back down same amount
+    MOVI 0, R6           ; jump_active = 0 (back on ground)
+
+AFTER_JUMP_LOGIC:
 
     ;----------------------------------------------------------
     ; 2) Move obstacle left by 3 px; wrap when it leaves screen
