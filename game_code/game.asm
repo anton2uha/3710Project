@@ -118,30 +118,32 @@ PLAYER_NOT_BELOW:
 OBSTACLE_ON_SCREEN:
 
     ; --- 5. COLLISION DETECTION ---
-    ; Player sprite: 32x32 at X=252, Y=player_y
-    ; Obstacle sprite: 32x32 at X=obstacle_x, Y=200 (ground)
+    ; Player sprite: 96x96 at X=252, Y=player_y
+    ; Obstacle sprite: 96x96 at X=obstacle_x, Y=200 (ground)
     
-    ; X collision: Check if obstacle_x is in range [220, 284]
+    ; X collision: Check if obstacle_x is in range [156, 348]
     
-    ; Build 220 (0xDC) in R6
-    MOVI 0x6E, R6         ; 110
-    ADDI 0x6E, R6         ; +110 = 220
-    CMP R3, R6            ; Compare obstacle_x with 220
-    BLT NO_COLLISION      ; Branch if obstacle_x < 220
+    ; Build 156 (0x9C) in R6
+    MOVI 0x4E, R6         ; 78
+    ADDI 0x4E, R6         ; +78 = 156
+    CMP R3, R6            ; Compare obstacle_x with 156
+    BLT NO_COLLISION      ; Branch if obstacle_x < 156
     
-    ; Build 284 (0x11C) in R6
-    MOVI 0x8E, R6         ; 142
-    ADDI 0x8E, R6         ; +142 = 284
-    CMP R3, R6            ; Compare obstacle_x with 284
-    BGE NO_COLLISION      ; Branch if obstacle_x >= 284
+    ; Build 348 (0x15C) in R6
+    MOVI 0x01, R6
+    LSHI 0x08, R6
+    ADDI 0x5C, R6         ; R6 = 0x015C = 348
+    CMP R3, R6            ; Compare obstacle_x with 348
+    BGE NO_COLLISION      ; Branch if obstacle_x >= 348
     
     ; X overlaps - now check Y
+    ; Y collision: player_y + 96 >= 200, or player_y >= 104
     
-    ; Build 168 (0xA8) in R6
-    MOVI 0x54, R6         ; 84
-    ADDI 0x54, R6         ; +84 = 168
-    CMP R1, R6            ; Compare player_y with 168
-    BLT NO_COLLISION      ; Branch if player_y < 168
+    ; Build 104 (0x68) in R6
+    MOVI 0x34, R6         ; 52
+    ADDI 0x34, R6         ; +52 = 104
+    CMP R1, R6            ; Compare player_y with 104
+    BLT NO_COLLISION      ; Branch if player_y < 104 (jumped over)
     
     ; COLLISION DETECTED - Game Over
     MOVI 1, R5            ; Set game state to game over
