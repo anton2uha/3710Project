@@ -33,7 +33,7 @@ INIT:
     ADDI 0x64, R8         ; +100 = 200
     
     MOVI 2, R9            ; R9 = Gravity 
-    MOVI -20, R10         ; R10 = Jump velocity (negative = upward)
+    MOVI -25, R10         ; R10 = Jump velocity (negative = upward)
     
     ; Screen wrap X = 608 (0x0260) - matches working code
     MOVI 0x02, R11
@@ -102,8 +102,8 @@ SKIP_JUMP:
 PLAYER_NOT_BELOW:
 
     ; --- 4. UPDATE OBSTACLE ---
-    ; Move obstacle left by 3 pixels
-    SUBI 3, R3            ; obstacle_x -= 3
+    ; Move obstacle left by 6 pixels
+    SUBI 6, R3            ; obstacle_x -= 6
     
     ; Check if obstacle went off left edge
     CMPI 0, R3
