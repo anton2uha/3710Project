@@ -15,7 +15,7 @@ module true_dual_port_ram_single_clock
 
 	// load memory using $readmemh
 	initial begin
-        $readmemh("C:/Users/IT Admin/Documents/GithubRepos/3710_project/3710Project/game_code/game.hex", ram);
+        $readmemh("C:/Users/toaoi/Documents/Repos/school/ECE3710/3710Project/game_code/game.hex", ram);
 	end
 
 	// Port A 

@@ -93,7 +93,7 @@ SKIP_JUMP:
     ; --- 3. GROUND COLLISION ---
     ; Check if player is below ground
     CMP R8, R1            ; Compare ground with player_y
-    BLT PLAYER_NOT_BELOW  ; If ground >= player_y, player is above ground
+    BLT PLAYER_NOT_BELOW  ; If ground < player_y, player is above ground
     
     ; Player hit ground - clamp position and stop
     MOV R8, R1            ; player_y = ground
@@ -118,27 +118,38 @@ PLAYER_NOT_BELOW:
 OBSTACLE_ON_SCREEN:
 
     ; --- 5. COLLISION DETECTION ---
+    ; Player is at fixed X (around 40), obstacle moves
+    ; Check if obstacle X is near player X AND player Y is low (near ground)
     
-    ; Build 157 in R6 (using positive values)
-    MOVI 0x64, R6         ; 100
-    ADDI 0x39, R6         ; +57 = 157
-    CMP R3, R6            ; Compare obstacle_x with 157
-    BLT NO_COLLISION      
+    ; Check X overlap: is obstacle near player's X position?
+    MOVI 40, R6           ; R6 = Player fixed X position
+    MOV R3, R7            ; R7 = obstacle X
+    SUB R6, R7            ; R7 = obstacle_x - player_x
     
-    ; Build 347 in R6 (using shift to avoid sign extension)
-    MOVI 0x01, R6
-    LSHI 0x08, R6         ; R6 = 256
-    ADDI 0x5B, R6         ; +91 = 347
-    CMP R3, R6            ; Compare obstacle_x with 347
-    BGE NO_COLLISION      
+    ; Get absolute value of X distance
+    CMPI 0, R7
+    BGE CHECK_POSITIVE_X
     
-    ; Build 105 in R6
-    MOVI 0x34, R6         ; 52
-    ADDI 0x35, R6         ; +53 = 105
-    CMP R1, R6            ; Compare player_y with 105
-    BLT NO_COLLISION      
+    ; R7 is negative, negate it
+    MOVI 0, R6
+    SUB R7, R6            ; R6 = -R7 (absolute value)
+    MOV R6, R7
+
+CHECK_POSITIVE_X:
+    ; R7 now has absolute X distance
+    CMP R14, R7           ; Compare collision_box with distance
+    BGT NO_COLLISION      ; If collision_box > distance, no X overlap
     
-    MOVI 1, R5            ; Collision detected
+    ; X overlaps - now check Y
+    ; Check if player is close to ground
+    MOV R8, R6            ; R6 = ground level (200)
+    SUB R1, R6            ; R6 = ground - player_y (how high player is)
+    
+    CMP R14, R6           ; Compare collision_box with height
+    BGT NO_COLLISION      ; If collision_box > height, player jumped over
+    
+    ; COLLISION DETECTED - Game Over
+    MOVI 1, R5            ; Set game state to game over
 
 NO_COLLISION:
 

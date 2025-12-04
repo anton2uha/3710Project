@@ -3,6 +3,7 @@
 module vga_control
 (
     input  wire clk,
+    input  wire reset,
     output reg  hsync,
     output reg  vsync,
     output wire bright,
@@ -14,8 +15,12 @@ module vga_control
 reg [1:0] clkdiv;
 reg pix_clk_internal;
 
-always @(posedge clk) begin
-    pix_clk_internal <= ~pix_clk_internal;
+always @(posedge clk or negedge reset) begin
+    if(!reset) begin
+        pix_clk_internal <= 1'b0;
+    end else begin
+        pix_clk_internal <= ~pix_clk_internal;
+    end
 end
 
 assign pix_clk_out = pix_clk_internal;
@@ -32,13 +37,16 @@ localparam V_VISIBLE = 10'd480,
            V_BACK    = 10'd33,
            V_TOTAL   = 10'd525;
 
-always @(posedge pix_clk_internal) begin
-	  if (hcount == H_TOTAL - 1) begin
-			hcount <= 0;
-			vcount <= (vcount == V_TOTAL - 1) ? 0 : vcount + 1;
-	  end else begin
-			hcount <= hcount + 1;
-	  end
+always @(posedge pix_clk_internal or negedge reset) begin
+    if(!reset) begin
+        hcount <= 0;
+        vcount <= 0;
+    end else if (hcount == H_TOTAL - 1) begin
+        hcount <= 0;
+        vcount <= (vcount == V_TOTAL - 1) ? 0 : vcount + 1;
+    end else begin
+        hcount <= hcount + 1;
+    end
 end
 
 always @(posedge pix_clk_internal) begin
