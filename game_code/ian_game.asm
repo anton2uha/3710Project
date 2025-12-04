@@ -143,24 +143,28 @@ OBSTACLE_ON_SCREEN:
     ; 3) P_top    >= O_bottom
     ; 4) P_bottom <= O_top
 
+    ; player1.x < player2.x + player2.width
     ; 1) If P_left >= O_right → NO_COLLISION
     MOV R3, R6            ; R6 = O_left
     ADD R15, R6           ; R6 = O_right = R3 + SPRITE_SIZE
     CMP R14, R6           ; compare P_left vs O_right (dest=P_left, src=O_right)
     BLT NO_COLLISION      ; if P_left < O_right: no overlap
 
+    ; player1.x + player1.width > player2.x 
     ; 2) If P_right <= O_left → NO_COLLISION
     MOV R14, R7           ; R7 = P_left
     ADD R15, R7           ; R7 = P_right = P_left + SPRITE_SIZE
-    CMP R3, R7            ; compare O_left vs P_right (dest=O_left, src=P_right)
-    BLT NO_COLLISION      ; if O_left < P_right: no overlap
+    CMP R7, R3            ; compare O_left vs P_right (dest=O_left, src=P_right)
+    BGT NO_COLLISION      ; if O_left < P_right: no overlap
 
+    ; player1.y < player2.y + player2.height
     ; 3) If P_top >= O_bottom → NO_COLLISION
     MOV R8, R6            ; R6 = O_top
     ADD R15, R6           ; R6 = O_bottom = O_top + SPRITE_SIZE
     CMP R1, R6            ; compare P_top vs O_bottom (dest=P_top, src=O_bottom)
     BLT NO_COLLISION      ; if P_top < O_bottom: no overlap
 
+    ; player1.y + player1.height > player2.y
     ; 4) If P_bottom <= O_top → NO_COLLISION
     MOV R1, R7            ; R7 = P_top
     ADD R15, R7           ; R7 = P_bottom = P_top + SPRITE_SIZE

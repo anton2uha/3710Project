@@ -15,7 +15,7 @@ module true_dual_port_ram_single_clock_vga
 
 	// load memory using $readmemh
 	initial begin
-        $readmemh("C:/Users/toaoi/Documents/Repos/school/ECE3710/3710Project/game_code/Combined_manWalking+Cactus.hex", ram);
+        $readmemh("C:/Users/toaoi/OneDrive/Documents/Repos/school/ECE3710/3710Project/game_code/Combined_manWalking+Cactus.hex", ram);
 	end
 
 	// Port A 
