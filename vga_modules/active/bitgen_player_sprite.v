@@ -27,8 +27,8 @@ module bitgen_player_sprite #(
     localparam PIXELS_PER_FRAME = SPRITE_WIDTH * SPRITE_HEIGHT;
 
     // Center X on screen
-    // localparam [9:0] PLAYER_X = ((SCREEN_WIDTH - SCALED_WIDTH) / 2) - 20;
-    localparam [9:0] PLAYER_X = 0;
+    localparam [9:0] PLAYER_X = ((SCREEN_WIDTH - SCALED_WIDTH) / 2) - 20;
+    // localparam [9:0] PLAYER_X = 0;
 
     localparam BG_R = 8'h88;
     localparam BG_G = 8'hCC;

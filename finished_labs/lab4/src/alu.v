@@ -166,7 +166,6 @@ begin
 	NOP: begin end // No operation, do nothing
 
 	// q: what's the difference between ashu and lsh? both seem to do logical left shifts and right shifts based on sign of B. 
-
 	default: // undefined behavior
 		begin
 

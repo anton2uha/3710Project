@@ -19,7 +19,7 @@
 ; R11 - Wrap X constant (608) / vblank value
 ; R12 - Memory address pointer
 ; R13 - Input value (driven externally)
-; R14 - Player X constant (0)
+; R14 - Player X constant (252)
 ; R15 - Sprite size (96)
 
 ; ============================================================
@@ -32,7 +32,7 @@ INIT:
     MOVI 0x64, R8         ; 100
     ADDI 0x64, R8         ; +100 = 200
     
-    MOVI 2, R9            ; R9 = Gravity 
+    MOVI 1, R9            ; R9 = Gravity 
     MOVI -40, R10         ; R10 = Jump velocity (negative = upward)
     
     ; Screen wrap X = 608 (0x0260)
@@ -40,8 +40,10 @@ INIT:
     LSHI 0x08, R11
     ADDI 0x60, R11        ; R11 = 608
     
-    ; Player X = 0 (left edge)
-    MOVI 0, R14
+    ; Player X = 252
+    MOVI 0xF, R14
+    LSHI 0x04, R14
+    ADDI 0xC, R14
 
     ; Sprite size = 96
     MOVI 96, R15          ; 96x96 hitbox
