@@ -12,7 +12,7 @@ module bitgen_obstacle_sprite #(
     input  wire        bright,
     input  wire [9:0]  hcount,
     input  wire [9:0]  vcount,
-    input  wire [15:0] sprite_data,   // from ROM
+    input  wire [16:0] sprite_data,   // from ROM
     output reg  [12:0] sprite_addr,   // to ROM
     output reg  [7:0]  vga_r,
     output reg  [7:0]  vga_g,

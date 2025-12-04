@@ -1,6 +1,6 @@
 module sprite_rom_dp #(
     parameter DATA_WIDTH = 16,
-    parameter ADDR_WIDTH = 13       // enough for 0..8191
+    parameter ADDR_WIDTH = 16       // enough for 0..8191
 )(
     input  wire                   clk,
     input  wire [ADDR_WIDTH-1:0]  addr_a,
