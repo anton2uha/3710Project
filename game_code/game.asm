@@ -118,33 +118,22 @@ PLAYER_NOT_BELOW:
 OBSTACLE_ON_SCREEN:
 
     ; --- 5. COLLISION DETECTION ---
-    ; Player sprite: 32x32 at X=252, Y=player_y
-    ; Obstacle sprite: 32x32 at X=obstacle_x, Y=200 (ground)
+    ; Player is at fixed X (around 40), obstacle moves
+    ; Check if obstacle X is near player X AND player Y is low (near ground)
     
-    ; X collision: Check if obstacle_x is in range [220, 284]
+    ; Check X overlap: is obstacle near player's X position?
+    MOVI 40, R6           ; R6 = Player fixed X position
+    MOV R3, R7            ; R7 = obstacle X
+    SUB R6, R7            ; R7 = obstacle_x - player_x
     
-    ; Build 220 (0xDC) in R6
-    MOVI 0x6E, R6         ; 110
-    ADDI 0x6E, R6         ; +110 = 220
-    CMP R6, R3            ; Compare 220 with obstacle_x
-    BGE NO_COLLISION      ; Branch if 220 >= obstacle_x (obstacle too far left)
+    ; Get absolute value of X distance
+    CMPI 0, R7
+    BGE CHECK_POSITIVE_X
     
-    ; Build 284 (0x11C) in R6
-    MOVI 0x8E, R6         ; 142
-    ADDI 0x8E, R6         ; +142 = 284
-    CMP R6, R3            ; Compare 284 with obstacle_x
-    BLT NO_COLLISION      ; Branch if 284 < obstacle_x (obstacle too far right)
-    
-    ; X overlaps - now check Y
-    
-    ; Build 168 (0xA8) in R6
-    MOVI 0x54, R6         ; 84
-    ADDI 0x54, R6         ; +84 = 168
-    CMP R6, R1            ; Compare 168 with player_y
-    BGE NO_COLLISION      ; Branch if 168 >= player_y (player jumped high enough)
-    
-    ; COLLISION DETECTED - Game Over
-    MOVI 1, R5            ; Set game state to game over
+    ; R7 is negative, negate it
+    MOVI 0, R6
+    SUB R7, R6            ; R6 = -R7 (absolute value)
+    MOV R6, R7
 
 NO_COLLISION:
 
