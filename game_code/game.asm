@@ -118,33 +118,27 @@ PLAYER_NOT_BELOW:
 OBSTACLE_ON_SCREEN:
 
     ; --- 5. COLLISION DETECTION ---
-    ; Player sprite: 96x96 at X=252, Y=player_y
-    ; Obstacle sprite: 96x96 at X=obstacle_x, Y=200 (ground)
     
-    ; X collision: Check if obstacle_x is in range (156, 348)
+    ; Build 157 in R6 (using positive values)
+    MOVI 0x64, R6         ; 100
+    ADDI 0x39, R6         ; +57 = 157
+    CMP R3, R6            ; Compare obstacle_x with 157
+    BLT NO_COLLISION      
     
-    ; Build 156 (0x9C) in R6
-    MOVI 0x4E, R6         ; 78
-    ADDI 0x4E, R6         ; +78 = 156
-    CMP R3, R6            ; Compare obstacle_x with 156
-    BGE NO_COLLISION      ; FLIPPED: was BLT
+    ; Build 347 in R6 (using shift to avoid sign extension)
+    MOVI 0x01, R6
+    LSHI 0x08, R6         ; R6 = 256
+    ADDI 0x5B, R6         ; +91 = 347
+    CMP R3, R6            ; Compare obstacle_x with 347
+    BGE NO_COLLISION      
     
-    ; Build 348 (0x15C) in R6
-    MOVI 0xAE, R6         ; 174
-    ADDI 0xAE, R6         ; +174 = 348
-    CMP R3, R6            ; Compare obstacle_x with 348
-    BLT NO_COLLISION      ; FLIPPED: was BGE
-    
-    ; X overlaps - now check Y
-    
-    ; Build 104 (0x68) in R6
+    ; Build 105 in R6
     MOVI 0x34, R6         ; 52
-    ADDI 0x34, R6         ; +52 = 104
-    CMP R1, R6            ; Compare player_y with 104
-    BGE NO_COLLISION      ; FLIPPED: was BLT
+    ADDI 0x35, R6         ; +53 = 105
+    CMP R1, R6            ; Compare player_y with 105
+    BLT NO_COLLISION      
     
-    ; COLLISION DETECTED - Game Over
-    MOVI 1, R5            ; Set game state to game over
+    MOVI 1, R5            ; Collision detected
 
 NO_COLLISION:
 
