@@ -17,9 +17,10 @@ module regfile #(
     input  [15:0] regEnable,    // enables for each register
     input  [3:0]  raddrA,       // read address A, selects which register to output.
     input  [3:0]  raddrB,	     // read address B
-	input		  space_is_down,
+	 input			space_is_down,
+	 input			space_pressed_pulse,
     output [15:0] rdataA,       // read data A
-    output [15:0] rdataB        // read data B
+    output [15:0] rdataB       // read data B
 );
 	
 	// 16 registers, each 16 bits wide
@@ -34,10 +35,21 @@ module regfile #(
 		begin
 			if (reset == 1'b0) begin
 				r[i] <= 16'd0;
+					// if(i == 1) r[i] <= INIT_R1;
+				// else if(i == 2) r[i] <= INIT_R2;
+				// else if(i == 3) r[i] <= INIT_R3;
+				// else if(i == 4) r[i] <= INIT_R4;
+				// else if(i == 5) r[i] <= INIT_R5;
+				// else if(i == 6) r[i] <= INIT_R6;
+				// else if(i == 7) r[i] <= INIT_R7;
+				// else if(i == 8) r[i] <= INIT_R8;
+				// else if(i == 10) r[i] <= INIT_R10;
+				// else if(i == 11) r[i] <= INIT_R11;
+				// else r[i]<= 16'd0;
 			end
 			else begin
-				if(i == 13) begin
-					r[i] <= {15'b0, space_is_down};
+				if(i == 13 && space_pressed_pulse) begin
+					r[i] <= {15'b0, 1'b1};
 				end else if(regEnable[i]==1'b1) begin
 					r[i] <= wdata;
 				end
@@ -48,5 +60,6 @@ module regfile #(
 
     assign rdataA = r[raddrA];
     assign rdataB = r[raddrB];
+
 
 endmodule
