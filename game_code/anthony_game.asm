@@ -1,5 +1,6 @@
 ; ============================================================
 ; DINO RUNNER GAME - 16-bit Assembly
+; With Limited Apex Float (5 frames)
 ; ============================================================
 
 ; ============================================================
@@ -23,6 +24,15 @@
 ; R15 - Sprite size (96)
 
 ; ============================================================
+; MEMORY MAP
+; ============================================================
+; 0x0100 - Player Y (VGA output)
+; 0x0101 - Obstacle X (VGA output)
+; 0x0102 - Score (VGA output)
+; 0x0103 - Float counter (internal)
+; 0xFFFE - Vblank flag
+
+; ============================================================
 ; PROGRAM START
 ; ============================================================
 
@@ -33,7 +43,7 @@ INIT:
     ADDI 0x64, R8         ; +100 = 200
     
     MOVI 1, R9            ; R9 = Gravity 
-    MOVI -30, R10         ; R10 = Jump velocity (negative = upward)
+    MOVI -25, R10         ; R10 = Jump velocity (negative = upward)
     
     ; Screen wrap X = 608 (0x0260)
     MOVI 0x02, R11
@@ -52,6 +62,13 @@ INIT:
     
     ; vblank address = 0xFFFE
     MOVI 0xFE, R0         ; R0 = 0xFFFE (sign-extended)
+    
+    ; Initialize float counter to 0
+    MOVI 0x01, R12
+    LSHI 0x08, R12
+    ADDI 0x03, R12        ; R12 = 0x0103 (float counter address)
+    MOVI 0, R6
+    STOR R6, R12          ; float_counter = 0
     
     ; --- Initialize game state ---
     MOV R8, R1            ; R1 = Player Y starts at ground (200)
@@ -93,26 +110,43 @@ WAIT_FOR_VBLANK:
 
 SKIP_JUMP:
 
-    ; --- 2. UPDATE PLAYER PHYSICS ---
-    ; Check if at apex of jump (velocity near 0) for float effect
-    ; If velocity is between -3 and 3, skip gravity (creates float)
+    ; --- 2. UPDATE PLAYER PHYSICS WITH APEX FLOAT ---
+    ; Load float counter from memory
+    MOVI 0x01, R12
+    LSHI 0x08, R12
+    ADDI 0x03, R12        ; R12 = 0x0103
+    LOAD R6, R12          ; R6 = float_counter
     
-    ; Check if velocity >= -3
+    ; Check if velocity is in apex range [-3, 3]
     CMPI -3, R2
-    BLT APPLY_GRAVITY     ; If velocity < -3, apply gravity normally
+    BLT NOT_AT_APEX       ; velocity < -3, not at apex
     
-    ; Check if velocity <= 3
     CMPI 3, R2
-    BGT APPLY_GRAVITY     ; If velocity > 3, apply gravity normally
+    BGT NOT_AT_APEX       ; velocity > 3, not at apex
     
-    ; Velocity is in range [-3, 3] - at apex, skip gravity for float effect
-    BUC SKIP_GRAVITY
+    ; We're at apex - check if we've floated enough frames
+    CMPI 10, R6            ; Compare float_counter with 5
+    BGE FLOAT_DONE        ; If floated >= 5 frames, stop floating
+    
+    ; Still floating - skip gravity and increment counter
+    ADDI 1, R6            ; float_counter++
+    STOR R6, R12          ; Save float_counter
+    BUC APPLY_VELOCITY    ; Skip gravity, just apply velocity
+
+NOT_AT_APEX:
+    ; Not at apex - reset float counter and apply gravity
+    MOVI 0, R6
+    STOR R6, R12          ; float_counter = 0
+    BUC APPLY_GRAVITY
+
+FLOAT_DONE:
+    ; Float time is over - apply gravity
+    BUC APPLY_GRAVITY
 
 APPLY_GRAVITY:
-    ; Apply gravity to velocity
     ADD R9, R2            ; velocity += gravity
 
-SKIP_GRAVITY:
+APPLY_VELOCITY:
     ; Apply velocity to position
     ADD R2, R1            ; player_y += velocity
     

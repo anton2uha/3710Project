@@ -48,8 +48,6 @@ INIT:
     ; Sprite size = 96
     MOVI 96, R15          ; 96x96 hitbox
 
-    MOVI 0, R7            ; prev input (jump edge detect)
-
     MOVI 0, R4            ; R4 = 0 (for resets / score)
     
     ; vblank address = 0xFFFE
@@ -89,8 +87,6 @@ WAIT_FOR_VBLANK:
     
     CMPI 1, R13           ; Check if jump button pressed
     BNE SKIP_JUMP         ; If button not pressed, skip
-    CMPI 0, R7            ; Require a fresh press (no jump on held button)
-    BNE SKIP_JUMP         ; If button was already held, skip
     
     ; Start jump - set upward velocity
     MOV R10, R2           ; velocity = JUMP_VELOCITY (negative = up)
@@ -197,9 +193,6 @@ NO_COLLISION:
     ADDI 0x01, R12        ; R12 = 0x0102
     MOV R4, R6            ; Get score from R4
     STOR R6, R12          ; Store score
-
-    ; Latch current input for next frame
-    MOV R13, R7
 
     ; --- 7. LOOP BACK ---
     BUC GAME_LOOP
