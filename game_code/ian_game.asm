@@ -169,7 +169,7 @@ OBSTACLE_ON_SCREEN:
     MOV R1, R7            ; R7 = P_top
     ADD R15, R7           ; R7 = P_bottom = P_top + SPRITE_SIZE
     CMP R8, R7            ; compare O_top vs P_bottom (dest=O_top, src=P_bottom)
-    BLT NO_COLLISION      ; if O_top < P_bottom: no overlap
+    BGE NO_COLLISION      ; if O_top < P_bottom: no overlap
 
     ; If we reach here, all four separating conditions are false:
     ; => boxes overlap → collision
