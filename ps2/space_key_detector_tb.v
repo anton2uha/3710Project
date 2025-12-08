@@ -1,8 +1,6 @@
 `timescale 1ns / 1ps
 
-// Testbench: space_key_detector_tb
 // Drives a PS/2 make code for the space key (0x29) into the DUT.
-
 module space_key_detector_tb;
 
     // 50 MHz system clock
