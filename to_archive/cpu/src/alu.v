@@ -8,22 +8,10 @@ input cin;
 output reg [15:0] C;
 output reg [4:0] Flags;
 
-/*
-parameter ADDU = 2'b00;
-parameter ADD = 2'b01;
-parameter SUB = 2'b10;
-parameter CMP = 2'b11;
-
-/*
-ADD, ADDI, ADDU, ADDUI, ADDC, ADDCU, ADDCUI, ADDCI, SUB, SUBI, CMP, CMPI, CMPU/I, AND,
-OR, XOR, NOT, LSH, LSHI, RSH, RSHI, ALSH, ARSH, NOP/WAIT
-*/
-
 parameter NOP   = 4'b0000;
 parameter AND   = 4'b0001;
 parameter OR    = 4'b0010;
 parameter XOR   = 4'b0011;
-// 0100 reserved for jcond
 parameter ADD   = 4'b0101;
 parameter ADDU  = 4'b0110;
 parameter ADDC  = 4'b0111;
@@ -31,7 +19,6 @@ parameter NOT   = 4'b1000;
 parameter SUB   = 4'b1001;
 parameter SUBC  = 4'b1010;
 parameter CMP   = 4'b1011;
-// 1100 reserved for bcond
 parameter MOV   = 4'b1101;
 parameter ASHU  = 4'b1110;
 parameter LSH   = 4'b1111;

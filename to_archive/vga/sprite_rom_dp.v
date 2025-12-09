@@ -9,7 +9,7 @@ module sprite_rom_dp #(
     output wire [DATA_WIDTH-1:0]  q_b
 );
 
-    // Reuse your true_dual_port_ram_single_clock as ROM
+    // Reuse true_dual_port_ram_single_clock as ROM
     true_dual_port_ram_single_clock_vga #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH)

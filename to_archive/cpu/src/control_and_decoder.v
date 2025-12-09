@@ -2,7 +2,7 @@
 `timescale 1ns / 1ps
 
 module control_and_decoder #(
-	 parameter can_be_paused = 1'b0,
+	parameter can_be_paused = 1'b0,
     parameter [4:0] instrs = 5'd24 // number of instructions to execute before pausing
 )(
     input  wire        clk,
