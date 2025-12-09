@@ -26,6 +26,7 @@ module vga_top(
     localparam POS_BASE          = 16'h0100;
     localparam MAN_BASE_ADDR     = 13'd0;
     localparam CACTUS_BASE_ADDR  = 13'd4096;
+	 localparam BG_BASE_ADDR     = 17'd5120;
     localparam VBLANK_FLAG_ADDR  = 16'hFFFE;
 
     vga_control vc (
@@ -72,6 +73,24 @@ module vga_top(
     wire [15:0] obstacle_data;
     wire [7:0]  obstacle_r, obstacle_g, obstacle_b;
     wire        obstacle_opaque;
+	 
+	 wire [16:0] bg_addr;    // Background address (17 bits)
+    wire [15:0] bg_data;    // Background data
+    wire [7:0] bg_r, bg_g, bg_b;
+	 
+	 bitgen_background_sprite #(  // Changed from bitgen_background_sprite
+        .BASE_ADDR(BG_BASE_ADDR)
+    ) background (
+        .pix_clk(pix_clk),
+        .bright(bright),
+        .hcount(hcount),
+        .vcount(vcount),
+        .bg_data(bg_data),
+        .bg_addr(bg_addr),
+        .vga_r(bg_r),
+        .vga_g(bg_g),
+        .vga_b(bg_b)
+    );
 
     bitgen_obstacle_sprite #(
         .BASE_ADDR(CACTUS_BASE_ADDR)
@@ -88,18 +107,23 @@ module vga_top(
         .pixel_opaque(obstacle_opaque),
         .obstacle_x(obstacle_x)
     );
+	 wire [16:0] mux_addr_b = obstacle_opaque ? {4'b0, obstacle_addr} : bg_addr;
+	wire [15:0] mux_data_b;
 
-    // Local sprite ROM
-    sprite_rom_dp #(
-        .DATA_WIDTH(16),
-        .ADDR_WIDTH(13)
-    ) srom (
-        .clk(pix_clk),
-        .addr_a(player_addr),
-        .addr_b(obstacle_addr),
-        .q_a(player_data),
-        .q_b(obstacle_data)
-    );
+	sprite_rom_dp #(
+		 .DATA_WIDTH(16),
+		 .ADDR_WIDTH(17)
+	) srom (
+		 .clk(pix_clk),
+		 .addr_a({4'b0, player_addr}),
+		 .addr_b(mux_addr_b),
+		 .q_a(player_data),
+		 .q_b(mux_data_b)
+	);
+
+// Route data to both obstacle and background
+assign obstacle_data = mux_data_b;
+assign bg_data = mux_data_b;
 
     reg [7:0] vga_r_reg, vga_g_reg, vga_b_reg;
     assign VGA_R = vga_r_reg;
@@ -229,9 +253,9 @@ module vga_top(
             vga_g_reg = obstacle_g;
             vga_b_reg = obstacle_b;
         end else begin
-            vga_r_reg = 8'h88;
-            vga_g_reg = 8'hCC;
-            vga_b_reg = 8'h88;
+            vga_r_reg = bg_r;
+            vga_g_reg = bg_g;
+            vga_b_reg = bg_b;
         end
     end
 
