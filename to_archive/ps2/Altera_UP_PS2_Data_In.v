@@ -1,4 +1,4 @@
- 
+ // Reference :  Department of Electrical and Computer Engineering, University of Toronto 
  // Module:       Altera_UP_PS2_Data_In                                       
  // Description:  This module accepts incoming data from a PS2 core.                   
 
