@@ -1,4 +1,4 @@
-                                                                        
+// Reference :  Department of Electrical and Computer Engineering, University of Toronto                                                                        
 // Module:       Altera_UP_PS2                                               
 // Description:  This module communicates with the PS2 core
 
