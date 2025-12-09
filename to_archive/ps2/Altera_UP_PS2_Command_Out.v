@@ -1,12 +1,4 @@
-/*****************************************************************************
- *                                                                           *
- * Module:       Altera_UP_PS2_Command_Out                                   *
- * Description:                                                              *
- *      This module sends commands out to the PS2 core.                      *
- *                                                                           *
- *****************************************************************************/
-
-
+// Not used since we are not communicating to the PS2
 module Altera_UP_PS2_Command_Out (
 	// Inputs
 	clk,
@@ -27,9 +19,7 @@ module Altera_UP_PS2_Command_Out (
 	error_communication_timed_out
 );
 
-/*****************************************************************************
- *                           Parameter Declarations                          *
- *****************************************************************************/
+
 
 // Timing info for initiating Host-to-Device communication 
 //   when using a 50MHz system clock
@@ -53,9 +43,7 @@ parameter	CLOCK_CYCLES_FOR_2MS		= 100000;
 parameter	NUMBER_OF_BITS_FOR_2MS		= 17;
 parameter	COUNTER_INCREMENT_FOR_2MS	= 17'h00001;
 
-/*****************************************************************************
- *                             Port Declarations                             *
- *****************************************************************************/
+
 // Inputs
 input				clk;
 input				reset;
@@ -74,9 +62,7 @@ inout			 	PS2_DAT;
 output	reg			command_was_sent;
 output	reg		 	error_communication_timed_out;
 
-/*****************************************************************************
- *                           Constant Declarations                           *
- *****************************************************************************/
+
 // states
 parameter	PS2_STATE_0_IDLE					= 3'h0,
 			PS2_STATE_1_INITIATE_COMMUNICATION	= 3'h1,
@@ -87,9 +73,7 @@ parameter	PS2_STATE_0_IDLE					= 3'h0,
 			PS2_STATE_6_COMMAND_WAS_SENT		= 3'h6,
 			PS2_STATE_7_TRANSMISSION_ERROR		= 3'h7;
 
-/*****************************************************************************
- *                 Internal wires and registers Declarations                 *
- *****************************************************************************/
+
 // Internal Wires
 
 // Internal Registers
@@ -105,9 +89,7 @@ reg			[NUMBER_OF_BITS_FOR_2MS:1]		transfer_counter;
 reg			[2:0]	ns_ps2_transmitter;
 reg			[2:0]	s_ps2_transmitter;
 
-/*****************************************************************************
- *                         Finite State Machine(s)                           *
- *****************************************************************************/
+
 
 always @(posedge clk)
 begin
@@ -194,9 +176,7 @@ begin
 	endcase
 end
 
-/*****************************************************************************
- *                             Sequential logic                              *
- *****************************************************************************/
+
 
 always @(posedge clk)
 begin
@@ -278,9 +258,7 @@ begin
 		error_communication_timed_out <= 1'b0;
 end
 
-/*****************************************************************************
- *                            Combinational logic                            *
- *****************************************************************************/
+
 
 assign PS2_CLK	= 
 	(s_ps2_transmitter == PS2_STATE_1_INITIATE_COMMUNICATION) ? 
@@ -293,10 +271,6 @@ assign PS2_DAT	=
 	((s_ps2_transmitter == PS2_STATE_1_INITIATE_COMMUNICATION) && 
 		(command_initiate_counter[NUMBER_OF_BITS_FOR_101US] == 1'b1)) ? 1'b0 : 
 			1'bz;
-
-/*****************************************************************************
- *                              Internal Modules                             *
- *****************************************************************************/
 
 
 endmodule
