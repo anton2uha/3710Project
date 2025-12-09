@@ -1,3 +1,4 @@
+// Reference :  Department of Electrical and Computer Engineering, University of Toronto
 // Not used since we are not communicating to the PS2
 module Altera_UP_PS2_Command_Out (
 	// Inputs
