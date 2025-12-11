@@ -26,6 +26,11 @@ Exact pin assignments are located in `/resources/pin_out.qsf` for the pins below
 - **Clock:** 50 MHz system clock (CLOCK_50)
 - **Reset:** KEY[0] (active low)
 
+### ISA Quirks
+Our custom ISA has two **non-standard instruction formats** that may cause confusion:
+- CMP instruction operands are reversed: The syntax CMP Rsrc, Rdest actually computes Rdest - Rsrc and sets flags accordingly. This is backwards from typical assembly conventions.
+- LOAD instruction syntax is backwards: The syntax is LOAD Rdest, Raddr which loads from memory address in Raddr into Rdest.
+
 ### VGA Subsystem Details
 - **Resolution:** 640×480 @ 60Hz
 - **Color Format:** RGB888 output (RGB565 stored in ROM)
