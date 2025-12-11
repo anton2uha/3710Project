@@ -13,12 +13,12 @@ module bitgen_obstacle_sprite #(
     input  wire        bright,
     input  wire [9:0]  hcount,
     input  wire [9:0]  vcount,
-    input  wire [16:0] sprite_data,   // from ROM
-    output reg  [12:0] sprite_addr,   // to ROM
+    input  wire [16:0] sprite_data,
+    output reg  [12:0] sprite_addr,
     output reg  [7:0]  vga_r,
     output reg  [7:0]  vga_g,
     output reg  [7:0]  vga_b,
-    output reg         pixel_opaque, // 1 if the pixel is part of the sprite, 0 if background
+    output reg         pixel_opaque,
     input  wire [9:0]  obstacle_x
 );
 
@@ -31,9 +31,9 @@ module bitgen_obstacle_sprite #(
     localparam BG_R = 8'h88;
     localparam BG_G = 8'hCC;
     localparam BG_B = 8'h88;
-	 localparam DEBUG_R = 8'hFF;  // ← ADD THESE
+	localparam DEBUG_R = 8'hFF;
     localparam DEBUG_G = 8'h00;
-    localparam DEBUG_B = 8'hFF;  // Magenta
+    localparam DEBUG_B = 8'hFF;
     localparam [23:0] TRANSPARENT_COLOR = 24'h00F81F;
 
     wire in_sprite_x = (hcount >= obstacle_x) &&
@@ -48,7 +48,7 @@ module bitgen_obstacle_sprite #(
     wire [9:0] sprite_x = sprite_x_scaled / SCALE;
     wire [9:0] sprite_y = sprite_y_scaled / SCALE;
 
-    wire [12:0] pixel_offset = sprite_y * SPRITE_WIDTH + sprite_x; // 0..1023
+    wire [12:0] pixel_offset = sprite_y * SPRITE_WIDTH + sprite_x;
     wire [12:0] rom_addr     = BASE_ADDR + pixel_offset;
 
     // RGB565 to RGB888 conversion
@@ -72,9 +72,9 @@ module bitgen_obstacle_sprite #(
         end else if (in_sprite) begin
             sprite_addr = rom_addr;
             if (is_transparent) begin
-                pixel_opaque = DEBUG_SHOW_BG ? 1'b1 : 1'b0;  // ← MODIFIED
-                vga_r        = DEBUG_SHOW_BG ? DEBUG_R : BG_R;  // ← MODIFIED
-                vga_g        = DEBUG_SHOW_BG ? DEBUG_G : BG_G;  // ← MODIFIED
+                pixel_opaque = DEBUG_SHOW_BG ? 1'b1 : 1'b0;
+                vga_r        = DEBUG_SHOW_BG ? DEBUG_R : BG_R;
+                vga_g        = DEBUG_SHOW_BG ? DEBUG_G : BG_G;
                 vga_b        = DEBUG_SHOW_BG ? DEBUG_B : BG_B;
             end else begin
                 pixel_opaque = 1'b1;
@@ -83,7 +83,7 @@ module bitgen_obstacle_sprite #(
                 vga_b        = b8;
             end
         end else begin
-            sprite_addr   = BASE_ADDR;  // don't care outside sprite
+            sprite_addr   = BASE_ADDR;
             pixel_opaque  = 1'b0;
             vga_r         = BG_R;
             vga_g         = BG_G;

@@ -10,10 +10,8 @@ module true_dual_port_ram_single_clock_vga
 	output reg [(DATA_WIDTH-1):0] q_a, q_b
 );
 
-	// Declare the RAM variable
 	reg [DATA_WIDTH-1:0] ram[2**ADDR_WIDTH-1:0];
 
-	// load memory using $readmemh
 	initial begin
         $readmemh("C:/Users/toaoi/Documents/Repos/school/ECE3710/3710Project/game_code/Combined_manWalking+Cactus+bg.hex", ram);
 	end
@@ -32,11 +30,9 @@ module true_dual_port_ram_single_clock_vga
 		end 
 	end 
 
-	// Port B 
+	// Port B. If A is write enabled and has the same writing address as Port B, then we dont write to port B
 	always @ (posedge clk)
 	begin
-		// Port A takes write precendence. Therefore, if A is write enabled 
-		// and has the same writing address as Port B, then just dont write to port B
 		if (we_b && !(we_a && addr_a == addr_b)) 
 		begin
 			ram[addr_b] <= data_b;

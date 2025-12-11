@@ -13,8 +13,8 @@ module bitgen_player_sprite #(
     input  wire        bright,
     input  wire [9:0]  hcount,
     input  wire [9:0]  vcount,
-    input  wire [15:0] sprite_data,        // from ROM
-    output reg  [12:0] sprite_addr,        // to ROM
+    input  wire [15:0] sprite_data,
+    output reg  [12:0] sprite_addr,
     output reg  [7:0]  vga_r,
     output reg  [7:0]  vga_g,
     output reg  [7:0]  vga_b,
@@ -26,23 +26,20 @@ module bitgen_player_sprite #(
     localparam SCALED_WIDTH   = SPRITE_WIDTH  * SCALE;
     localparam SCALED_HEIGHT  = SPRITE_HEIGHT * SCALE;
     localparam PIXELS_PER_FRAME = SPRITE_WIDTH * SPRITE_HEIGHT;
-
-    // Center X on screen
     localparam [9:0] PLAYER_X = ((SCREEN_WIDTH - SCALED_WIDTH) / 2) - 20;
-    //localparam [9:0] PLAYER_X = 0;
 
     localparam BG_R = 8'h88;
     localparam BG_G = 8'hCC;
     localparam BG_B = 8'h88;
-	 localparam DEBUG_R = 8'hFF;  // ← ADD THESE
+	localparam DEBUG_R = 8'hFF;
     localparam DEBUG_G = 8'h00;
-    localparam DEBUG_B = 8'hFF;  // Magenta
+    localparam DEBUG_B = 8'hFF;
     localparam [23:0] TRANSPARENT_COLOR = 24'h00F81F;
 
-    // Animation control (only frames, no movement)
+    // Animation control
     reg [1:0]  current_frame;
     reg [25:0] anim_counter;
-    localparam [25:0] ANIM_SPEED = 26'd5_000_000;  // ~5 FPS at 25 MHz
+    localparam [25:0] ANIM_SPEED = 26'd5_000_000; // 5 FPS
 
     initial begin
         current_frame = 2'd0;
@@ -69,7 +66,7 @@ module bitgen_player_sprite #(
     wire [9:0] sprite_x_scaled = hcount - PLAYER_X;
     wire [9:0] sprite_y_scaled = vcount - player_y;
 
-    // Flip horizontally like your original (optional)
+    // Flip image horizontally
     wire [9:0] sprite_x = (SPRITE_WIDTH - 1) - (sprite_x_scaled / SCALE);
     wire [9:0] sprite_y = sprite_y_scaled / SCALE;
 
@@ -78,6 +75,7 @@ module bitgen_player_sprite #(
     wire [12:0] local_addr   = frame_offset + pixel_offset;
     wire [12:0] rom_addr     = BASE_ADDR + local_addr;
 
+    // RGB565 to RGB888 conversion
     wire [4:0] r5 = sprite_data[15:11];
     wire [5:0] g6 = sprite_data[10:5];
     wire [4:0] b5 = sprite_data[4:0];
@@ -90,7 +88,6 @@ module bitgen_player_sprite #(
 
     always @(*) begin
         if (!bright) begin
-            // Outside active video
             sprite_addr  = BASE_ADDR;
             pixel_opaque = 1'b0;
             vga_r        = 8'h00;
@@ -99,10 +96,10 @@ module bitgen_player_sprite #(
         end else if (in_sprite) begin
             sprite_addr = rom_addr;
             if (is_transparent) begin
-                pixel_opaque = DEBUG_SHOW_BG ? 1'b1 : 1'b0;  // ← MODIFIED
-                vga_r        = DEBUG_SHOW_BG ? DEBUG_R : BG_R;  // ← MODIFIED
-                vga_g        = DEBUG_SHOW_BG ? DEBUG_G : BG_G;  // ← MODIFIED
-                vga_b        = DEBUG_SHOW_BG ? DEBUG_B : BG_B;  // ← MODIFIED
+                pixel_opaque = DEBUG_SHOW_BG ? 1'b1 : 1'b0;
+                vga_r        = DEBUG_SHOW_BG ? DEBUG_R : BG_R;
+                vga_g        = DEBUG_SHOW_BG ? DEBUG_G : BG_G;
+                vga_b        = DEBUG_SHOW_BG ? DEBUG_B : BG_B;
             end else begin
                 pixel_opaque = 1'b1;
                 vga_r        = r8;
@@ -110,7 +107,7 @@ module bitgen_player_sprite #(
                 vga_b        = b8;
             end
         end else begin
-            sprite_addr  = BASE_ADDR;  // don't care when not in sprite
+            sprite_addr  = BASE_ADDR;
             pixel_opaque = 1'b0;
             vga_r        = BG_R;
             vga_g        = BG_G;

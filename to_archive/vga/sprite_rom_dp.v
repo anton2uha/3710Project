@@ -1,6 +1,6 @@
 module sprite_rom_dp #(
     parameter DATA_WIDTH = 16,
-    parameter ADDR_WIDTH = 13       // enough for 0..8191
+    parameter ADDR_WIDTH = 13
 )(
     input  wire                   clk,
     input  wire [ADDR_WIDTH-1:0]  addr_a,
@@ -9,7 +9,6 @@ module sprite_rom_dp #(
     output wire [DATA_WIDTH-1:0]  q_b
 );
 
-    // Reuse true_dual_port_ram_single_clock as ROM
     true_dual_port_ram_single_clock_vga #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH)
@@ -18,7 +17,7 @@ module sprite_rom_dp #(
         .data_b({DATA_WIDTH{1'b0}}),
         .addr_a(addr_a),
         .addr_b(addr_b),
-        .we_a(1'b0),                 // disable writes
+        .we_a(1'b0),
         .we_b(1'b0),
         .clk(clk),
         .q_a(q_a),
